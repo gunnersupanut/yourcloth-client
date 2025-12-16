@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink} from "react-router-dom";
 import searchIcon from "../assets/search_icon.png";
 import accountIcon from "../assets/account_icon.png";
 import cartIcon from "../assets/cart_icon.png";
@@ -7,7 +7,7 @@ const Navbar = () => {
   // Search State
   const [isSearchOpen, setIsSearchOpen] = useState(false); // สวิตช์เปิด/ปิด
   const [searchText, setSearchText] = useState(""); // เก็บค่าที่พิมพ์
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   // เก็บ class style ของเมนูแต่ละอัน
   const getMenuClass = ({ isActive }: { isActive: boolean }) => {
