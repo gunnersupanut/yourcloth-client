@@ -6,6 +6,7 @@ import FeaturedSlider from "../components/FeaturedSlider";
 import Category from "../components/Category";
 
 const Homepage = () => {
+  console.log("api url:", import.meta.env.VITE_API_URL);
   return (
     <div>
       {/* <p className="text-h1xl text-primary pl-5">Home</p>
