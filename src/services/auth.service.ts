@@ -15,5 +15,5 @@ export const authService = {
       throw error;
     }
   },
-  logout: () => { localStorage.removeItem("token"); }
+  logout() { localStorage.removeItem("token") }
 }
