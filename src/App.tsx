@@ -1,6 +1,6 @@
 // src/App.tsx
 import { Routes, Route, useParams } from "react-router-dom";
-
+import LoginPage from "./pages/LoginPage";
 // import layouts and pages
 import MainLayout from "./layouts/MainLayout";
 import Homepage from "./pages/HomePage";
@@ -24,7 +24,6 @@ const ShopPage = () => {
   );
 };
 const CartPage = () => <div className="text-xl">🛒 ตะกร้าสินค้า (รอทำ)</div>;
-const LoginPage = () => <div className="text-xl">🔐 หน้า Login (รอทำ)</div>;
 const AboutPage = () => <div className="text-xl">🔐 หน้า About (รอทำ)</div>;
 const ContactPage = () => <div className="text-xl">🔐 หน้า Contact (รอทำ)</div>;
 
