@@ -42,6 +42,9 @@ export default {
         text_secondary: "#999999",
       },
     },
+    boxShadow: {
+      custom: "5px 5px 5px rgba(0, 0, 0, 0.3)", 
+    },
   },
   plugins: [],
 };

@@ -1,10 +1,11 @@
 // src/App.tsx
 import { Routes, Route, useParams } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
+
 // import layouts and pages
 import MainLayout from "./layouts/MainLayout";
 import Homepage from "./pages/HomePage";
-
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 // สร้างหน้า Mock โง่ๆ ไว้เทสก่อน (เดี๋ยวค่อยแยกไฟล์จริง)
 const ShopPage = () => {
   // ดึงค่า category มาจาก URL
@@ -42,6 +43,7 @@ function App() {
         </Route>
         <Route path="cart" element={<CartPage />} />
         <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<RegisterPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactPage />} />
       </Route>
