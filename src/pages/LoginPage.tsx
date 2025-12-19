@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AuthCard from "../components/AuthCard";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { authService } from "../services/auth.service";
 
 // import pictures and icons here
 import UserIcon from "../assets/icons/icons8-user-48 1.png";
@@ -11,11 +13,47 @@ import ShowPassWordIcon from "../assets/icons/icons8-eye-50 1.png";
 import HidePassWordIcon from "../assets/icons/hidepasswordIcon.png";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
+
+  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // ฟังก์ชันสำหรับอัปเดตค่าเมื่อพิมพ์
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value, // อัปเดตเฉพาะ field ที่พิมพ์
+    }));
+  };
+
+  // ฟังก์ชั่นปุ่ม Submit
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); // กันหน้าเว็บรีเฟรช};
+    // เตรียมข้อมูล
+    const payload = { ...formData, rememberMe };
+    try {
+      await authService.login(payload);
+      alert("Login แล้วว");
+      navigate("/");
+      window.location.reload();
+    } catch (error: any) {
+      // Error handling เหมือนเดิม
+      alert(error.response?.data?.message || "Login ไม่สำเร็จ");
+    }
+  };
+
+  useEffect(() => {
+    console.log("FormData:", formData, "Rememberme:", rememberMe);
+  }, [formData, rememberMe]);
   return (
     <div className="flex justify-center items-center">
       <AuthCard>
-        <form onSubmit={(e) => e.preventDefault()} className="font-kanit">
+        <form onSubmit={handleSubmit} className="font-kanit">
           {/* Input UserName */}
           <div className="relative mt-8">
             {/* ไอคอน  */}
@@ -23,6 +61,8 @@ const LoginPage = () => {
               <img src={UserIcon} alt="UserIcon" />
             </div>
             <input
+              name="username"
+              onChange={handleChange}
               type="text"
               placeholder="USERNAME"
               className="w-full py-3 pl-16 pr-4 bg-white text-gray-800 rounded-[20px] shadow-custom focus:outline-none focus:ring-2 focus:ring-secondary"
@@ -35,6 +75,8 @@ const LoginPage = () => {
               <img src={PasswordIcon} alt="PasswordIcon" />
             </div>
             <input
+              name="password"
+              onChange={handleChange}
               type={showPassword ? "text" : "password"}
               placeholder="PASSWORD"
               className="w-full py-3 pl-16 pr-4 bg-white text-gray-800 rounded-[20px] shadow-custom focus:outline-none focus:ring-2 focus:ring-secondary"
@@ -55,15 +97,21 @@ const LoginPage = () => {
           {/* --- Remember Me & Forgot Password --- */}
           <div className="flex justify-between items-center text-sm text-white mt-6 px-2">
             <label className="flex items-center space-x-2 cursor-pointer">
-              <input type="checkbox" className="form-checkbox text-secondary" />
+              <input
+                name="rememberMe"
+                type="checkbox"
+                className="form-checkbox text-secondary"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
               <span>Remember Me</span>
             </label>
-            <a
-              href="#"
+            <Link
+              to="#"
               className="underline text-tertiary hover:text-secondary"
             >
               forgot password?
-            </a>
+            </Link>
           </div>
           {/* --- Button: Sign In --- */}
           <button
@@ -100,5 +148,4 @@ const LoginPage = () => {
     </div>
   );
 };
-
 export default LoginPage;
