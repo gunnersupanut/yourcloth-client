@@ -1,5 +1,6 @@
 // src/App.tsx
 import { Routes, Route, useParams } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 // import layouts and pages
 import MainLayout from "./layouts/MainLayout";
@@ -30,24 +31,27 @@ const ContactPage = () => <div className="text-xl">🔐 หน้า Contact (�
 
 function App() {
   return (
-    <Routes>
-      {/* ครอบด้วย MainLayout */}
-      <Route path="/" element={<MainLayout />}>
-        {/* หน้าลูกๆ ที่จะไปโผล่ตรง <Outlet /> */}
-        <Route index element={<Homepage />} />
-        {/* Shop */}
-        <Route path="shop">
-          <Route index element={<ShopPage />} />
-          {/* :category คือตัวแปรที่เราตั้งชื่อขึ้นมาเอง */}
-          <Route path=":category" element={<ShopPage />} />
+    <>
+      <Toaster position="top-center" reverseOrder={false} />
+      <Routes>
+        {/* ครอบด้วย MainLayout */}
+        <Route path="/" element={<MainLayout />}>
+          {/* หน้าลูกๆ ที่จะไปโผล่ตรง <Outlet /> */}
+          <Route index element={<Homepage />} />
+          {/* Shop */}
+          <Route path="shop">
+            <Route index element={<ShopPage />} />
+            {/* :category คือตัวแปรที่เราตั้งชื่อขึ้นมาเอง */}
+            <Route path=":category" element={<ShopPage />} />
+          </Route>
+          <Route path="cart" element={<CartPage />} />
+          <Route path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterPage />} />
+          <Route path="about" element={<AboutPage />} />
+          <Route path="contact" element={<ContactPage />} />
         </Route>
-        <Route path="cart" element={<CartPage />} />
-        <Route path="login" element={<LoginPage />} />
-        <Route path="register" element={<RegisterPage />} />
-        <Route path="about" element={<AboutPage />} />
-        <Route path="contact" element={<ContactPage />} />
-      </Route>
-    </Routes>
+      </Routes>
+    </>
   );
 }
 

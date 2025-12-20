@@ -1,34 +1,18 @@
 import { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
-import type { DecodedToken } from "../types/user";
-import { authService } from "../services/auth.service";
+import { Link, NavLink } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+
 // import Icon
 import searchIcon from "../assets/search_icon.png";
 import accountIcon from "../assets/account_icon.png";
 import cartIcon from "../assets/cart_icon.png";
 const Navbar = () => {
-  const navigate = useNavigate();
+  // ดึง user กับ logout มาใช้ได้เลย (ไม่ต้องเขียน logic แกะ token แล้ว)
+  const { user, logout, isAuthenticated } = useAuth();
 
-  // Token
-  const token = localStorage.getItem("token");
-  let userName = "username";
-  let firstLetter = "U";
-  if (token) {
-    // Decode Token ออก
-
-    try {
-      const decoded = jwtDecode<DecodedToken>(token);
-      if (decoded.username) {
-        firstLetter = decoded.username.charAt(0).toUpperCase();
-        userName = decoded.username;
-      }
-    } catch (error) {
-      console.error("Token ไม่ถูกต้อง,", error);
-      localStorage.removeItem("token");
-    }
-  }
-
+  const firstLetter = user?.username
+    ? user.username.charAt(0).toUpperCase()
+    : "U";
   // UserDropdown
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   // Search State
@@ -60,16 +44,6 @@ const Navbar = () => {
     }
   };
 
-  const handleLogout = () => {
-    // เคลียร์ Token
-    authService.logout();
-    // ปิด Dropdown
-    setIsDropdownOpen(false);
-    // Reload หน้า
-    navigate("/");
-    // รัเฟรซหน้าจอ
-    window.location.reload();
-  };
   return (
     <nav className="bg-primary shadow-md sticky top-0 z-50 ">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center ">
@@ -124,7 +98,7 @@ const Navbar = () => {
           >
             <img src={searchIcon} alt="Search_Icon" className="w-[50px]" />
           </button>
-          {token ? (
+          {isAuthenticated ? (
             // Login แล้ว
             <div className="flex items-center gap-4">
               {/* Dropdown */}
@@ -145,7 +119,7 @@ const Navbar = () => {
                     <div className="px-4 py-2 border-b border-gray-100 mb-1">
                       <p className="text-sm text-gray-500">Signed in as</p>
                       <p className="text-sm text-primary truncate">
-                        {userName}
+                        {user?.username}
                       </p>
                     </div>
 
@@ -159,7 +133,7 @@ const Navbar = () => {
 
                     {/* Logout */}
                     <button
-                      onClick={handleLogout}
+                      onClick={logout}
                       className="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                     >
                       Logout

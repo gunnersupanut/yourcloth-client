@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="w-full">
+    <footer className="w-full mt-14">
       {/* --- ส่วนบน (เนื้อหาหลัก) สีม่วงเข้ม --- */}
       <div className="bg-primary text-white">
         <div className="container mx-auto px-4">

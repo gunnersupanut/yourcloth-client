@@ -2,7 +2,7 @@ import { useRef } from "react";
 import arrowLeftIcon from "../assets/icons/arrow-left.png";
 import arrowRightIcon from "../assets/icons/arrow-right.png";
 import ProductCard from "./ProductCard";
-import { useProduct } from "../context/ProductContext";
+import { useProduct } from "../contexts/ProductContext";
 
 const FeaturedSlider = () => {
   const { products, loading, error } = useProduct();

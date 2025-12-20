@@ -3,7 +3,9 @@ import AuthCard from "../components/AuthCard";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../services/auth.service";
+import { useAuth } from "../contexts/AuthContext";
 
+import toast from "react-hot-toast";
 // import pictures and icons here
 import UserIcon from "../assets/icons/icons8-user-48 1.png";
 import PasswordIcon from "../assets/icons/icons8-password-50 1.png";
@@ -13,6 +15,7 @@ import ShowPassWordIcon from "../assets/icons/icons8-eye-50 1.png";
 import HidePassWordIcon from "../assets/icons/hidepasswordIcon.png";
 
 const LoginPage = () => {
+  const { login } = useAuth(); // ดึงฟังก์ชันมาใช้
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
@@ -37,13 +40,16 @@ const LoginPage = () => {
     // เตรียมข้อมูล
     const payload = { ...formData, rememberMe };
     try {
-      await authService.login(payload);
-      alert("Login แล้วว");
+      const response = await authService.login(payload);
+      login(response.token);
+      toast.success("Login Complete, Welcome.", {
+        duration: 2000,
+      });
       navigate("/");
-      window.location.reload();
     } catch (error: any) {
       // Error handling เหมือนเดิม
-      alert(error.response?.data?.message || "Login ไม่สำเร็จ");
+      const message = error.response?.data?.message || "Login Fail.";
+      toast.error(message);
     }
   };
 
