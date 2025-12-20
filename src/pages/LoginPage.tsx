@@ -21,7 +21,7 @@ const LoginPage = () => {
     username: "",
     password: "",
   });
-
+  const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -36,20 +36,31 @@ const LoginPage = () => {
 
   // ฟังก์ชั่นปุ่ม Submit
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // กันหน้าเว็บรีเฟรช};
-    // เตรียมข้อมูล
+    e.preventDefault();
     const payload = { ...formData, rememberMe };
+    // ล็อคปุ่ม
+    setLoading(true);
+
     try {
-      const response = await authService.login(payload);
-      login(response.token);
-      toast.success("Login Complete, Welcome.", {
-        duration: 2000,
-      });
+      await toast.promise(
+        (async () => {
+          const res = await authService.login(payload);
+          login(res.token); // อัปเดต Context
+        })(),
+        {
+          loading: "Logging in...",
+          success: "Login Complete",
+          error: (err) =>
+            `${err.response?.data?.message || "Something went wrong"} `,
+        }
+      );
+
       navigate("/");
-    } catch (error: any) {
-      // Error handling เหมือนเดิม
-      const message = error.response?.data?.message || "Login Fail.";
-      toast.error(message);
+    } catch (error) {
+      console.error("Login Error:", error);
+      // ปลดล็อคปุ่ม
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -122,7 +133,11 @@ const LoginPage = () => {
           {/* --- Button: Sign In --- */}
           <button
             type="submit"
-            className="w-3/4 mx-auto block mt-12 bg-secondary text-text_inverse text-button py-3 rounded-[20px] shadow-custom hover:bg-yellow-400 transition-transform transform hover:scale-105"
+            disabled={loading}
+            className={`w-3/4 mx-auto block mt-12 text-text_inverse text-button py-3 rounded-[20px] shadow-custom transition-transform transform hover:scale-105
+              ${
+                loading ? "bg-quaternary cursor-not-allowed" : " bg-secondary"
+              }`}
           >
             Sign In
           </button>
