@@ -1,13 +1,39 @@
 import { useState } from "react";
-import { Link, NavLink} from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+import type { DecodedToken } from "../types/user";
+import { authService } from "../services/auth.service";
+// import Icon
 import searchIcon from "../assets/search_icon.png";
 import accountIcon from "../assets/account_icon.png";
 import cartIcon from "../assets/cart_icon.png";
 const Navbar = () => {
+  const navigate = useNavigate();
+
+  // Token
+  const token = localStorage.getItem("token");
+  let userName = "username";
+  let firstLetter = "U";
+  if (token) {
+    // Decode Token ออก
+
+    try {
+      const decoded = jwtDecode<DecodedToken>(token);
+      if (decoded.username) {
+        firstLetter = decoded.username.charAt(0).toUpperCase();
+        userName = decoded.username;
+      }
+    } catch (error) {
+      console.error("Token ไม่ถูกต้อง,", error);
+      localStorage.removeItem("token");
+    }
+  }
+
+  // UserDropdown
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   // Search State
   const [isSearchOpen, setIsSearchOpen] = useState(false); // สวิตช์เปิด/ปิด
   const [searchText, setSearchText] = useState(""); // เก็บค่าที่พิมพ์
-  // const navigate = useNavigate();
 
   // เก็บ class style ของเมนูแต่ละอัน
   const getMenuClass = ({ isActive }: { isActive: boolean }) => {
@@ -32,6 +58,17 @@ const Navbar = () => {
       setIsSearchOpen(false); // ค้นเสร็จปิดกล่อง
       setSearchText(""); // ล้างคำค้น
     }
+  };
+
+  const handleLogout = () => {
+    // เคลียร์ Token
+    authService.logout();
+    // ปิด Dropdown
+    setIsDropdownOpen(false);
+    // Reload หน้า
+    navigate("/");
+    // รัเฟรซหน้าจอ
+    window.location.reload();
   };
   return (
     <nav className="bg-primary shadow-md sticky top-0 z-50 ">
@@ -87,9 +124,55 @@ const Navbar = () => {
           >
             <img src={searchIcon} alt="Search_Icon" className="w-[50px]" />
           </button>
-          <NavLink to="/login" className={iconLinkClass}>
-            <img src={accountIcon} alt="Account_Icon" className="w-[50px]" />
-          </NavLink>
+          {token ? (
+            // Login แล้ว
+            <div className="flex items-center gap-4">
+              {/* Dropdown */}
+              <div
+                className="relative py-2"
+                onMouseEnter={() => setIsDropdownOpen(true)}
+                onMouseLeave={() => setIsDropdownOpen(false)}
+              >
+                <button className="focus:outline-none">
+                  <div className="w-10 h-10 rounded-full bg-secondary text-primary text-lg flex items-center justify-center shadow-md border-2 border-white">
+                    {firstLetter}
+                  </div>
+                </button>
+                {/* DropdownMenu */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-0 w-48 bg-white text-bodyxl rounded-xl shadow-xl py-2 z-20 border border-gray-100 overflow-hidden">
+                    {/* Header */}
+                    <div className="px-4 py-2 border-b border-gray-100 mb-1">
+                      <p className="text-sm text-gray-500">Signed in as</p>
+                      <p className="text-sm text-primary truncate">
+                        {userName}
+                      </p>
+                    </div>
+
+                    {/* Settings */}
+                    <Link
+                      to="/settings"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-secondary transition-colors"
+                    >
+                      Account
+                    </Link>
+
+                    {/* Logout */}
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <NavLink to="/login" className={iconLinkClass}>
+              <img src={accountIcon} alt="Account_Icon" className="w-[50px]" />
+            </NavLink>
+          )}
           {/* Cart Icon */}
           <NavLink to="/cart" className={iconLinkClass}>
             <img src={cartIcon} alt="Cart_Icon" className="w-[50px]" />

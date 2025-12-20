@@ -8,3 +8,9 @@ export interface LoginReq {
     password: string;
     rememberMe: boolean
 }
+
+export interface DecodedToken {
+    id: number;
+    username: string;
+    exp: number;
+}
