@@ -7,6 +7,9 @@ import MainLayout from "./layouts/MainLayout";
 import Homepage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import VerifyPage from "./pages/VerifyPage";
+import VerifiedPage from "./pages/VerifiedPage";
+
 // สร้างหน้า Mock โง่ๆ ไว้เทสก่อน (เดี๋ยวค่อยแยกไฟล์จริง)
 const ShopPage = () => {
   // ดึงค่า category มาจาก URL
@@ -47,6 +50,8 @@ function App() {
           <Route path="cart" element={<CartPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
+          <Route path="verify" element={<VerifyPage />} />
+          <Route path="verified" element={<VerifiedPage />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactPage />} />
         </Route>
