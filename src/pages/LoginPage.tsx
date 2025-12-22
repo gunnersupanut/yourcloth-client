@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AuthCard from "../components/AuthCard";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
@@ -56,17 +56,19 @@ const LoginPage = () => {
       );
 
       navigate("/");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login Error:", error);
+      if (error.response?.data?.message === "Please verify your email.") {
+        navigate("/verify", {
+          state: { email: error.response?.data?.email },
+        });
+      }
       // ปลดล็อคปุ่ม
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    console.log("FormData:", formData, "Rememberme:", rememberMe);
-  }, [formData, rememberMe]);
   return (
     <div className="flex justify-center items-center">
       <AuthCard>

@@ -1,6 +1,28 @@
+import { useLocation, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import AuthCard from "../components/AuthCard";
+import toast from "react-hot-toast";
+import { useEffect } from "react";
 const VerifyPage = () => {
+  // รับ email ที่ส่งมาจากหน้า Login
+  const { state } = useLocation();
+  const navigate = useNavigate();
+
+  // ถ้าไม่มี email ติดมา ให้ดีดกลับ
+  useEffect(() => {
+    if (!state?.email) {
+      console.log("No Email with state")
+      navigate("/login");
+      toast.error("Please enter your email address again.", 
+        // แนบ id แก้เด้งซ้ำใน local
+        { id: "auth-check-error",
+      });
+    }
+  }, [state, navigate]);
+  // return null ไว้ เพื่อไม่ให้มันไปเรนเดอร์ส่วนข้างล่างระหว่างรอดีดกลับ
+  if (!state?.email) {
+    return null;
+  }
   return (
     <div className="flex justify-center items-center font-kanit">
       <AuthCard>
@@ -11,8 +33,7 @@ const VerifyPage = () => {
           <p className="text-body text-text_inverse mt-4">
             We have sent a confirmation link to Your Email
             <br />
-            Please click the link in the email 
-            to activate account. <br />
+            Please click the link in the email to activate account. <br />
             (Don't forget to check your Spam folder!)
           </p>
         </div>
@@ -26,10 +47,8 @@ const VerifyPage = () => {
         </Link>
         <div className="text-center mt-24">
           <p className="text-white text-bodyxl">
-            Didn't receive the email? {" "}
-            <button
-              className="underline text-tertiary text-bodyxl hover:text-secondary"
-            >
+            Didn't receive the email?{" "}
+            <button className="underline text-tertiary text-bodyxl hover:text-secondary">
               [Resend Link]
             </button>
           </p>
