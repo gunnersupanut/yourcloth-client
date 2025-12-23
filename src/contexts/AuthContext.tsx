@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { jwtDecode } from "jwt-decode";
 import { authService } from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
-import type { DecodedToken } from "../types/user";
+import type { DecodedToken } from "../types/authTypes";
 
 interface AuthContextType {
   user: DecodedToken | null;
