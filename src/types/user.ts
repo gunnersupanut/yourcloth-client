@@ -9,6 +9,16 @@ export interface LoginReq {
     rememberMe: boolean
 }
 
+export interface RegisterReq {
+    username: string;
+    password: string;
+    email: string;
+}
+export interface RegisterRes {
+    message: string;
+    userId: number;
+}
+
 export interface DecodedToken {
     id: number;
     username: string;
