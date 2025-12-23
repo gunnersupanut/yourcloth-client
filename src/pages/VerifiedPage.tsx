@@ -1,7 +1,7 @@
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AuthCard from "../components/AuthCard";
 import VerifiedIcon from "../assets/icons/correctIcon.png";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { authService } from "../services/auth.service";
 const VerifiedPage = () => {
@@ -12,7 +12,10 @@ const VerifiedPage = () => {
 
   const [loading, setLoading] = useState(false);
 
+  const effectRan = useRef(false);
   useEffect(() => {
+    // เช็คว่าเคยรันไปยัง? ถ้าเคยแล้วให้หยุดเลย
+    if (effectRan.current === true) return;
     if (!token) {
       toast.error("No verification link found.", { id: "no-token" });
       navigate("/login", { replace: true });
@@ -35,12 +38,16 @@ const VerifiedPage = () => {
         );
       } catch (error) {
         console.error("Fail to verify token", error);
+        navigate("/login", { replace: true });
       } finally {
         setLoading(false);
       }
     };
     verifyToken();
-  }, []);
+    return () => {
+      effectRan.current = true;
+    };
+  }, [token]);
 
   return (
     <div className="flex justify-center items-center font-kanit">

@@ -11,12 +11,13 @@ const VerifyPage = () => {
   // ถ้าไม่มี email ติดมา ให้ดีดกลับ
   useEffect(() => {
     if (!state?.email) {
-      console.log("No Email with state")
+      console.log("No Email with state");
       navigate("/login");
-      toast.error("Please enter your email address again.", 
+      toast.error(
+        "Please enter your email address again.",
         // แนบ id แก้เด้งซ้ำใน local
-        { id: "auth-check-error",
-      });
+        { id: "auth-check-error" }
+      );
     }
   }, [state, navigate]);
   // return null ไว้ เพื่อไม่ให้มันไปเรนเดอร์ส่วนข้างล่างระหว่างรอดีดกลับ
@@ -31,7 +32,10 @@ const VerifyPage = () => {
             Please Verify Your Email Address
           </p>
           <p className="text-body text-text_inverse mt-4">
-            We have sent a confirmation link to Your Email
+            We have sent a confirmation link to{" "}
+            <span className="text-secondary">
+              {state.email || "Your Email"}
+            </span>
             <br />
             Please click the link in the email to activate account. <br />
             (Don't forget to check your Spam folder!)
