@@ -56,7 +56,7 @@ const RegisterPage = () => {
           await authService.register(payload);
         })(),
         {
-          loading: "Registerin...",
+          loading: "Registering...",
           success: "Register Complete",
           error: (err) =>
             `${err.response?.data?.message || "Something went wrong"} `,

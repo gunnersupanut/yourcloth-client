@@ -68,7 +68,11 @@ const LoginPage = () => {
       setLoading(false);
     }
   };
-
+  const handleSocialSignUp = () => {
+    toast.success("Not ready yet, but working on it", {
+      icon: "🔜",
+    });
+  };
   return (
     <div className="flex justify-center items-center">
       <AuthCard>
@@ -157,13 +161,19 @@ const LoginPage = () => {
 
           <div className="flex justify-center gap-4 mt-4">
             {/* Facebook Circle */}
-            <button className="p-3 hover:scale-110 transition text-[#1877F2]">
-              <img src={FacebookIcon} alt="FacebookIcon" />
+            <button
+              className="p-3 hover:scale-110 transition text-[#1877F2]"
+              onClick={handleSocialSignUp}
+            >
+              <img src={FacebookIcon} alt="FacebookIcon" width={60}/>
             </button>
 
             {/* Google Circle */}
-            <button className="p-3 hover:scale-110 transition text-red-500">
-              <img src={GoogleIcon} alt="GoogleIcon" />
+            <button
+              className="p-3 hover:scale-110 transition text-red-500"
+              onClick={handleSocialSignUp}
+            >
+              <img src={GoogleIcon} alt="GoogleIcon" width={60}/>
             </button>
           </div>
         </div>
