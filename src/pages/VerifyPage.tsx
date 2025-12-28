@@ -32,10 +32,11 @@ const VerifyPage = () => {
             Please Verify Your Email Address
           </p>
           <p className="text-body text-text_inverse mt-4">
-            We have sent a confirmation link to{" "}
+            We have sent a confirmation link to <br />
             <span className="text-secondary">
               {state.email || "Your Email"}
             </span>
+            <br />
             <br />
             Please click the link in the email to activate account. <br />
             (Don't forget to check your Spam folder!)

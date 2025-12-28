@@ -12,11 +12,33 @@ import ShowPassWordIcon from "../assets/icons/icons8-eye-50 1.png";
 import HidePassWordIcon from "../assets/icons/hidepasswordIcon.png";
 import EmailIcon from "../assets/icons/icons8-email-50 3.png";
 
+import TermsModal from "../components/TermsModal";
+
 const RegisterPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showComfirmPassword, setShowComfirmPassword] = useState(false);
 
+  // State สำหรับ Checkbox
+  const [agreed, setAgreed] = useState(false);
+
+  const termsContent = `1. Educational Purpose Only
+This website is developed as part of a Senior Project (Faculty of Science and Technology, Rajamangala University of Technology Phra Nakhon). It is intended solely for educational and testing purposes. It is not for commercial use.
+
+2. Data Collection (Privacy)
+- We collect basic information (Username, Email) for authentication testing purposes only.
+- Your password is encrypted and stored securely.
+- Please do NOT use your real banking passwords or sensitive personal data, as this is a test environment.
+
+3. Disclaimer
+The developer is not responsible for any errors, data loss, or issues arising from the use of this website. All content provided is for demonstration purposes.
+
+4. Acceptance
+By clicking "Sign Up", you acknowledge that you have read and understood these terms.
+
+---------------------------------------------------------------
+(หมายเหตุ เว็บไซต์นี้จัดทำขึ้นเพื่อการศึกษาเท่านั้น ไม่ได้มีวัตถุประสงค์ทางการค้า)
+`;
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -25,6 +47,12 @@ const RegisterPage = () => {
   });
   const [loading, setLoading] = useState(false);
 
+  // State สำหรับ Modal (เปิดไหม? / แสดงเนื้อหาอะไร?)
+  const [modalOpen, setModalOpen] = useState(false);
+  // ฟังก์ชันเปิด Modal
+  const openModal = () => {
+    setModalOpen(true);
+  };
   // ฟังก์ชันสำหรับอัปเดตค่าเมื่อพิมพ์
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -47,6 +75,14 @@ const RegisterPage = () => {
       toast.error("Please provide at least 6 characters.");
       return;
     }
+    // เช็ค ติ๊ก Terms/Privacy ไหม
+    if (!agreed) {
+      toast.error(
+        "Please accept the Terms & Policy."
+      );
+      return;
+    }
+
     // ดึง confirmpassword ออก
     const { confirmpassword, ...payload } = formData;
     setLoading(true);
@@ -156,8 +192,16 @@ const RegisterPage = () => {
           </div>
           <div className="flex justify-between items-center text-sm text-white mt-10 px-2">
             <label className="flex items-center space-x-2 cursor-pointer">
-              <input type="checkbox" className="form-checkbox text-secondary" />
-              <span className="text-tertiary underline">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="form-checkbox text-secondary"
+              />
+              <span
+                className="text-tertiary underline"
+                onClick={() => openModal()}
+              >
                 I agree to the Terms and Conditions and Privacy Policy
               </span>
             </label>
@@ -183,6 +227,12 @@ const RegisterPage = () => {
           </Link>
         </div>
       </AuthCard>
+      <TermsModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Terms of Service & Privacy Policy"
+        content={termsContent}
+      />
     </div>
   );
 };
