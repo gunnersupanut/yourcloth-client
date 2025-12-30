@@ -3,11 +3,16 @@ import { Link } from "react-router-dom";
 import AuthCard from "../components/AuthCard";
 import toast from "react-hot-toast";
 import { useEffect } from "react";
+
+import { authService } from "../services/auth.service";
+import { useResendTimer } from "../hooks/useResendTimer";
 const VerifyPage = () => {
   // รับ email ที่ส่งมาจากหน้า Login
   const { state } = useLocation();
   const navigate = useNavigate();
 
+  // เรียกใช้ hook
+  const { timeLeft, startCooldown, isCooldown } = useResendTimer(60);
   // ถ้าไม่มี email ติดมา ให้ดีดกลับ
   useEffect(() => {
     if (!state?.email) {
@@ -24,6 +29,24 @@ const VerifyPage = () => {
   if (!state?.email) {
     return null;
   }
+
+  const handleResend = async () => {
+    // กันกดซ้ำ
+    if (isCooldown) {
+      return};
+    try {
+      await toast.promise(authService.resendVerification(state?.email), {
+        loading: "Resending...",
+        success: "Resend Complete",
+        error: (err) =>
+          `${err.response?.data?.message || "Something went wrong"} `,
+      });
+      // เริ่มนับถอยหลัง
+      startCooldown();
+    } catch (error) {
+      console.error("Login Error:", error);
+    }
+  };
   return (
     <div className="flex justify-center items-center font-kanit">
       <AuthCard>
@@ -35,7 +58,7 @@ const VerifyPage = () => {
             We have sent a confirmation link to <br />
             <span className="text-secondary">
               {state.email || "Your Email"}
-            </span> 
+            </span>
             <br />
             Please click the link in the email to activate account. <br />
             (Don't forget to check your Spam folder!)
@@ -52,8 +75,11 @@ const VerifyPage = () => {
         <div className="text-center mt-14">
           <p className="text-white text-bodyxl">
             Didn't receive the email?{" "}
-            <button className="underline text-tertiary text-bodyxl hover:text-secondary">
-              [Resend Link]
+            <button
+              className="underline text-tertiary text-bodyxl hover:text-secondary"
+              onClick={handleResend}
+            >
+              {isCooldown ? `Wait ${timeLeft}s` : "[Resend Link]"}
             </button>
           </p>
         </div>
