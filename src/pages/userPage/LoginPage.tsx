@@ -7,12 +7,12 @@ import { useAuth } from "../../contexts/AuthContext";
 
 import toast from "react-hot-toast";
 // import pictures and icons here
-import UserIcon from "../assets/icons/icons8-user-48 1.png";
-import PasswordIcon from "../assets/icons/icons8-password-50 1.png";
-import FacebookIcon from "../assets/icons/fb icon.png";
-import GoogleIcon from "../assets/icons/gg icon.png";
-import ShowPassWordIcon from "../assets/icons/icons8-eye-50 1.png";
-import HidePassWordIcon from "../assets/icons/hidepasswordIcon.png";
+import UserIcon from "../../assets/icons/icons8-user-48 1.png";
+import PasswordIcon from "../../assets/icons/icons8-password-50 1.png";
+import FacebookIcon from "../../assets/icons/fb icon.png";
+import GoogleIcon from "../../assets/icons/gg icon.png";
+import ShowPassWordIcon from "../../assets/icons/icons8-eye-50 1.png";
+import HidePassWordIcon from "../../assets/icons/hidepasswordIcon.png";
 
 const LoginPage = () => {
   const { login } = useAuth(); // ดึงฟังก์ชันมาใช้

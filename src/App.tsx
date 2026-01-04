@@ -5,10 +5,10 @@ import { Toaster } from "react-hot-toast";
 // import layouts and pages
 import MainLayout from "./layouts/MainLayout";
 import Homepage from "./pages/HomePage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./pages/userPage/LoginPage";
+import RegisterPage from "./pages/userPage/RegisterPage";
 import VerifyPage from "./pages/userPage/VerifyPage";
-import VerifiedPage from "./pages/VerifiedPage";
+import VerifiedPage from "./pages/userPage/VerifiedPage";
 
 // สร้างหน้า Mock โง่ๆ ไว้เทสก่อน (เดี๋ยวค่อยแยกไฟล์จริง)
 const ShopPage = () => {

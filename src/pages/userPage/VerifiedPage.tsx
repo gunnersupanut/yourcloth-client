@@ -1,9 +1,9 @@
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import AuthCard from "../components/AuthCard";
-import VerifiedIcon from "../assets/icons/correctIcon.png";
+import AuthCard from "../../components/AuthCard";
+import VerifiedIcon from "../../assets/icons/correctIcon.png";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { authService } from "../services/auth.service";
+import { authService } from "../../services/auth.service";
 const VerifiedPage = () => {
   // ดึง  token จาก Params
   const [searchParams] = useSearchParams();
