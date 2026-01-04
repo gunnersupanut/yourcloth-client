@@ -17,7 +17,8 @@ const ForgotPasswordPage = () => {
       [name]: value, // อัปเดตเฉพาะ field ที่พิมพ์
     }));
   };
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     console.log("Submit");
   };
   return (
@@ -55,7 +56,7 @@ const ForgotPasswordPage = () => {
             >
               Send Email
             </button>
-            <div className="text-center mt-28"> 
+            <div className="text-center mt-28">
               <Link
                 to="/login"
                 className="underline text-tertiary text-bodyxl hover:text-secondary"
