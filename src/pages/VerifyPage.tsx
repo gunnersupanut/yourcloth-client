@@ -33,7 +33,8 @@ const VerifyPage = () => {
   const handleResend = async () => {
     // กันกดซ้ำ
     if (isCooldown) {
-      return};
+      return;
+    }
     try {
       await toast.promise(authService.resendVerification(state?.email), {
         loading: "Resending...",
@@ -41,9 +42,14 @@ const VerifyPage = () => {
         error: (err) =>
           `${err.response?.data?.message || "Something went wrong"} `,
       });
-      // เริ่มนับถอยหลัง
       startCooldown();
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response?.data?.message === "Account already verified.") {
+        // รอสักนิดให้ Toast เด้งให้อ่านก่อน ค่อยดีดไป
+        setTimeout(() => {
+          navigate("/login");
+        }, 1000);
+      }
       console.error("Login Error:", error);
     }
   };
