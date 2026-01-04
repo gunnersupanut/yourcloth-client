@@ -3,8 +3,8 @@ import { config } from "../config";
 
 export const api = axios.create({
     baseURL: config.apiUrl,
-    // ตั้งเวลา timeout (ถ้าเกิน 2 นาที ให้ตัดจบ กันค้าง)
-    timeout: 1200000,
+    // ตั้งเวลา timeout (ถ้าเกิน 5 นาที ให้ตัดจบ กันค้าง)
+    timeout: 300000,
     headers: {
         "Content-Type": "application/json",
     },
