@@ -1,9 +1,9 @@
 import { useState } from "react";
-import AuthCard from "../components/AuthCard";
+import AuthCard from "../../components/AuthCard";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { authService } from "../services/auth.service";
-import { useAuth } from "../contexts/AuthContext";
+import { authService } from "../../services/auth.service";
+import { useAuth } from "../../contexts/AuthContext";
 
 import toast from "react-hot-toast";
 // import pictures and icons here

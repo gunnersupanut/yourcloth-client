@@ -1,11 +1,11 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import AuthCard from "../components/AuthCard";
+import AuthCard from "../../components/AuthCard";
 import toast from "react-hot-toast";
 import { useEffect } from "react";
 
-import { authService } from "../services/auth.service";
-import { useResendTimer } from "../hooks/useResendTimer";
+import { authService } from "../../services/auth.service";
+import { useResendTimer } from "../../hooks/useResendTimer";
 const VerifyPage = () => {
   // รับ email ที่ส่งมาจากหน้า Login
   const { state } = useLocation();

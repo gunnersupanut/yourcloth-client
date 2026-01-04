@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 // Auth Service
-import { authService } from "../services/auth.service";
+import { authService } from "../../services/auth.service";
 // Toast
 import toast from "react-hot-toast";
 // import pictures and component here
-import AuthCard from "../components/AuthCard";
+import AuthCard from "../../components/AuthCard";
 import UserIcon from "../assets/icons/icons8-user-48 1.png";
 import PasswordIcon from "../assets/icons/icons8-password-50 1.png";
 import ShowPassWordIcon from "../assets/icons/icons8-eye-50 1.png";
 import HidePassWordIcon from "../assets/icons/hidepasswordIcon.png";
 import EmailIcon from "../assets/icons/icons8-email-50 3.png";
 
-import TermsModal from "../components/TermsModal";
+import TermsModal from "../../components/TermsModal";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
