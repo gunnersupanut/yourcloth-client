@@ -3,8 +3,13 @@ import { useState } from "react";
 import AuthCard from "../../components/AuthCard";
 import EmailIcon from "../../assets/icons/icons8-email-50 3.png";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
+import { authService } from "../../services/auth.service";
+import { useResendTimer } from "../../hooks/useResendTimer";
 
 const ForgotPasswordPage = () => {
+  // เรียกใช้ hook
+  const { timeLeft, startCooldown, isCooldown } = useResendTimer(60);
   const [formData, setFormData] = useState({
     email: "",
   });
@@ -19,7 +24,23 @@ const ForgotPasswordPage = () => {
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submit");
+    if (isCooldown)
+      return toast.error(`Please Wait ${timeLeft}S. And Try again later.`);
+    setLoading(true);
+    try {
+      await toast.promise(authService.forgotPassword(formData.email), {
+        loading: "Sending Email...",
+        success: "Reset Password Email send.",
+        error: (err) =>
+          `${err.response?.data?.message || "Something went wrong"} `,
+      });
+      startCooldown();
+      setFormData({ ...formData, email: "" });
+    } catch (error) {
+      console.log("Forgot password Error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <div className="flex justify-center items-center">
@@ -40,6 +61,7 @@ const ForgotPasswordPage = () => {
               </div>
               <input
                 name="email"
+                value={formData.email}
                 onChange={handleChange}
                 type="email"
                 placeholder="EMAIL ADDRESS"
@@ -48,15 +70,26 @@ const ForgotPasswordPage = () => {
             </div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || isCooldown}
               className={`w-3/4 mx-auto block mt-20 text-text_inverse text-button py-3 rounded-[20px] shadow-custom transition-transform transform hover:scale-105
               ${
-                loading ? "bg-quaternary cursor-not-allowed" : " bg-secondary"
+                loading || isCooldown
+                  ? "bg-quaternary cursor-not-allowed"
+                  : " bg-secondary"
               }`}
             >
               Send Email
             </button>
-            <div className="text-center mt-28">
+
+            <div className="text-center mt-3">
+              {isCooldown && (
+                <p className="text-text_inverse text-ui">
+                  Please Wait {timeLeft}s.
+                </p>
+              )}
+            </div>
+
+            <div className="text-center mt-24">
               <Link
                 to="/login"
                 className="underline text-tertiary text-bodyxl hover:text-secondary"

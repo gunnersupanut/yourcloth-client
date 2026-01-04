@@ -10,7 +10,7 @@ const VerifiedPage = () => {
   const token = searchParams.get("token");
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const effectRan = useRef(false);
   useEffect(() => {

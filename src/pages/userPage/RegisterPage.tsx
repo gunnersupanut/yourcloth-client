@@ -190,6 +190,7 @@ By clicking "Sign Up", you acknowledge that you have read and understood these t
               )}
             </button>
           </div>
+          {/* Agree Checkbox */}
           <div className="flex justify-between items-center text-sm text-white mt-10 px-2">
             <label className="flex items-center space-x-2 cursor-pointer">
               <input

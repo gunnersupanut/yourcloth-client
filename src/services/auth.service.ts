@@ -32,7 +32,21 @@ export const authService = {
     return response.data;
   },
   resendVerification: async (email: string) => {
-    const response = await api.post('/auth/resent-email', {email})
+    const response = await api.post('/auth/resent-email', { email })
     return response.data
-  }
+  },
+  forgotPassword: async (email: string) => {
+    const response = await api.post('/auth/forgotpassword', { email })
+    return response.data
+  },
+  checkResetPasswordToken: async (token: string) => {
+    const response = await api.get('/auth/checkresetpasswordtoken', {
+      params: { token: token }
+    });
+    return response.data
+  },
+  resetPassword: async (password: string,token: string) => {
+    const response = await api.post('/auth/resetpassword', { password, token });
+    return response.data
+  },
 }
