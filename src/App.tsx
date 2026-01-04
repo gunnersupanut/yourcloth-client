@@ -9,6 +9,7 @@ import LoginPage from "./pages/userPage/LoginPage";
 import RegisterPage from "./pages/userPage/RegisterPage";
 import VerifyPage from "./pages/userPage/VerifyPage";
 import VerifiedPage from "./pages/userPage/VerifiedPage";
+import ForgotPasswordPage from "./pages/userPage/ForgotPasswordPage";
 
 // สร้างหน้า Mock โง่ๆ ไว้เทสก่อน (เดี๋ยวค่อยแยกไฟล์จริง)
 const ShopPage = () => {
@@ -52,6 +53,7 @@ function App() {
           <Route path="register" element={<RegisterPage />} />
           <Route path="verify" element={<VerifyPage />} />
           <Route path="verified" element={<VerifiedPage />} />
+          <Route path="forgotpassword" element={<ForgotPasswordPage />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactPage />} />
         </Route>

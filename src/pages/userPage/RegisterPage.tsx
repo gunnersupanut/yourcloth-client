@@ -134,7 +134,7 @@ By clicking "Sign Up", you acknowledge that you have read and understood these t
               name="email"
               onChange={handleChange}
               type="email"
-              placeholder="Email"
+              placeholder="EMAIL ADDRESS"
               className="w-full py-3 pl-16  bg-white text-gray-800 rounded-[20px] shadow-custom focus:outline-none focus:ring-2 focus:ring-secondary"
             />
           </div>

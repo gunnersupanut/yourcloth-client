@@ -130,7 +130,7 @@ const LoginPage = () => {
               <span>Remember Me</span>
             </label>
             <Link
-              to="#"
+              to="/forgotpassword"
               className="underline text-tertiary hover:text-secondary"
             >
               forgot password?
