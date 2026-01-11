@@ -3,13 +3,25 @@ import arrowLeftIcon from "../assets/icons/arrow-left.png";
 import arrowRightIcon from "../assets/icons/arrow-right.png";
 import ProductCard from "./ProductCard";
 import { useProduct } from "../contexts/ProductContext";
-
-const FeaturedSlider = () => {
+interface FeaturedSliderProps {
+  currentProductId?: number;
+}
+const FeaturedSlider = ({ currentProductId }: FeaturedSliderProps) => {
   const { products, loading, error } = useProduct();
   const sliderRef = useRef<HTMLDivElement>(null);
 
-  // ตัดเอาแค่ 10 ตัวแรก
-  const featuredProducts = products.slice(0, 10);
+  // product ที่จะโชว์
+  let displayProducts = [];
+
+  // สำหรับแนะนำสินค้า
+  if (currentProductId) {
+    displayProducts = products
+      .filter((item) => item.id !== currentProductId)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 10);
+  } else {
+    displayProducts = products.slice(0, 10);
+  }
 
   // ฟังก์ชันกดปุ่มแล้วเลื่อน
   const slideLeft = () => {
@@ -49,7 +61,7 @@ const FeaturedSlider = () => {
           ref={sliderRef}
           className="flex gap-[100px] overflow-x-auto scroll-smooth no-scrollbar py-4 px-2 snap-x snap-mandatory ml-[85px]"
         >
-          {featuredProducts.map((product) => (
+          {displayProducts.map((product) => (
             // กำหนดความกว้างการ์ดตรงนี้ (min-w)
             // บนจอคอม: 1/3 ของจอ (โชว์ 3 การ์ด) หรือจะ fix px ก็ได้
             // ในที่นี้ผมแนะนำ Fix px จะคุมง่ายกว่าสำหรับ Slider

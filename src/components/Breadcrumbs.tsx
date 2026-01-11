@@ -6,8 +6,11 @@ const Breadcrumbs = () => {
   // แยก URL ออกเป็นชิ้นๆ (เช่น /shop/men -> ['', 'shop', 'men'])
   // filter((x) => x) คือตัดตัวว่างทิ้ง
   const pathnames = location.pathname.split("/").filter((x) => x);
+  // ดัก productDetail
+  // ถ้า url ขึ้นต้นด้วย shop และมีความยาว 3 ท่อน (เช่น /shop/men/123)
+  const isProductDetailPage = pathnames[0] === "shop" && pathnames.length === 3;
   // ถ้าไม่มี pathnames เลย (อยู่หน้า Home) ก็ไม่ต้องแสดงอะไร
-  if (pathnames.length === 0) {
+  if (pathnames.length === 0 || isProductDetailPage) {
     return null;
   }
   return (

@@ -43,7 +43,8 @@ export default {
       },
     },
     boxShadow: {
-      custom: "5px 5px 5px rgba(0, 0, 0, 0.3)", 
+      custommain: "5px 5px 5px 2px rgba(0, 0, 0, 0.25)", 
+      custombutton: "2px 2px 5px 0px rgba(0, 0, 0, 0.25)", 
     },
   },
   plugins: [],
