@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { productService } from "../services/product.service";
 import type { Product } from "../types/product";
@@ -15,7 +15,12 @@ const MOCK_GALLERY = [
   "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80",
   "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&q=80",
   "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=800&q=80",
-  "https://images.unsplash.com/photo-1529374255404-311a2a4f1bbc?w=800&q=80",
+  "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80",
+  "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&q=80",
+  "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=800&q=80",
+  "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80",
+  "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&q=80",
+  "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=800&q=80",
 ];
 
 type ProductParams = {
@@ -25,8 +30,6 @@ type ProductParams = {
 
 const ProductDetailPage = () => {
   const navigate = useNavigate();
-
-  // --- 1. Logic ดึงข้อมูล (ตามโค้ดเดิมของคุณ) ---
   const { products } = useProduct();
   const { id } = useParams<ProductParams>();
 
@@ -36,13 +39,16 @@ const ProductDetailPage = () => {
   // State ข้อมูลสินค้า
   const [product, setProduct] = useState<Product | null>(cachedProduct || null);
   const [loading, setLoading] = useState(!cachedProduct);
+  //  Render Guard Clauses
+  if (loading) return <div className="p-10 text-center">Loading...</div>;
+  if (!product)
+    return <div className="p-10 text-center">Product not found</div>;
 
   // State สำหรับ UI
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState("");
-
   // useEffect Fetch Data ---
   useEffect(() => {
     // เลื่อนขึ้นบนสุดเสมอ
@@ -84,22 +90,60 @@ const ProductDetailPage = () => {
     }
   }, [product]);
 
+  // ฟังก์ชั่นเลื่อนรูป
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  // ฟังก์ชันสั่งเลื่อน
+  const scroll = (direction: "left" | "right") => {
+    if (scrollRef.current) {
+      const { current } = scrollRef;
+      const scrollAmount = 200; // ระยะที่จะเลื่อนต่อการกด 1 ครั้ง (ปรับได้)
+
+      if (direction === "left") {
+        current.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+      } else {
+        current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      }
+    }
+  };
+  // รวมรายการรูปภาพ (เอารูปจริง + รูป Mock มาต่อกันให้ดูเยอะๆ)
+  const galleryImages = product.image_url
+    ? [product.image_url, ...MOCK_GALLERY]
+    : MOCK_GALLERY;
+
   // ฟังก์ชันปรับจำนวน
   const handleQuantity = (type: "inc" | "dec") => {
     if (type === "dec" && quantity > 1) setQuantity(quantity - 1);
     if (type === "inc") setQuantity(quantity + 1);
   };
 
-  // --- 3. Render Guard Clauses ---
-  if (loading) return <div className="p-10 text-center">Loading...</div>;
-  if (!product)
-    return <div className="p-10 text-center">Product not found</div>;
-
-  // รวมรายการรูปภาพ (เอารูปจริง + รูป Mock มาต่อกันให้ดูเยอะๆ)
-  const galleryImages = product.image_url
-    ? [product.image_url, ...MOCK_GALLERY.slice(0, 3)]
-    : MOCK_GALLERY;
-
+  // ฟังก์ชั่นปุ่มต่างๆ
+  const handleShare = () => {
+    toast.success(`Share Coming Soon.`, {
+      icon: "🔜",
+    });
+  };
+  const handleSizeDetails = () => {
+    toast.success(`Size Details Coming Soon.`, {
+      icon: "🔜",
+    });
+  };
+  const handleAddCart = () => {
+    try {
+      const payload = { id: product.id, quantity, selectedColor, selectedSize };
+      console.log("payload:", payload);
+    } catch (error) {}
+    toast.success(`Added ${quantity} item(s) to cart Coming Soon.`, {
+      icon: "🔜",
+    });
+  };
+  const handleBuy = () => {
+    try {
+    } catch (error) {}
+    toast.success(`Buy ${quantity} item(s) Coming Soon.`, {
+      icon: "🔜",
+    });
+  };
   return (
     <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 pb-16 pt-10 font-kanit">
       {/*BREADCRUMB*/}
@@ -168,20 +212,26 @@ const ProductDetailPage = () => {
           </div>
 
           {/* รูปเล็ก */}
-          <div className="flex items-center gap-4 relative justify-center">
-            {/* ปุ่มเลื่อนซ้าย (ใช้ Text แทน Icon) */}
-            <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 font-bold text-lg">
+          <div className="flex items-center gap-4 relative justify-center lg:w-[90%] lg:ml-8">
+            {/* ปุ่มเลื่อนซ้าย */}
+            <button
+              onClick={() => scroll("left")}
+              className="w-8 h-8 flex flex-shrink-0 items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+            >
               <img src={arrowLeftIcon} alt="arrowLeftIcon" />
             </button>
 
-            <div className="flex gap-4 overflow-x-auto no-scrollbar py-2">
+            <div
+              ref={scrollRef}
+              className="flex gap-4 overflow-x-auto no-scrollbar py-2"
+            >
               {galleryImages.map((img, index) => (
                 <div
                   key={index}
                   onClick={() => setMainImage(img)}
-                  className={`w-24 h-24 flex-shrink-0 cursor-pointer overflow-hidden border-2 transition-all ${
+                  className={`w-28 h-28 flex-shrink-0 cursor-pointer overflow-hidden border-2 transition-all ${
                     mainImage === img
-                      ? "border-purple-800 opacity-100"
+                      ? "border-primary opacity-100"
                       : "border-transparent opacity-70 hover:opacity-100"
                   }`}
                 >
@@ -195,14 +245,20 @@ const ProductDetailPage = () => {
             </div>
 
             {/* ปุ่มเลื่อนขวา */}
-            <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 font-bold text-lg">
+            <button
+              onClick={() => scroll("right")}
+              className="w-8 h-8 flex flex-shrink-0 items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+            >
               <img src={arrowRightIcon} alt="arrowRightIcon" />
             </button>
           </div>
 
           {/* ปุ่ม Share */}
           <div className="flex justify-end text-primary ">
-            <button className="flex items-center gap-2 px-4 py-2 shadow-custombutton border border-gray-300 rounded-full text-sm text-gray-600 hover:scale-105 transition shadow-sm mt-4">
+            <button
+              className="flex items-center gap-2 px-4 py-2 shadow-custombutton border border-gray-300 rounded-full text-sm text-gray-600 hover:scale-105 transition shadow-sm mt-4"
+              onClick={handleShare}
+            >
               {/* ใช้ Text แทน Icon */}
               <img src={shareIcon} alt="shareIcon" className="w-[24px]" />
               Share
@@ -293,8 +349,11 @@ const ProductDetailPage = () => {
             </div>
             {/*---ลิงก์ตารางไซส์ */}
             <div className="text-right mt-14 w-full flex justify-end">
-              <button className="text-xs text-primary underline hover:text-text_primary">
-                รายละเอียด Size
+              <button
+                className="text-xs text-primary underline hover:text-text_primary"
+                onClick={handleSizeDetails}
+              >
+                Size details
               </button>
             </div>
           </div>
@@ -323,15 +382,16 @@ const ProductDetailPage = () => {
           {/* ปุ่ม Action */}
           <div className="space-y-4 w-full max-w-md mx-auto flex flex-col justify-center">
             <button
-              onClick={() =>
-                toast.success(`Added ${quantity} item(s) to cart!`)
-              }
               className="w-full bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-3.5 rounded-full shadow-md transition transform active:scale-[0.98]"
+              onClick={handleAddCart}
             >
               Add to Cart
             </button>
 
-            <button className="w-full bg-white border-2 border-purple-900 text-purple-900 font-bold py-3.5 rounded-full hover:bg-purple-50 transition transform active:scale-[0.98]">
+            <button
+              className="w-full bg-white border-2 border-purple-900 text-purple-900 font-bold py-3.5 rounded-full hover:bg-purple-50 transition transform active:scale-[0.98]"
+              onClick={handleBuy}
+            >
               Buy Now
             </button>
           </div>
