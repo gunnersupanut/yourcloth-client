@@ -1,5 +1,5 @@
 // src/App.tsx
-import { Routes, Route, useParams } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 // import layouts and pages
