@@ -39,9 +39,6 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     fetchProducts();
   }, []);
-  useEffect(() => {
-    console.log("all product =", products);
-  }, [products]);
   // ส่งออกไปให้ตัวอื่นใช้
   return (
     <ProductContext.Provider
