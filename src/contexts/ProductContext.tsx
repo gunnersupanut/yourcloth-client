@@ -24,7 +24,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      // เรียกใช้ Service 
+      // เรียกใช้ Service
       const data = await productService.getAll();
       setProducts(data);
     } catch (err) {
@@ -39,7 +39,9 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     fetchProducts();
   }, []);
-
+  useEffect(() => {
+    console.log("all product =", products);
+  }, [products]);
   // ส่งออกไปให้ตัวอื่นใช้
   return (
     <ProductContext.Provider

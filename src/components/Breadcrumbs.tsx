@@ -42,7 +42,7 @@ const Breadcrumbs = () => {
           const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
 
           return (
-            <li key={to} className="flex items-center">
+            <li key={to} className="flex items-center ">
               {/* ตัวคั่น*/}
               <span className="mx-2 text-text_secondary">/</span>
 

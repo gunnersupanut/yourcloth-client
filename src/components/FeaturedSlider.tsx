@@ -59,7 +59,7 @@ const FeaturedSlider = ({ currentProductId }: FeaturedSliderProps) => {
         {/* --- ตัวรางเลื่อน (Slider Container) --- */}
         <div
           ref={sliderRef}
-          className="flex gap-[100px] overflow-x-auto scroll-smooth no-scrollbar py-4 px-2 snap-x snap-mandatory ml-[85px]"
+          className="flex gap-[100px] overflow-x-auto scroll-smooth no-scrollbar py-4 px-2 snap-x snap-mandatory md:ml-[85px]"
         >
           {displayProducts.map((product) => (
             // กำหนดความกว้างการ์ดตรงนี้ (min-w)

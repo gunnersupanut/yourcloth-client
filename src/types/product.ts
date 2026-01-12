@@ -5,6 +5,7 @@ export interface Product {
   image_url: string;
   description: string;
   category: string;
+  gender: string;
   available_colors_code: string[];
   available_colors_name: string[];
   available_sizes: string[];

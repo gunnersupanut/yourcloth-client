@@ -12,16 +12,16 @@ const Category = () => {
       id: 1,
       name: "Head Wear",
       icon: headWearIcon,
-      path: "/shop/headwear",
+      path: "/shop/Head Wear",
     },
-    { id: 2, name: "Tops", icon: topsIcon, path: "/shop/tops" },
-    { id: 3, name: "Pants", icon: pantsIcon, path: "/shop/pants" },
-    { id: 4, name: "Shoes", icon: shoesIcon, path: "/shop/shoes" },
+    { id: 2, name: "Tops", icon: topsIcon, path: "/shop/Tops" },
+    { id: 3, name: "Pants", icon: pantsIcon, path: "/shop/Pants" },
+    { id: 4, name: "Shoes", icon: shoesIcon, path: "/shop/Shoes" },
     {
       id: 5,
       name: "Accessories",
       icon: accessoriesIcon,
-      path: "/shop/accessories",
+      path: "/shop/Accessories",
     },
   ];
   return (

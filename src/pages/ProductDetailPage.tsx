@@ -33,16 +33,13 @@ const ProductDetailPage = () => {
   const { products } = useProduct();
   const { id } = useParams<ProductParams>();
 
+
   // หาของใน Context ก่อน (Cache)
   const cachedProduct = products.find((p) => p.id === Number(id));
 
   // State ข้อมูลสินค้า
   const [product, setProduct] = useState<Product | null>(cachedProduct || null);
   const [loading, setLoading] = useState(!cachedProduct);
-  //  Render Guard Clauses
-  if (loading) return <div className="p-10 text-center">Loading...</div>;
-  if (!product)
-    return <div className="p-10 text-center">Product not found</div>;
 
   // State สำหรับ UI
   const [selectedSize, setSelectedSize] = useState("");
@@ -55,7 +52,9 @@ const ProductDetailPage = () => {
     window.scrollTo(0, 0);
 
     const fetchProduct = async () => {
+      console.log("Test Fechแล้ว");
       if (!id) return;
+      console.log("มี ID");
       try {
         const res = await productService.getById(id);
         setProduct(res.result);
@@ -91,7 +90,6 @@ const ProductDetailPage = () => {
   }, [product]);
 
   // ฟังก์ชั่นเลื่อนรูป
-
   const scrollRef = useRef<HTMLDivElement>(null);
   // ฟังก์ชันสั่งเลื่อน
   const scroll = (direction: "left" | "right") => {
@@ -106,6 +104,10 @@ const ProductDetailPage = () => {
       }
     }
   };
+  //  Render Guard Clauses
+  if (loading) return <div className="p-10 text-center">Loading...</div>;
+  if (!product)
+    return <div className="p-10 text-center">Product not found</div>;
   // รวมรายการรูปภาพ (เอารูปจริง + รูป Mock มาต่อกันให้ดูเยอะๆ)
   const galleryImages = product.image_url
     ? [product.image_url, ...MOCK_GALLERY]
@@ -145,9 +147,9 @@ const ProductDetailPage = () => {
     });
   };
   return (
-    <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 pb-16 pt-10 font-kanit">
+    <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 pb-16 pt-10 font-kanit ">
       {/*BREADCRUMB*/}
-      <nav className="text-sm font-medium text-text_secondary mb-8">
+      <nav className="text-sm font-medium text-text_secondary mb-8 overflow-x-auto whitespace-nowrap">
         <ol className="list-none p-0 inline-flex items-center">
           <li className="flex items-center">
             <Link
@@ -203,7 +205,7 @@ const ProductDetailPage = () => {
         {/* IMAGE GALLERY */}
         <div className="space-y-0">
           {/* รูปใหญ่ */}
-          <div className="aspect-square w-[70%] mx-auto bg-gray-100 overflow-hidden shadow-custommain relative group mb-5">
+          <div className="aspect-square w-[70%] mx-auto bg-gray-100 overflow-hidden shadow-custommain relative group mb-5 ">
             <img
               src={mainImage || product.image_url || MOCK_GALLERY[0]}
               alt={product.product_name}
