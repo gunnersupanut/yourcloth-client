@@ -31,7 +31,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
       console.error(err);
       setError("ไม่สามารถโหลดข้อมูลสินค้าได้");
     } finally {
-      setLoading(false); // จบงาน (ไม่ว่าจะสำเร็จหรือล้มเหลว) ให้ปิด Loading
+      setLoading(false); 
     }
   };
 

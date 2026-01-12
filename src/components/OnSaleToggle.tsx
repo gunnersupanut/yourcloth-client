@@ -37,7 +37,9 @@ const OnSaleToggle = () => {
         `}
         ></div>
       </div>
-      <span className="ml-3 text-button font-kanit text-secondary">On Sale</span>
+      <span className="ml-3 text-button font-kanit text-secondary">
+        On Sale
+      </span>
     </label>
   );
 };
