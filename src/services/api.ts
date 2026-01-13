@@ -12,11 +12,10 @@ export const api = axios.create({
 // ดักจับทุก Request ก่อนส่งออกไป
 api.interceptors.request.use(
     (config) => {
-        // อนาคตจะดึง Token จาก LocalStorage มาแปะตรงนี้
-        // const token = localStorage.getItem('token');
-        // if (token) {
-        //     config.headers.Authorization = `Bearer ${token}`;
-        // }
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
         return config;
     },
     (error) => {

@@ -2,10 +2,12 @@ import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
+import AuthModal from "./AuthModal";
 // import Icon
 import searchIcon from "../assets/search_icon.png";
 import accountIcon from "../assets/account_icon.png";
 import cartIcon from "../assets/cart_icon.png";
+
 const Navbar = () => {
   // ดึง user กับ logout มาใช้ได้เลย (ไม่ต้องเขียน logic แกะ token แล้ว)
   const { user, logout, isAuthenticated } = useAuth();
@@ -19,6 +21,7 @@ const Navbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false); // สวิตช์เปิด/ปิด
   const [searchText, setSearchText] = useState(""); // เก็บค่าที่พิมพ์
 
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   // เก็บ class style ของเมนูแต่ละอัน
   const getMenuClass = ({ isActive }: { isActive: boolean }) => {
     return isActive
@@ -44,6 +47,15 @@ const Navbar = () => {
     }
   };
 
+  const handleCartClick = (e: React.MouseEvent) => {
+    if (!isAuthenticated) {
+      // อย่าเพิ่งเปลี่ยนหน้า
+      e.preventDefault();
+      // เปิด Modal ขึ้นมาเคลียร์กันก่อน
+      setIsAuthModalOpen(true);
+    }
+    // ถ้า Logged In แล้ว มันจะทำงานตามปกติ (ไปหน้า /cart)
+  };
   return (
     <nav className="bg-primary shadow-md sticky top-0 z-50 ">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center ">
@@ -148,10 +160,19 @@ const Navbar = () => {
             </NavLink>
           )}
           {/* Cart Icon */}
-          <NavLink to="/cart" className={iconLinkClass}>
+          <NavLink
+            to="/cart"
+            className={iconLinkClass}
+            onClick={handleCartClick}
+          >
             <img src={cartIcon} alt="Cart_Icon" className="w-[50px]" />
           </NavLink>
         </div>
+        <AuthModal
+          message="Login to view your cart"
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+        />
       </div>
     </nav>
   );

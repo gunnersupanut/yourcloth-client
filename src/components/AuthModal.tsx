@@ -1,21 +1,21 @@
 import { Link } from "react-router-dom";
 interface AuthModalProps {
   isOpen: boolean;
+  message?: string;
   onClose: () => void;
 }
 
-const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
+const AuthModal = ({ isOpen, message, onClose }: AuthModalProps) => {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 font-kanit">
-      {/* 1. Backdrop (ฉากหลังมัวๆ กดแล้วปิดได้) */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       ></div>
 
-      {/* 2. Modal Content (กล่องขาวเด้งๆ) */}
+      {/* Modal Content */}
       <div className="relative bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl transform transition-all scale-100 animate-in fade-in zoom-in duration-200">
         {/* Close Button (กากบาทมุมขวา) */}
         <button
@@ -60,9 +60,8 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
           <h3 className="text-2xl font-bold text-[#5B486B] mb-2">
             Please Login
           </h3>
-          <p className="text-gray-500 mb-8">
-            You need to be logged in to add items to your cart or make a
-            purchase.
+          <p className="text-text_primary mb-8">
+            {message || "Please log in to continue."}
           </p>
 
           {/* Action Buttons */}
@@ -70,7 +69,8 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             {/* ปุ่ม Login */}
             <Link
               to="/login" // หรือใช้ Link ของ Next.js
-              className="block w-full py-3 px-4 bg-[#5B486B] hover:bg-[#4A3B58] text-white font-bold rounded-xl transition-transform active:scale-95 shadow-lg shadow-purple-200"
+              className="text-button     block w-full py-3 px-4 bg-secondary hover:scale-105 text-white rounded-xl transition-all duration-300 active:scale-95 shadow-lg shadow-purple-200"
+              onClick={onClose}
             >
               Log In Now
             </Link>
@@ -78,7 +78,8 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             {/* ปุ่ม Register */}
             <Link
               to="/register"
-              className="block w-full py-3 px-4 bg-white border-2 border-gray-100 hover:border-[#5B486B] text-gray-700 hover:text-[#5B486B] font-bold rounded-xl transition-colors"
+              className="text-button block w-full py-3 px-4 bg-white border-2 border-primary rounded-xl hover:scale-105  text-primary"
+              onClick={onClose}
             >
               Create Account
             </Link>

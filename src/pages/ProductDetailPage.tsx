@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { productService } from "../services/product.service";
-import type { Product } from "../types/product";
+import type { ProductDetail } from "../types/product";
 import { useProduct } from "../contexts/ProductContext";
+import { useAuth } from "../contexts/AuthContext";
 import toast from "react-hot-toast";
 
+import AuthModal from "../components/AuthModal";
 import arrowLeftIcon from "../assets/icons/arrow-left.png";
 import arrowRightIcon from "../assets/icons/arrow-right.png";
 import shareIcon from "../assets/icons/icons8-share-100 1.png";
 import FeaturedSlider from "../components/FeaturedSlider";
+import { cartService } from "../services/cart.service";
 
 // 🖼️ รูปภาพจำลอง (เอาไว้ทำ Gallery สวยๆ กรณีสินค้ามีรูปเดียว)
 const MOCK_GALLERY = [
@@ -29,18 +32,22 @@ type ProductParams = {
 };
 
 const ProductDetailPage = () => {
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { products } = useProduct();
   const { id } = useParams<ProductParams>();
 
-
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   // หาของใน Context ก่อน (Cache)
   const cachedProduct = products.find((p) => p.id === Number(id));
 
   // State ข้อมูลสินค้า
-  const [product, setProduct] = useState<Product | null>(cachedProduct || null);
+  const [product, setProduct] = useState<ProductDetail | null>(
+    cachedProduct ? ({ ...cachedProduct, variants: [] } as ProductDetail) : null
+  );
+  // loading state
   const [loading, setLoading] = useState(!cachedProduct);
-
+  const [addingToCart, setAddingToCart] = useState(false);
   // State สำหรับ UI
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState<string>("");
@@ -52,9 +59,7 @@ const ProductDetailPage = () => {
     window.scrollTo(0, 0);
 
     const fetchProduct = async () => {
-      console.log("Test Fechแล้ว");
       if (!id) return;
-      console.log("มี ID");
       try {
         const res = await productService.getById(id);
         setProduct(res.result);
@@ -64,10 +69,11 @@ const ProductDetailPage = () => {
         } else {
           setMainImage(MOCK_GALLERY[0]);
         }
+        console.log("Fetching product Complete.");
       } catch (error: any) {
         console.error("Error fetching product:", error);
 
-        // Logic เดิม: ถ้าไม่มีของโชว์เลย ค่อยดีดออก
+        // ถ้าไม่มีของโชว์เลย ดีดออก
         if (!product && !cachedProduct) {
           toast.error("Product not found.");
           navigate("/shop");
@@ -130,18 +136,56 @@ const ProductDetailPage = () => {
       icon: "🔜",
     });
   };
-  const handleAddCart = () => {
+  // --Add To Cart
+  const handleAddCart = async () => {
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    if (!selectedSize || !selectedColor) {
+      toast.error("Please select Size and Color");
+      return;
+    }
+    // เช็คของว่ามีไหม
+    // หาตัวที่ Size ตรง และ Color ตรง
+    const targetVariant = product.variants.find(
+      (v) => v.size === selectedSize && v.color_name === selectedColor
+    );
+    // เช็คว่าเจอไหม
+    if (!targetVariant) {
+      toast.error("This option is unavailable");
+      return;
+    }
+    // เช็คว่าของหมดไหม
+    if (targetVariant.stock <= 0) {
+      toast.error("Out of Stock!");
+      return;
+    }
     try {
-      const payload = { id: product.id, quantity, selectedColor, selectedSize };
-      console.log("payload:", payload);
-    } catch (error) {}
-    toast.success(`Added ${quantity} item(s) to cart Coming Soon.`, {
-      icon: "🔜",
-    });
+      setAddingToCart(true);
+      await cartService.addToCart(targetVariant.variant_id, quantity);
+      toast.success(`Added ${quantity} item(s) to cart`);
+      console.log("target Variant", targetVariant);
+    } catch (error: any) {
+      const data = error.response?.data?.data;
+      if (data) {
+        toast.error(`Only stock left ${data.availableStock} Please try again.`);
+      } else {
+        toast.error("Add item to cart Failed");
+      }
+    } finally {
+      setAddingToCart(false);
+    }
   };
   const handleBuy = () => {
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true);
+      return;
+    }
     try {
-    } catch (error) {}
+    } catch (error) {
+      console.error("Buy Failed.", error);
+    }
     toast.success(`Buy ${quantity} item(s) Coming Soon.`, {
       icon: "🔜",
     });
@@ -384,7 +428,12 @@ const ProductDetailPage = () => {
           {/* ปุ่ม Action */}
           <div className="space-y-4 w-full max-w-md mx-auto flex flex-col justify-center">
             <button
-              className="w-full bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-3.5 rounded-full shadow-md transition transform active:scale-[0.98]"
+              disabled={addingToCart}
+              className={`w-full font-bold py-3.5 rounded-full shadow-md transition transform active:scale-[0.98] hover:scale-105                ${
+                addingToCart
+                  ? ` bg-quaternary  text-white `
+                  : ` bg-yellow-400  text-white `
+              }`}
               onClick={handleAddCart}
             >
               Add to Cart
@@ -409,6 +458,10 @@ const ProductDetailPage = () => {
           <FeaturedSlider currentProductId={product.id} />
         </div>
       </div>
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </div>
   );
 };

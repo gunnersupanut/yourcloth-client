@@ -1,7 +1,7 @@
 // src/App.tsx
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-
+import { ProtectedRoute } from "./components/ProtectedRoute";
 // import layouts and pages
 import MainLayout from "./layouts/MainLayout";
 import Homepage from "./pages/HomePage";
@@ -34,7 +34,14 @@ function App() {
             <Route path=":category" element={<ShopPage />} />
             <Route path="/shop/:category/:id" element={<ProductDetailPage />} />
           </Route>
-          <Route path="cart" element={<CartPage />} />
+          <Route
+            path="cart"
+            element={
+              <ProtectedRoute>
+                <CartPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="login" element={<LoginPage />} />
           {/* User */}
           <Route path="register" element={<RegisterPage />} />
