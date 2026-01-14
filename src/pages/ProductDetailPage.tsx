@@ -169,7 +169,7 @@ const ProductDetailPage = () => {
     } catch (error: any) {
       const data = error.response?.data?.data;
       if (data) {
-        toast.error(`Only stock left ${data.availableStock} Please try again.`);
+        toast.error(`Only ${data.availableStock} items remaining.`);
       } else {
         toast.error("Add item to cart Failed");
       }
