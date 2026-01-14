@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 interface AuthModalProps {
   isOpen: boolean;
   message?: string;
@@ -7,7 +7,13 @@ interface AuthModalProps {
 
 const AuthModal = ({ isOpen, message, onClose }: AuthModalProps) => {
   if (!isOpen) return null;
-
+  const navigate = useNavigate();
+  const location = useLocation();
+  // บอกหน้า Login ว่า "มาจากไหน" (location)
+  const goToLogin = () => {
+    navigate("/login", { state: { from: location } });
+    onClose();
+  };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 font-kanit">
       <div
@@ -67,13 +73,12 @@ const AuthModal = ({ isOpen, message, onClose }: AuthModalProps) => {
           {/* Action Buttons */}
           <div className="space-y-3">
             {/* ปุ่ม Login */}
-            <Link
-              to="/login" // หรือใช้ Link ของ Next.js
+            <button
               className="text-button     block w-full py-3 px-4 bg-secondary hover:scale-105 text-white rounded-xl transition-all duration-300 active:scale-95 shadow-lg shadow-purple-200"
-              onClick={onClose}
+              onClick={goToLogin}
             >
               Log In Now
-            </Link>
+            </button>
 
             {/* ปุ่ม Register */}
             <Link

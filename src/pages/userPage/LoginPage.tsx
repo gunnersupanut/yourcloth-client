@@ -1,6 +1,6 @@
 import { useState } from "react";
 import AuthCard from "../../components/AuthCard";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../../services/auth.service";
 import { useAuth } from "../../contexts/AuthContext";
@@ -17,6 +17,9 @@ import HidePassWordIcon from "../../assets/icons/hidepasswordIcon.png";
 const LoginPage = () => {
   const { login } = useAuth(); // ดึงฟังก์ชันมาใช้
   const navigate = useNavigate();
+  // เช็คว่ากดเด้ง login มาจากหน้าอื่่นไหม
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -55,7 +58,7 @@ const LoginPage = () => {
         }
       );
 
-      navigate("/");
+      navigate(from, { replace: true });
     } catch (error: any) {
       console.error("Login Error:", error);
       if (error.response?.data?.message === "Please verify your email.") {
@@ -165,7 +168,7 @@ const LoginPage = () => {
               className="p-3 hover:scale-110 transition text-[#1877F2]"
               onClick={handleSocialSignUp}
             >
-              <img src={FacebookIcon} alt="FacebookIcon" width={60}/>
+              <img src={FacebookIcon} alt="FacebookIcon" width={60} />
             </button>
 
             {/* Google Circle */}
@@ -173,7 +176,7 @@ const LoginPage = () => {
               className="p-3 hover:scale-110 transition text-red-500"
               onClick={handleSocialSignUp}
             >
-              <img src={GoogleIcon} alt="GoogleIcon" width={60}/>
+              <img src={GoogleIcon} alt="GoogleIcon" width={60} />
             </button>
           </div>
         </div>
