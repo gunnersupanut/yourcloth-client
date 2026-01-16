@@ -7,15 +7,17 @@ import AuthModal from "./AuthModal";
 import searchIcon from "../assets/search_icon.png";
 import accountIcon from "../assets/account_icon.png";
 import cartIcon from "../assets/cart_icon.png";
+import { useCart } from "../contexts/CartContext";
 
 const Navbar = () => {
   // ดึง user กับ logout มาใช้ได้เลย (ไม่ต้องเขียน logic แกะ token แล้ว)
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuth();
-
+  const { cartItems } = useCart();
   const firstLetter = user?.username
     ? user.username.charAt(0).toUpperCase()
     : "U";
+  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   // UserDropdown
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   // Search State
@@ -165,10 +167,18 @@ const Navbar = () => {
           {/* Cart Icon */}
           <NavLink
             to="/cart"
-            className={iconLinkClass}
+            className={`${iconLinkClass} relative`}
             onClick={handleCartClick}
           >
             <img src={cartIcon} alt="Cart_Icon" className="w-[50px]" />
+
+            {/* ส่วนของ Badge (แสดงเฉพาะตอนมีของ > 0) */}
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] text-button text-white shadow-sm ring-2 ring-white">
+                {/* ถ้าเกิน 99 ให้โชว์ 99+*/}
+                {totalItems > 99 ? "99+" : totalItems}
+              </span>
+            )}
           </NavLink>
         </div>
         <AuthModal
