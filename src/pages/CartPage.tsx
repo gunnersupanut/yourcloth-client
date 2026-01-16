@@ -4,6 +4,7 @@ import { Trash2, Minus, Plus, Info, Ticket } from "lucide-react"; // ไอค�
 import { useCart } from "../contexts/CartContext";
 import toast from "react-hot-toast";
 import { cartService } from "../services/cart.service";
+import DeleteModal from "../components/ีui/DeleteModal";
 const CartPage = () => {
   const navigate = useNavigate();
 
@@ -12,6 +13,11 @@ const CartPage = () => {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Delete state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   // ---ฟังก์ชั่น
   // ฟังก์ชันเลือกของ (Checkbox)
   const toggleSelect = (id: number) => {
@@ -72,19 +78,28 @@ const CartPage = () => {
     }
   };
 
-  const removeItem = async (id: number) => {
+  // ลบ cart
+  const handleDeleteClick = (cartId: number) => {
+    setDeleteTargetId(cartId);
+    setIsDeleteModalOpen(true);
+  };
+  const confirmDelete = async () => {
+    if (!deleteTargetId) return;
+    setIsDeleting(true);
+
     try {
-      // ยิง API ลบ
-      // await cartService.removeItem(id);
-      console.log(`Delete item ${id}`);
-
-      //  สั่งโหลดใหม่
+      await cartService.deleteCart(deleteTargetId);
+      toast.success("Delete cart item success.");
       await fetchCart();
-
-      // เคลียร์ออกจาก Selected (ถ้าเลือกไว้อยู่)
-      setSelectedItems((prev) => prev.filter((itemId) => itemId !== id));
-    } catch (error) {
-      console.error("Remove failed", error);
+    } catch (error: any) {
+      // ถ้าไม่ผ่าน
+      console.error("Update Error:", error);
+      toast.error(error.response?.data?.message || "Delete cart item failed.");
+      await fetchCart();
+    } finally {
+      setIsDeleteModalOpen(false);
+      setIsDeleting(false);
+      setDeleteTargetId(null);
     }
   };
 
@@ -155,7 +170,7 @@ const CartPage = () => {
                   {/* ปุ่มลบ */}
                   <button
                     disabled={isUpdating}
-                    onClick={() => removeItem(item.cart_item_id)}
+                    onClick={() => handleDeleteClick(item.cart_item_id)}
                     className="text-secondary hover:text-red-500 transition-colors p-1 sm:p-2 -mr-2 sm:mr-0"
                   >
                     <Trash2 size={18} className="sm:w-6 sm:h-6" />
@@ -317,6 +332,14 @@ const CartPage = () => {
           </div>
         </div>
       </div>
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="ลบสินค้า?"
+        message="แน่ใจนะว่าจะเอาชิ้นนี้ออกจากตะกร้า? หายแล้วหายเลยนะวัยรุ่น!"
+        isLoading={isDeleting}
+      />
     </div>
   );
 };

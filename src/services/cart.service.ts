@@ -37,5 +37,14 @@ export const cartService = {
             console.error("Error update cart:", error);
             throw error;
         }
+    },
+    deleteCart: async (cartId: number) => {
+        try {
+            const res = await api.delete(`/carts/${cartId}`)
+            return res.data
+        } catch (error) {
+            console.error("Error Delete cart:", error);
+            throw error;
+        }
     }
 };
