@@ -26,7 +26,16 @@ export const cartService = {
             console.error("Error fetching cart:", error);
             throw error;
         }
-
-
     },
+    updateCart: async (cartId: number, quantity: number, variantId: number) => {
+        try {
+            const res = await api.patch(`/carts/${cartId}`, {
+                quantity, variantId
+            })
+            return res.data
+        } catch (error) {
+            console.error("Error update cart:", error);
+            throw error;
+        }
+    }
 };

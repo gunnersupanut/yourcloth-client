@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Trash2, Minus, Plus, Info, Ticket } from "lucide-react"; // ไอคอน
-import type { CartItem } from "../types/cartTypes";
 import { useCart } from "../contexts/CartContext";
 import toast from "react-hot-toast";
 import { cartService } from "../services/cart.service";
@@ -12,9 +11,11 @@ const CartPage = () => {
 
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
+  const [isUpdating, setIsUpdating] = useState(false);
   // ---ฟังก์ชั่น
   // ฟังก์ชันเลือกของ (Checkbox)
   const toggleSelect = (id: number) => {
+    // หา id ถ้าเจอ = มีอยู่แล้ว ลบออก ถ้าไม่เจอ = เพิ่มเข้าไป
     if (selectedItems.includes(id)) {
       setSelectedItems(selectedItems.filter((item) => item !== id));
     } else {
@@ -24,6 +25,8 @@ const CartPage = () => {
 
   // ฟังก์ชันเลือกทั้งหมด
   const toggleSelectAll = () => {
+    // ถ้าเลือกทั้งหมดอยู่แล้ว = ยกเลิก
+    // ถ้ายัง เพิ่ม id ทั้งหมดเข้าไป
     if (selectedItems.length === cartItems.length) {
       setSelectedItems([]);
     } else {
@@ -33,48 +36,52 @@ const CartPage = () => {
 
   const handleUpdateQuantity = async (
     cartItemId: number,
+    variantId: number,
     currentQty: number,
-    delta: number,
-    stockQty: number
+    delta: number
   ) => {
     const newQty = currentQty + delta;
 
-    // Guard 1: ห้ามต่ำกว่า 1 (ถ้าจะลบต้องกดถังขยะ)
-    if (newQty < 1) return;
-
-    // Guard 2: (Optional) เช็ค Stock เบื้องต้นในมือ (Frontend Check)
-    // แต่ตัวตัดสินจริงๆ คือ Backend นะ อันนี้แค่กัน User กดเล่น
-    const item = cartItems.find((i) => i.cart_item_id === cartItemId);
-    if (item && newQty > item.stock_quantity) {
-      toast.error(`ของเหลือแค่ ${item.stock_quantity} ชิ้นครับวัยรุ่น!`);
+    // ห้ามต่ำกว่า 1
+    if (newQty < 1) {
+      toast.error("Minimum quantity is 1.");
       return;
     }
 
+    // Guard 2 เช็ค Stock เบื้องต้นในมือ
+    // แต่ตัวตัดสินจริงๆ คือ Backend นะ อันนี้แค่กัน User กดเล่น
+    const item = cartItems.find((i) => i.cart_item_id === cartItemId);
+    if (item && newQty > item.stock_quantity) {
+      toast.error(`Only a few items left ${item.stock_quantity} .`);
+      return;
+    }
+    setIsUpdating(true);
     try {
-      // await cartService.updateQuantity(cartItemId, newQty);
-
-      // ✅ ถ้าผ่าน -> สั่ง Context โหลดตะกร้าใหม่ทันที (ตัวเลขจะเปลี่ยนเองตาม DB)
+      await cartService.updateCart(cartItemId, newQty, variantId);
+      // ถ้าผ่าน -> สั่ง Context โหลดตะกร้าใหม่ทันที (ตัวเลขจะเปลี่ยนเองตาม DB)
       await fetchCart();
     } catch (error: any) {
-      // ถ้าหลังบ้านด่ากลับมา (เช่น ของหมดพอดี)
+      // ถ้าไม่ผ่าน
       console.error("Update Error:", error);
-      toast.error(error.response?.data?.message || "อัปเดตจำนวนไม่ได้!");
-
-      // แนะนำ: โหลดตะกร้าใหม่ด้วย เผื่อข้อมูลหน้าเว็บมันไม่อัปเดต
+      toast.error(
+        error.response?.data?.message || "Unable to update quantity."
+      );
       await fetchCart();
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   const removeItem = async (id: number) => {
     try {
-      // 1. ยิง API ลบ
+      // ยิง API ลบ
       // await cartService.removeItem(id);
       console.log(`Delete item ${id}`);
 
-      // 2. สั่งโหลดใหม่
+      //  สั่งโหลดใหม่
       await fetchCart();
 
-      // 3. เคลียร์ออกจาก Selected (ถ้าเลือกไว้อยู่)
+      // เคลียร์ออกจาก Selected (ถ้าเลือกไว้อยู่)
       setSelectedItems((prev) => prev.filter((itemId) => itemId !== id));
     } catch (error) {
       console.error("Remove failed", error);
@@ -83,9 +90,13 @@ const CartPage = () => {
 
   // คำนวณเงิน (Subtotal)
   const calculateTotal = () => {
-    return cartItems
-      .filter((item) => selectedItems.includes(item.cart_item_id))
-      .reduce((total, item) => total + Number(item.price) * item.quantity, 0);
+    return (
+      cartItems
+        // เช็คดูว่าของในตระกร้า ถูกเลือกไว้ไหม
+        .filter((item) => selectedItems.includes(item.cart_item_id))
+        // เอาของที่เลือกไว้มาบวกเลขเข้าไปทีละชิ้น
+        .reduce((total, item) => total + Number(item.price) * item.quantity, 0)
+    );
   };
 
   const subtotal = calculateTotal();
@@ -143,6 +154,7 @@ const CartPage = () => {
 
                   {/* ปุ่มลบ */}
                   <button
+                    disabled={isUpdating}
                     onClick={() => removeItem(item.cart_item_id)}
                     className="text-secondary hover:text-red-500 transition-colors p-1 sm:p-2 -mr-2 sm:mr-0"
                   >
@@ -171,9 +183,9 @@ const CartPage = () => {
                       onClick={() =>
                         handleUpdateQuantity(
                           item.cart_item_id,
+                          item.variant_id,
                           item.quantity,
-                          -1,
-                          item.stock_quantity
+                          -1
                         )
                       }
                       className="w-6 h-6 flex items-center justify-center rounded-full border border-black text-black hover:bg-gray-100 transition-colors"
@@ -187,9 +199,13 @@ const CartPage = () => {
 
                     {/* ตัวเลข */}
                     <div className="min-w-[30px] sm:min-w-[50px] h-6 sm:h-8 flex items-center justify-center rounded-full border border-black px-2">
-                      <span className="text-sm sm:text-bodyxl text-primary font-medium">
-                        {item.quantity}
-                      </span>
+                      <div className="text-sm sm:text-bodyxl text-primary font-medium">
+                        {isUpdating ? (
+                          <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+                        ) : (
+                          item.quantity
+                        )}
+                      </div>
                     </div>
 
                     {/* ปุ่มบวก */}
@@ -197,9 +213,9 @@ const CartPage = () => {
                       onClick={() =>
                         handleUpdateQuantity(
                           item.cart_item_id,
+                          item.variant_id,
                           item.quantity,
-                          1,
-                          item.stock_quantity
+                          1
                         )
                       }
                       className="w-6 h-6 flex items-center justify-center rounded-full border border-black text-black hover:bg-gray-100 transition-colors"

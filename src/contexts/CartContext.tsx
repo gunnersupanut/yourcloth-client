@@ -34,8 +34,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(true);
       const res = await cartService.getCartItem();
       setCartItems(res.result);
-
-      console.log("Fetching cart for user:", user.id);
     } catch (error) {
       console.error("Fetch cart error", error);
     } finally {
