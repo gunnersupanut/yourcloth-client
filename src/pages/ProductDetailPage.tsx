@@ -12,6 +12,7 @@ import arrowRightIcon from "../assets/icons/arrow-right.png";
 import shareIcon from "../assets/icons/icons8-share-100 1.png";
 import FeaturedSlider from "../components/FeaturedSlider";
 import { cartService } from "../services/cart.service";
+import { useCart } from "../contexts/CartContext";
 
 // 🖼️ รูปภาพจำลอง (เอาไว้ทำ Gallery สวยๆ กรณีสินค้ามีรูปเดียว)
 const MOCK_GALLERY = [
@@ -33,6 +34,7 @@ type ProductParams = {
 
 const ProductDetailPage = () => {
   const { isAuthenticated } = useAuth();
+  const { fetchCart } = useCart();
   const navigate = useNavigate();
   const { products } = useProduct();
   const { id } = useParams<ProductParams>();
@@ -164,6 +166,8 @@ const ProductDetailPage = () => {
     try {
       setAddingToCart(true);
       await cartService.addToCart(targetVariant.variant_id, quantity);
+      // สั่งให้รีหน้าตะกร้าด้วย
+      await fetchCart();
       toast.success(`Added ${quantity} item(s) to cart`);
       console.log("target Variant", targetVariant);
     } catch (error: any) {
@@ -193,7 +197,7 @@ const ProductDetailPage = () => {
   return (
     <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 pb-16 pt-10 font-kanit ">
       {/*BREADCRUMB*/}
-      <nav className="text-sm font-medium text-text_secondary mb-8 overflow-x-auto whitespace-nowrap">
+      <nav className="text-sm text-text_secondary mb-8 py-5 overflow-x-auto whitespace-nowrap">
         <ol className="list-none p-0 inline-flex items-center">
           <li className="flex items-center">
             <Link
@@ -232,7 +236,7 @@ const ProductDetailPage = () => {
       {/* Product Name */}
 
       {/*  MAIN CONTENT GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-5">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-5">
         <div className="flex items-center">
           {" "}
           <p className="text-h1xl text-primary">

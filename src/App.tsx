@@ -13,8 +13,7 @@ import ForgotPasswordPage from "./pages/userPage/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/userPage/ResetPasswordPage";
 import ShopPage from "./pages/ShopPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
-
-const CartPage = () => <div className="text-xl">🛒 ตะกร้าสินค้า (รอทำ)</div>;
+import CartPage from "./pages/CartPage";
 const AboutPage = () => <div className="text-xl">🔐 หน้า About (รอทำ)</div>;
 const ContactPage = () => <div className="text-xl">🔐 หน้า Contact (รอทำ)</div>;
 

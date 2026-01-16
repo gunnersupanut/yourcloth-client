@@ -7,6 +7,7 @@ import type { DecodedToken } from "../types/authTypes";
 
 interface AuthContextType {
   user: DecodedToken | null;
+  isLoading: boolean;
   login: (token: string) => void;
   logout: () => void;
   isAuthenticated: boolean;
@@ -16,6 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<DecodedToken | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   // โหลดครั้งแรก เช็คว่ามี Token ในเครื่องไหม
   useEffect(() => {
@@ -35,6 +37,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       } catch (error) {
         localStorage.removeItem("token");
+      } finally {
+        setIsLoading(false);
       }
     }
   }, []);
@@ -52,7 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, isAuthenticated: !!user }}
+      value={{ isLoading, user, login, logout, isAuthenticated: !!user }}
     >
       {children}
     </AuthContext.Provider>

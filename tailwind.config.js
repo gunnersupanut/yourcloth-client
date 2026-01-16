@@ -6,22 +6,29 @@ export default {
   theme: {
     extend: {
       fontSize: {
-        logoxl: "3.5rem",
+        logoxl: ["3.5rem", { lineHeight: "1.1", fontWeight: "800" }],
         h1xl: [
           "36px",
           {
+            lineHeight: "1.2",
             fontWeight: "800",
           },
         ],
-        h2xl: ["32px", { fontWeight: "700" }],
-        h3xl: ["24px", { fontWeight: "500" }],
-        bodyxl: "16px",
-        button: ["16px", { fontWeight: "700" }],
-        cardtitleprimary: ["14px", { fontWeight: "700" }],
-        cardtitlesecondary: ["14px", { fontWeight: "500" }],
+
+        h2xl: ["32px", { lineHeight: "1.25", fontWeight: "700" }],
+
+        h3xl: ["24px", { lineHeight: "1.3", fontWeight: "500" }],
+
+        bodyxl: ["16px", { lineHeight: "1.5" }], // หรือ "24px"
+
+        button: ["16px", { lineHeight: "1.2", fontWeight: "700" }],
+
+        cardtitleprimary: ["14px", { lineHeight: "1.4", fontWeight: "700" }],
+        cardtitlesecondary: ["14px", { lineHeight: "1.4", fontWeight: "500" }],
         ui: [
           "12px",
           {
+            lineHeight: "16px",
             fontWeight: "500",
           },
         ],
@@ -43,8 +50,8 @@ export default {
       },
     },
     boxShadow: {
-      custommain: "5px 5px 5px 2px rgba(0, 0, 0, 0.25)", 
-      custombutton: "2px 2px 5px 0px rgba(0, 0, 0, 0.25)", 
+      custommain: "5px 5px 5px 2px rgba(0, 0, 0, 0.25)",
+      custombutton: "2px 2px 5px 0px rgba(0, 0, 0, 0.25)",
     },
   },
   plugins: [],

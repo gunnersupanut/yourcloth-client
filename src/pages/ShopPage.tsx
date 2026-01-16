@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import Category from "../components/Category";
 import { useState } from "react";
-import DropdownFilter from "../components/DropdownFilter";
+import DropdownFilter from "../components/ีui/DropdownFilter";
 import OnSaleToggle from "../components/OnSaleToggle";
 import PriceSlider from "../components/PriceSlider";
 import { useProduct } from "../contexts/ProductContext";
@@ -10,6 +10,9 @@ const ShopPage = () => {
   // ดึงค่า category มาจาก URL
   // ถ้าเข้า /shop -> category จะเป็น undefined
   // ถ้าเข้า /shop/men -> category จะเป็น "men"
+  // const [searchParams] = useSearchParams();
+  // // แกะคำว่า "search" ออกมา
+  // const keyword = searchParams.get("search");
   const { category } = useParams();
 
   const { products } = useProduct();
@@ -72,7 +75,7 @@ const ShopPage = () => {
   });
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-8xl font-kanit">
+    <div className="container mx-auto px-4 py-8 max-w-7xl font-kanit">
       {/*---Category List */}
       <div>
         <h1 className="text-h1xl text-primary mb-12">

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 import AuthModal from "./AuthModal";
@@ -10,6 +10,7 @@ import cartIcon from "../assets/cart_icon.png";
 
 const Navbar = () => {
   // ดึง user กับ logout มาใช้ได้เลย (ไม่ต้องเขียน logic แกะ token แล้ว)
+  const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuth();
 
   const firstLetter = user?.username
@@ -38,12 +39,14 @@ const Navbar = () => {
       : `p-2 rounded-full text-white border-2 border-transparent transition-all duration-300 hover:border-secondary`; // Inactive Style
   };
   // ฟังก์ชันจัดการการกด Enter ในช่องค้นหา
-  const handleSearchSubmit = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      console.log("Search:", searchText);
-      // navigate(`/search?q=${searchText}`); // เปิดบรรทัดนี้เมื่อมีหน้า Search จริง
-      setIsSearchOpen(false); // ค้นเสร็จปิดกล่อง
-      setSearchText(""); // ล้างคำค้น
+  const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // เช็คว่ากด Enter และมีข้อความไหม
+    if (e.key === "Enter" && searchText.trim() !== "") {
+      // 🚀 ไปหน้า Shop พร้อมแนบ ?search=คำค้น
+      navigate(`/shop?search=${encodeURIComponent(searchText.trim())}`);
+
+      // ปิดช่อง Search เพื่อความเนียน
+      setIsSearchOpen(false);
     }
   };
 
