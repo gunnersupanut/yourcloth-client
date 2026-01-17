@@ -1,11 +1,4 @@
-interface DeleteModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title?: string;
-  message: string;
-  isLoading?: boolean;
-}
+import type { DeleteModalProps } from "../../types/modalTypes";
 
 const DeleteModal: React.FC<DeleteModalProps> = ({
   isOpen,

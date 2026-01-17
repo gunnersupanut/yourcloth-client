@@ -5,6 +5,7 @@ import { useCart } from "../contexts/CartContext";
 import toast from "react-hot-toast";
 import { cartService } from "../services/cart.service";
 import DeleteModal from "../components/ีui/DeleteModal";
+import type { DeleteModalProps, DeleteModalState } from "../types/modalTypes";
 const CartPage = () => {
   const navigate = useNavigate();
 
@@ -15,8 +16,12 @@ const CartPage = () => {
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Delete state
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+  const [deleteModal, setDeleteModal] = useState<DeleteModalState>({
+    isOpen: false,
+    targetId: null,
+    title: "",
+    message: "",
+  });
   const [isDeleting, setIsDeleting] = useState(false);
   // ---ฟังก์ชั่น
   // ฟังก์ชันเลือกของ (Checkbox)
@@ -79,17 +84,45 @@ const CartPage = () => {
   };
 
   // ลบ cart
-  const handleDeleteClick = (cartId: number) => {
-    setDeleteTargetId(cartId);
-    setIsDeleteModalOpen(true);
+  const handleSingleDeleteClick = (cartId: number) => {
+    setDeleteModal({
+      isOpen: true,
+      type: "SINGLE",
+      targetId: cartId,
+      title: "Remove Item",
+      message: "Are you sure you want to remove this item from your cart?",
+    });
+  };
+  // ลบ Selected Cart
+  const handleBulkDeleteClick = () => {
+    // ถ้าไม่ได้เลือกอะไรเลย อย่าเปิด Modal
+    if (selectedItems.length === 0) {
+      // สมมติว่าตัวแปรเก็บ checkbox คือ selectedItems
+      toast.error("Please select items to delete.");
+      return;
+    }
+
+    setDeleteModal({
+      isOpen: true,
+      type: "BULK",
+      targetId: null,
+      title: "Remove Selected Items",
+      message: `Are you sure you want to remove ${selectedItems.length} items?`, // ใส่จำนวนไปด้วย ดูใส่ใจ!
+    });
   };
   const confirmDelete = async () => {
-    if (!deleteTargetId) return;
     setIsDeleting(true);
-
     try {
-      await cartService.deleteCart(deleteTargetId);
-      toast.success("Delete cart item success.");
+      if (deleteModal.type === "SINGLE" && deleteModal.targetId) {
+        await cartService.deleteCart(deleteModal.targetId);
+        toast.success("Delete cart item success.");
+      } else if (deleteModal.type === "BULK") {
+        await cartService.deleteSeletedCarts(selectedItems);
+        toast.success("Selected items removed.");
+        // อย่าลืมเคลียร์ checkbox ด้วยนะ
+        setSelectedItems([]);
+      }
+
       await fetchCart();
     } catch (error: any) {
       // ถ้าไม่ผ่าน
@@ -97,9 +130,8 @@ const CartPage = () => {
       toast.error(error.response?.data?.message || "Delete cart item failed.");
       await fetchCart();
     } finally {
-      setIsDeleteModalOpen(false);
+      setDeleteModal((prev) => ({ ...prev, isOpen: false }));
       setIsDeleting(false);
-      setDeleteTargetId(null);
     }
   };
 
@@ -170,7 +202,7 @@ const CartPage = () => {
                   {/* ปุ่มลบ */}
                   <button
                     disabled={isUpdating}
-                    onClick={() => handleDeleteClick(item.cart_item_id)}
+                    onClick={() => handleSingleDeleteClick(item.cart_item_id)}
                     className="text-secondary hover:text-red-500 transition-colors p-1 sm:p-2 -mr-2 sm:mr-0"
                   >
                     <Trash2 size={18} className="sm:w-6 sm:h-6" />
@@ -288,7 +320,11 @@ const CartPage = () => {
                   Select all
                 </span>
               </label>
-              <button className="text-primary hover:text-red-600 underline text-sm font-medium">
+              <button
+                className="text-primary hover:text-red-600 underline text-sm font-medium"
+                onClick={() => handleBulkDeleteClick()}
+                disabled={isDeleting}
+              >
                 Delete all items
               </button>
             </div>
@@ -333,11 +369,11 @@ const CartPage = () => {
         </div>
       </div>
       <DeleteModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal((prev) => ({ ...prev, isOpen: false }))}
         onConfirm={confirmDelete}
-        title="ลบสินค้า?"
-        message="แน่ใจนะว่าจะเอาชิ้นนี้ออกจากตะกร้า? หายแล้วหายเลยนะวัยรุ่น!"
+        title={deleteModal.title}
+        message={deleteModal.message}
         isLoading={isDeleting}
       />
     </div>
