@@ -5,17 +5,8 @@ import { productService } from "../services/product.service";
 import PageLoading from "../components/ui/PageLoading";
 import AddressSelectionModal from "../components/AddressSelectionModal";
 import type { CheckoutItem, CheckoutUIState } from "../types/checkoutTypes";
-
-// ------------------- MOCK DATA ZONE -------------------
-
-const mockAddress = {
-  id: 1,
-  name: "Mr. Gunner Sirname",
-  phone: "099-999-9999",
-  detail:
-    "123 Sukhumvit Road, Khlong Toei Nuea, Watthana, Bangkok 10110, Thailand",
-};
-// ------------------------------------------------------
+import type { Address } from "../types/addressTypes";
+import { addressService } from "../services/addressService";
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -31,11 +22,16 @@ const CheckoutPage = () => {
   });
   const [checkoutItems, setCheckoutItems] = useState<CheckoutItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [address] = useState(mockAddress);
+  const [addresses, setAddresses] = useState<Address[]>([]);
   const [shippingMethod, setShippingMethod] = useState("standard");
   const [paymentMethod, setPaymentMethod] = useState("bank");
   const [loading, setLoading] = useState(false);
+  const [loadingAddr, setLoadingAddr] = useState(false);
 
+  const defaultAddress =
+    addresses.find((addr) => addr.id === uiState.selectedAddressId) ||
+    addresses.find((i) => i.isDefault) ||
+    addresses[0];
   // Helper Function เอาไว้เปลี่ยนค่า
   // รับ key ที่จะแก้ และ value ใหม่
   const updateUi = (key: keyof CheckoutUIState, value: any) => {
@@ -86,6 +82,27 @@ const CheckoutPage = () => {
       }
     };
     fetchLatestPrices();
+  }, [selectedItemsRaw, navigate]);
+
+  // FetchAddresses
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        setLoadingAddr(true);
+        const myAddresses = await addressService.getMyAddresses();
+        setAddresses(myAddresses);
+        console.log("Fetch Address:", myAddresses);
+        // Auto Select ถ้ายังไม่ได้เลือกที่อยู่ ให้เลือกตัวแรกอัตโนมัติ (Default)
+        if (uiState.selectedAddressId === null && myAddresses.length > 0) {
+          updateUi("selectedAddressId", myAddresses[0].id);
+        }
+      } catch (error) {
+        console.error("Failed to load addresses");
+      } finally {
+        setLoadingAddr(false);
+      }
+    };
+    fetchAddresses();
   }, []);
 
   // คำนวณเงิน
@@ -94,7 +111,7 @@ const CheckoutPage = () => {
     0
   );
   const shippingCost = 50;
-  const discount = 50;
+  const discount = 0;
   const totalNet = subtotal + shippingCost - discount;
 
   // 🔥 ฟังก์ชันจำลองการสั่งซื้อ (Mock Logic)
@@ -102,9 +119,8 @@ const CheckoutPage = () => {
     try {
       setLoading(true);
 
-      // 1. เตรียม Payload (ให้เหมือนของจริงที่สุด)
+      // เตรียม Payload (ให้เหมือนของจริงที่สุด)
       const payload = {
-        addressId: address.id,
         checkoutItems: checkoutItems.map((item) => ({
           variantId: item.variantId,
           quantity: item.quantity,
@@ -156,7 +172,7 @@ const CheckoutPage = () => {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 max-w-7xl font-kanit">
-      {isLoading && <PageLoading />}
+      {(isLoading || loadingAddr) && <PageLoading />}
       <h1 className="text-h1xl text-primary mb-5">Place An Order</h1>
 
       {/* Order checkoutItems */}
@@ -225,27 +241,60 @@ const CheckoutPage = () => {
                 <span className="font-bold text-lg">Shipping address</span>
               </div>
 
-              {/* Card Address */}
-              <div className="flex bg-white rounded-xl overflow-hidden shadow-lg h-32">
-                {/* แถบสีเข้มชื่อคน */}
-                <div className="bg-[#563F58] text-white p-6 w-1/3 flex flex-col justify-center">
-                  <p className="font-bold text-lg truncate">
-                    Mr. Gunner Surname
-                  </p>
-                  <p className="text-sm opacity-80">0999999999</p>
-                </div>
-                {/* ที่อยู่ */}
-                <div className="p-6 flex-1 flex flex-col justify-center text-gray-600 text-sm relative">
-                  <p>123 Sukhumvit Road, Khlong Toei Nuea,</p>
-                  <p>Watthana, Bangkok 10110, Thailand</p>
+              {defaultAddress ? (
+                // ✅ เหลือ Div ตัวเดียวพอ (ตัวที่มี relative group)
+                <div className="flex bg-white rounded-xl overflow-hidden shadow-lg h-32 relative group">
+                  {/* ฝั่งซ้าย: ชื่อ & เบอร์ (สีม่วงเข้ม) */}
+                  <div className="bg-[#563F58] text-white p-6 w-[35%] flex flex-col justify-center min-w-[120px]">
+                    <p className="font-bold text-lg truncate capitalize">
+                      {defaultAddress.recipient_name}
+                    </p>
+                    <p className="text-sm opacity-80 font-medium">
+                      {defaultAddress.phone}
+                    </p>
+                  </div>
+
+                  {/* ฝั่งขวา: รายละเอียดที่อยู่ */}
+                  <div className="p-6 pr-4 flex-1 flex flex-col justify-center text-gray-600 text-sm">
+                    <p className="line-clamp-2 leading-relaxed font-medium">
+                      {defaultAddress.address}
+                    </p>
+                  </div>
+
+                  {/* ปุ่ม Change Address (ลอยขวาล่าง) */}
                   <button
-                    className="absolute bottom-4 right-6 text-xs text-gray-500 underline hover:text-primary"
+                    className="absolute bottom-3 right-5 text-xs text-gray-400 underline decoration-gray-400 hover:text-[#6B4B6E] hover:decoration-[#6B4B6E] transition font-bold"
                     onClick={() => updateUi("isAddressModalOpen", true)}
                   >
                     Change Address
                   </button>
                 </div>
-              </div>
+              ) : (
+                // ❌ Case ไม่มีที่อยู่
+                <div
+                  onClick={() => updateUi("isAddressModalOpen", true)}
+                  className="flex flex-col items-center justify-center h-32 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-[#563F58] hover:bg-[#563F58]/5 transition group"
+                >
+                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mb-2 group-hover:bg-[#563F58] transition">
+                    <svg
+                      className="w-6 h-6 text-gray-500 group-hover:text-white transition"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                  </div>
+                  <span className="font-bold text-gray-400 group-hover:text-[#563F58] transition">
+                    Add New Address
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* 🚚 Right Side: Shipping & Payment Options */}
@@ -363,9 +412,9 @@ const CheckoutPage = () => {
         </div>
       </div>
 
-      {/* 🔥 ส่วน Footer แบบ Full Width (ทะลุ Container) */}
+      {/* ส่วน Footer แบบ Full Width (ทะลุ Container) */}
       <div className="fixed bottom-0 z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.1)] w-screen left-1/2 -translate-x-1/2">
-        {/* 🎟️ Bar 1: Discount Section (Dark Purple) */}
+        {/* Discount Section (Dark Purple) */}
         <div className="bg-[#563F58] py-4">
           <div className="container mx-auto px-4 md:px-8 flex justify-end items-center gap-6">
             <span className="text-[#FFD700] flex items-center gap-2 font-medium cursor-pointer underline decoration-[#FFD700]">
@@ -439,8 +488,8 @@ const CheckoutPage = () => {
       <AddressSelectionModal
         isOpen={uiState.isAddressModalOpen} // ดึงจากก้อน
         onClose={() => updateUi("isAddressModalOpen", false)} // สั่งปิด
-        addresses={[mockAddress]}
-        selectedId={uiState.selectedAddressId} // ส่ง ID ปัจจุบันไปโชว์
+        addresses={addresses}
+        selectedId={defaultAddress?.id}
         onConfirm={(newAddress) => {
           setUiState((prev) => ({
             ...prev,

@@ -3,12 +3,12 @@ import { api } from "./api";
 
 export const addressService = {
     getMyAddresses: async () => {
-        const response = await api.get("/addresses");
-        return response.data.data; // เจาะเอา array ออกมา
+        const response = await api.get("/addresses/");
+        return response.data; // เจาะเอา array ออกมา
     },
 
     createAddress: async (data: CreateAddressPayload) => {
-        const response = await api.post("/addresses", data);
+        const response = await api.post("/addresses/", data);
         return response.data;
     },
     updateAddress: async (addressId: number, data: UpdateAddressPayload) => {
@@ -17,6 +17,10 @@ export const addressService = {
     },
     deleteAddress: async (addressId: number,) => {
         const response = await api.delete(`/${addressId}`);
+        return response.data;
+    },
+    setDefault: async (addressId: number,) => {
+        const response = await api.delete(`/default/${addressId}`);
         return response.data;
     },
 };

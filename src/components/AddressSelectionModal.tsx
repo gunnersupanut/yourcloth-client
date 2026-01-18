@@ -34,6 +34,7 @@ const AddressSelectionModal = ({
     const selectedAddress = addresses.find(
       (addr) => addr.id === tempSelectedId
     );
+
     if (selectedAddress) {
       onConfirm(selectedAddress);
       onClose();
@@ -45,12 +46,12 @@ const AddressSelectionModal = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       {/* Modal Container */}
       <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        {/* ❌ Header */}
+        {/* Header */}
         <div className="flex justify-between items-center p-6 pb-2">
-          <h2 className="text-3xl font-extrabold text-[#563F58]">Address</h2>
+          <h2 className="text-h1xl text-primary">Address</h2>
           <button
             onClick={onClose}
-            className="text-yellow-400 hover:text-yellow-500 transition"
+            className="text-secondary hover:text-yellow-500 transition"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -69,7 +70,7 @@ const AddressSelectionModal = ({
           </button>
         </div>
 
-        {/* 📜 Scrollable Content */}
+        {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 pt-2 space-y-4 custom-scrollbar">
           {addresses.map((addr) => {
             const isSelected = tempSelectedId === addr.id;
@@ -78,33 +79,35 @@ const AddressSelectionModal = ({
               <div
                 key={addr.id}
                 onClick={() => setTempSelectedId(addr.id)}
-                className={`group flex items-stretch rounded-2xl border-2 cursor-pointer transition-all shadow-sm hover:shadow-md
-                  ${isSelected ? "border-[#6B4B6E]" : "border-gray-200"}`}
+                className={`group flex items-stretch rounded-2xl border-2 cursor-pointer transition-all duration-300 shadow-sm hover:scale-105
+                  ${isSelected ? "border-primary" : "border-gray-200"}`}
               >
-                {/* 🎨 Left Side: Name & Phone */}
+                {/* Name & Phone */}
                 <div
                   className={`w-[40%] p-5 flex flex-col justify-center gap-1 rounded-l-[14px] transition-colors
                     ${
                       isSelected
-                        ? "bg-[#6B4B6E] text-white"
+                        ? "bg-primary text-white"
                         : "bg-gray-200 text-gray-400"
                     }`}
                 >
                   {/* Dot Indicator */}
                   <div
                     className={`w-4 h-4 rounded-full mb-2 ${
-                      isSelected ? "bg-yellow-400" : "bg-white"
+                      isSelected ? "bg-secondary" : "bg-white"
                     }`}
                   />
 
-                  <p className="font-bold text-sm leading-tight">{addr.name}</p>
-                  <p className="text-xs font-medium opacity-90">{addr.phone}</p>
+                  <p className="text-body leading-tight">
+                    {addr.recipient_name}
+                  </p>
+                  <p className="text-body">{addr.phone}</p>
                 </div>
 
-                {/* 🏠 Right Side: Address Detail */}
+                {/* Address Detail */}
                 <div className="w-[60%] p-5 flex items-center bg-white rounded-r-[14px]">
-                  <p className="text-gray-600 text-sm font-medium leading-relaxed">
-                    {addr.detail}
+                  <p className="text-gray-600 text-body font-medium leading-relaxed">
+                    {addr.address}
                   </p>
                 </div>
               </div>
@@ -112,10 +115,10 @@ const AddressSelectionModal = ({
           })}
         </div>
 
-        {/* 🦶 Footer Buttons */}
+        {/* Footer Buttons */}
         <div className="p-6 pt-2 flex flex-col gap-4">
           {/* Add New Address Button */}
-          <button className="w-full py-3 rounded-full border-2 border-[#6B4B6E] text-[#6B4B6E] font-bold flex items-center justify-center gap-2 hover:bg-purple-50 transition">
+          <button className="w-full text-button py-6 rounded-full border-2 border-primary text-primary flex items-center justify-center gap-2 hover:bg-purple-50 transition">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5"
@@ -148,7 +151,6 @@ const AddressSelectionModal = ({
           </button>
         </div>
       </div>
-      
     </div>
   );
 };
