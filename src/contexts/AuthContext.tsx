@@ -37,10 +37,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       } catch (error) {
         localStorage.removeItem("token");
-      } finally {
-        setIsLoading(false);
       }
     }
+    setIsLoading(false);
   }, []);
   // ฟังก์ชั่น Login
   const login = (token: string) => {

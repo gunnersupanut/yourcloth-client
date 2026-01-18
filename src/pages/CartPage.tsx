@@ -4,7 +4,7 @@ import { Trash2, Minus, Plus, Info, Ticket } from "lucide-react"; // ไอค�
 import { useCart } from "../contexts/CartContext";
 import toast from "react-hot-toast";
 import { cartService } from "../services/cart.service";
-import DeleteModal from "../components/ีui/DeleteModal";
+import DeleteModal from "../components/ui/DeleteModal";
 import type { DeleteModalState } from "../types/modalTypes";
 const CartPage = () => {
   const navigate = useNavigate();
@@ -135,6 +135,33 @@ const CartPage = () => {
     }
   };
 
+  const handleCheckout = () => {
+    // เช็คก่อนว่ามีการเลือกของไหม
+    if (selectedItems.length === 0) {
+      return;
+    }
+    // กรองเอา ข้อมูลสินค้าตัวเต็ม จาก cartItems โดยใช้ ID ที่เลือก
+    // เอา quantity และ variant info ไปด้วย
+    const itemsToCheckout = cartItems
+      .filter(
+        (item) => selectedItems.includes(item.cart_item_id) // เช็คว่า item นี้ถูกเลือกไหม
+      )
+      .map((item) => ({
+        // จัด Format ให้หน้า Checkout ใช้ง่ายๆ
+        variantId: item.variant_id,
+        quantity: item.quantity,
+        name: item.product_name,
+        price: item.price,
+        image: item.image_url,
+      }));
+
+    // ส่ง Object นี้ไปหน้า Checkout
+    navigate("/checkout", {
+      state: {
+        selectedItems: itemsToCheckout,
+      },
+    });
+  };
   // คำนวณเงิน (Subtotal)
   const calculateTotal = () => {
     return (
@@ -176,7 +203,7 @@ const CartPage = () => {
                 />
 
                 {/*Image*/}
-                <div className="w-20 h-20 sm:w-60 sm:h-60 flex-shrink-0 bg-gray-100 ">
+                <div className="w-20 h-20 sm:w-64 sm:h-64 flex-shrink-0 bg-gray-100 ">
                   <Link to={`/shop/${item.category}/${item.product_id}`}>
                     <img
                       src={item.image_url}
@@ -356,9 +383,7 @@ const CartPage = () => {
               </div>
 
               <button
-                onClick={() =>
-                  navigate("/checkout", { state: { selectedItems } })
-                }
+                onClick={() => handleCheckout()}
                 disabled={selectedItems.length === 0}
                 className="bg-secondary text-text_inverse text-h3xl px-10 py-5 rounded-[25px] hover:bg-yellow-500 hover:scale-105 active:scale-95 transition-all shadow-custombutton w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >

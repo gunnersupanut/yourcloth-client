@@ -14,12 +14,15 @@ import ResetPasswordPage from "./pages/userPage/ResetPasswordPage";
 import ShopPage from "./pages/ShopPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import ScrollToTop from "./components/ScrollToTop";
 const AboutPage = () => <div className="text-xl">🔐 หน้า About (รอทำ)</div>;
 const ContactPage = () => <div className="text-xl">🔐 หน้า Contact (รอทำ)</div>;
 
 function App() {
   return (
     <>
+      <ScrollToTop />
       <Toaster position="top-center" reverseOrder={false} />
       <Routes>
         {/* ครอบด้วย MainLayout */}
@@ -33,14 +36,6 @@ function App() {
             <Route path=":category" element={<ShopPage />} />
             <Route path="/shop/:category/:id" element={<ProductDetailPage />} />
           </Route>
-          <Route
-            path="cart"
-            element={
-              <ProtectedRoute>
-                <CartPage />
-              </ProtectedRoute>
-            }
-          />
           <Route path="login" element={<LoginPage />} />
           {/* User */}
           <Route path="register" element={<RegisterPage />} />
@@ -51,6 +46,13 @@ function App() {
 
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactPage />} />
+          <Route element={<ProtectedRoute />}>
+            {/* โซน ต้อง Login ถึงจะเข้าได้ */}
+            <Route path="cart" element={<CartPage />} />
+            <Route path="checkout" element={<CheckoutPage />} />{" "}
+            {/* <Route path="orders/:id" element={<OrderDetailPage />} />
+            <Route path="profile" element={<ProfilePage />} /> */}
+          </Route>
         </Route>
       </Routes>
     </>

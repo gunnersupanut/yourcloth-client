@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import Category from "../components/Category";
 import { useState } from "react";
-import DropdownFilter from "../components/ีui/DropdownFilter";
+import DropdownFilter from "../components/ui/DropdownFilter";
 import OnSaleToggle from "../components/OnSaleToggle";
 import PriceSlider from "../components/PriceSlider";
 import { useProduct } from "../contexts/ProductContext";

@@ -19,5 +19,17 @@ export const productService = {
             console.error("Error fetching products:", error);
             throw error;
         }
+    },
+    validateCheckout: async (variantIds: number[]) => {
+        try {
+            const response = await api.post(`/products/validate-checkout`, {
+                variantIds
+            }
+            );
+            return response.data.data;
+        } catch (error) {
+            console.error("Error fetching products:", error);
+            throw error;
+        }
     }
 };
