@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Address } from "../types/addressTypes";
+import toast from "react-hot-toast";
+import { addressService } from "../services/addressService";
 
 // Type
 
@@ -31,10 +33,12 @@ const AddressSelectionModal = ({
   if (!isOpen) return null;
 
   const handleConfirm = () => {
+    // 1. หา Object ที่อยู่จาก ID ที่เลือกไว้
     const selectedAddress = addresses.find(
       (addr) => addr.id === tempSelectedId
     );
 
+    // 2. ถ้าเจอ ก็ส่งกลับไปหน้าแม่ (Parent) เลย จบ! ไม่ต้องรอ API
     if (selectedAddress) {
       onConfirm(selectedAddress);
       onClose();

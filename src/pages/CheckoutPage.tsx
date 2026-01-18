@@ -25,7 +25,7 @@ const CheckoutPage = () => {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [shippingMethod, setShippingMethod] = useState("standard");
   const [paymentMethod, setPaymentMethod] = useState("bank");
-  const [loading, setLoading] = useState(false);
+  const [confirm, setConfirm] = useState(false);
   const [loadingAddr, setLoadingAddr] = useState(false);
 
   const defaultAddress =
@@ -117,7 +117,7 @@ const CheckoutPage = () => {
   // 🔥 ฟังก์ชันจำลองการสั่งซื้อ (Mock Logic)
   const handlePlaceOrder = async () => {
     try {
-      setLoading(true);
+      setConfirm(true);
 
       // เตรียม Payload (ให้เหมือนของจริงที่สุด)
       const payload = {
@@ -161,7 +161,7 @@ const CheckoutPage = () => {
       // ❌ แจ้งเตือน Error
       toast.error(error.message || "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง");
     } finally {
-      setLoading(false);
+      setConfirm(false);
     }
   };
 
@@ -474,12 +474,12 @@ const CheckoutPage = () => {
 
               <button
                 onClick={handlePlaceOrder}
-                disabled={loading}
+                disabled={confirm}
                 className={`bg-[#FFD700] hover:bg-[#ffc800] text-white text-xl  py-3 px-10 rounded-xl shadow-lg transition transform active:scale-95 flex items-center gap-2 ${
-                  loading ? "opacity-70 cursor-not-allowed" : ""
+                  confirm ? "opacity-70 cursor-not-allowed" : ""
                 }`}
               >
-                {loading ? "Processing..." : "Place Order"}
+                {confirm ? "Processing..." : "Place Order"}
               </button>
             </div>
           </div>
