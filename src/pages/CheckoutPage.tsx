@@ -27,7 +27,7 @@ const CheckoutPage = () => {
     selectedAddressId: 0,
     editingAddress: null,
   });
-  const [checkoutItems, setCheckoutItems] = useState<CheckoutItem[]>(selectedItemsRaw);
+  const [checkoutItems, setCheckoutItems] = useState<CheckoutItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [shippingMethod, setShippingMethod] = useState("standard");
