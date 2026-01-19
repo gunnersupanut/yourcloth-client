@@ -193,7 +193,7 @@ const CheckoutPage = () => {
       // ล้างของที่เลือกทิ้ง
       setSelectedCartItemIds([]);
       // ย้ายหน้าไปดูบิล
-      // navigate(`/orders/${res.data.orderId}`);
+      navigate(`/cart`);
     } catch (error: any) {
       console.error("Order Error:", error);
 

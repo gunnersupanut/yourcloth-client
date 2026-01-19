@@ -142,10 +142,22 @@ const Navbar = () => {
 
                     {/* Settings */}
                     <Link
-                      to="/settings"
+                      to="/setting/account"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-secondary transition-colors"
                     >
                       Account
+                    </Link>
+                    <Link
+                      to="/settings"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-secondary transition-colors"
+                    >
+                      Addresses
+                    </Link>
+                    <Link
+                      to="/settings"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-secondary transition-colors"
+                    >
+                      Orders
                     </Link>
 
                     {/* Logout */}

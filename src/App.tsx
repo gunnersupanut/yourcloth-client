@@ -1,5 +1,5 @@
 // src/App.tsx
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 // import layouts and pages
@@ -16,6 +16,10 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import ScrollToTop from "./components/ScrollToTop";
+import SettingLayout from "./pages/setting/SettingLayout";
+import MyAccount from "./pages/setting/MyAccount";
+import Addresses from "./pages/setting/Addresses";
+import Orders from "./pages/setting/Orders";
 const AboutPage = () => <div className="text-xl">🔐 หน้า About (รอทำ)</div>;
 const ContactPage = () => <div className="text-xl">🔐 หน้า Contact (รอทำ)</div>;
 
@@ -50,8 +54,15 @@ function App() {
             {/* โซน ต้อง Login ถึงจะเข้าได้ */}
             <Route path="cart" element={<CartPage />} />
             <Route path="checkout" element={<CheckoutPage />} />{" "}
-            {/* <Route path="orders/:id" element={<OrderDetailPage />} />
-            <Route path="profile" element={<ProfilePage />} /> */}
+            <Route path="/setting" element={<SettingLayout />}>
+              {/* Redirect: เข้า /setting เฉยๆ ให้ดีดไป /setting/account */}
+              <Route index element={<Navigate to="account" replace />} />
+
+              {/* Child Routes: ไส้ในที่จะเปลี่ยนไปตาม URL */}
+              <Route path="account" element={<MyAccount />} />
+              <Route path="addresses" element={<Addresses />} />
+              <Route path="orders" element={<Orders />} />
+            </Route>
           </Route>
         </Route>
       </Routes>
