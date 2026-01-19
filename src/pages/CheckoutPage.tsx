@@ -8,8 +8,12 @@ import type { CheckoutItem, CheckoutUIState } from "../types/checkoutTypes";
 import type { Address } from "../types/addressTypes";
 import { addressService } from "../services/addressService";
 import AddNewAddressModal from "../components/AddNewAddressModal";
+import { useCart } from "../contexts/CartContext";
+import type { CreateOrderPayload } from "../types/orderTypes";
+import { orderService } from "../services/orderService";
 
 const CheckoutPage = () => {
+  const { fetchCart, selectedCartItemIds, setSelectedCartItemIds } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
   // รับ ID มาจากหน้า Cart/จ่ายเงิน
@@ -20,7 +24,7 @@ const CheckoutPage = () => {
     isAddressModalOpen: false,
     shippingMethod: "standard",
     paymentMethod: "bank",
-    selectedAddressId: 1,
+    selectedAddressId: 0,
     editingAddress: null,
   });
   const [checkoutItems, setCheckoutItems] = useState<CheckoutItem[]>([]);
@@ -67,7 +71,7 @@ const CheckoutPage = () => {
 
             return {
               ...freshItem, // เอาชื่อ, ราคา, รูป, สต็อก ล่าสุด
-              quantity: cartItem.quantity, // 👈 เอาจำนวนที่ User เลือกกลับมาใส่!
+              quantity: cartItem.quantity, // เอาจำนวนที่ User เลือกกลับมาใส่!
               // คำนวณราคารวมต่อชิ้น
               lineTotal: freshItem.price * cartItem.quantity,
             };
@@ -96,9 +100,8 @@ const CheckoutPage = () => {
       setLoadingAddr(true);
       const myAddresses = await addressService.getMyAddresses();
       setAddresses(myAddresses);
-      console.log("Fetch Address:", myAddresses);
       // Auto Select ถ้ายังไม่ได้เลือกที่อยู่ ให้เลือกตัวแรกอัตโนมัติ (Default)
-      if (uiState.selectedAddressId === null && myAddresses.length > 0) {
+      if (!uiState.selectedAddressId && myAddresses.length > 0) {
         updateUi("selectedAddressId", myAddresses[0].id);
       }
     } catch (error) {
@@ -158,52 +161,43 @@ const CheckoutPage = () => {
   const discount = 0;
   const totalNet = subtotal + shippingCost - discount;
 
-  // ฟังก์ชันจำลองการสั่งซื้อ (Mock Logic)
+  // ฟังก์ชันสั่งซื้อ
   const handlePlaceOrder = async () => {
+    if (!uiState.selectedAddressId) {
+      toast.error("Please Select Address.");
+      return;
+    }
+    if (checkoutItems.length === 0) {
+      toast.error("You don't have checkout items.");
+      return;
+    }
     try {
       setConfirm(true);
-
+      console.log("checkoutItems", checkoutItems);
       // เตรียม Payload (ให้เหมือนของจริงที่สุด)
-      const payload = {
-        checkoutItems: checkoutItems.map((item) => ({
-          variantId: item.variantId,
+      const payload: CreateOrderPayload = {
+        addressId: uiState.selectedAddressId,
+        items: checkoutItems.map((item) => ({
+          variantId: item.id,
           quantity: item.quantity,
         })),
+        cartItemIds: selectedCartItemIds, // ส่ง Array ID ไปลบในตะกร้า (จาก Context)
+        paymentMethod: "BANK_TRANSFER", // Hardcode ไปก่อน (ตามแผน)
+        shippingMethod: "STANDARD", // Hardcode ไปก่อน
       };
 
-      // 🔍 Log ดู data ก่อนส่ง (Console Log หลอกๆ)
-      console.log("🚀 [Mock] Preparing Payload:", payload);
-      console.log("⏳ [Mock] Sending request to POST /api/orders...");
-
-      // 2. จำลองความหน่วง (Simulate API Lag 1.5 วิ)
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // --- อยากลอง Test Error ให้ Uncomment บรรทัดล่างนี้ ---
-      // throw new Error("สินค้าบางรายการหมดสต็อก!");
-
-      // 3. จำลอง Success Response
-      const mockResponse = {
-        data: {
-          orderId: 1002, // เลขมั่วๆ ไปก่อน
-          status: "PENDING",
-        },
-      };
-
-      console.log("✅ [Mock] API Success:", mockResponse);
-
-      // ✅ แจ้งเตือนสวยๆ ด้วย Toast
-      toast.success(`สั่งซื้อสำเร็จ! Order ID: ${mockResponse.data.orderId}`, {
-        duration: 4000,
-        position: "top-center",
-      });
-
+      const res = await orderService.createOrder(payload);
+      toast.success(`Order completed Order ID: ${res.data.orderId}`);
+      // รออัปเดตตะกร้าให้เสร็จก่อน
+      await fetchCart();
+      // ล้างของที่เลือกทิ้ง
+      setSelectedCartItemIds([]);
       // ย้ายหน้าไปดูบิล
-      navigate(`/orders/${mockResponse.data.orderId}`);
+      // navigate(`/orders/${res.data.orderId}`);
     } catch (error: any) {
-      console.error("❌ [Mock] Error:", error);
+      console.error("Order Error:", error);
 
-      // ❌ แจ้งเตือน Error
-      toast.error(error.message || "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง");
+      toast.error(error.message || "Something went wrong.");
     } finally {
       setConfirm(false);
     }
@@ -364,7 +358,7 @@ const CheckoutPage = () => {
                   className={`w-6 h-6 rounded-full flex items-center justify-center border transition-all
                       ${
                         shippingMethod === "standard"
-                          ? "bg-[#6B4B6E] border-[#6B4B6E]"
+                          ? "bg-primary border-primary"
                           : "border-gray-300"
                       }`}
                 >

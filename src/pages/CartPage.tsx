@@ -9,9 +9,8 @@ import type { DeleteModalState } from "../types/modalTypes";
 const CartPage = () => {
   const navigate = useNavigate();
 
-  const { cartItems, fetchCart } = useCart();
-
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const { cartItems, fetchCart, selectedCartItemIds, setSelectedCartItemIds } =
+    useCart();
 
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -27,10 +26,10 @@ const CartPage = () => {
   // ฟังก์ชันเลือกของ (Checkbox)
   const toggleSelect = (id: number) => {
     // หา id ถ้าเจอ = มีอยู่แล้ว ลบออก ถ้าไม่เจอ = เพิ่มเข้าไป
-    if (selectedItems.includes(id)) {
-      setSelectedItems(selectedItems.filter((item) => item !== id));
+    if (selectedCartItemIds.includes(id)) {
+      setSelectedCartItemIds(selectedCartItemIds.filter((item) => item !== id));
     } else {
-      setSelectedItems([...selectedItems, id]);
+      setSelectedCartItemIds([...selectedCartItemIds, id]);
     }
   };
 
@@ -38,10 +37,10 @@ const CartPage = () => {
   const toggleSelectAll = () => {
     // ถ้าเลือกทั้งหมดอยู่แล้ว = ยกเลิก
     // ถ้ายัง เพิ่ม id ทั้งหมดเข้าไป
-    if (selectedItems.length === cartItems.length) {
-      setSelectedItems([]);
+    if (selectedCartItemIds.length === cartItems.length) {
+      setSelectedCartItemIds([]);
     } else {
-      setSelectedItems(cartItems.map((item) => item.cart_item_id));
+      setSelectedCartItemIds(cartItems.map((item) => item.cart_item_id));
     }
   };
 
@@ -96,8 +95,8 @@ const CartPage = () => {
   // ลบ Selected Cart
   const handleBulkDeleteClick = () => {
     // ถ้าไม่ได้เลือกอะไรเลย อย่าเปิด Modal
-    if (selectedItems.length === 0) {
-      // สมมติว่าตัวแปรเก็บ checkbox คือ selectedItems
+    if (selectedCartItemIds.length === 0) {
+      // สมมติว่าตัวแปรเก็บ checkbox คือ selectedCartItemIds
       toast.error("Please select items to delete.");
       return;
     }
@@ -107,7 +106,7 @@ const CartPage = () => {
       type: "BULK",
       targetId: null,
       title: "Remove Selected Items",
-      message: `Are you sure you want to remove ${selectedItems.length} items?`, // ใส่จำนวนไปด้วย ดูใส่ใจ!
+      message: `Are you sure you want to remove ${selectedCartItemIds.length} items?`, // ใส่จำนวนไปด้วย ดูใส่ใจ!
     });
   };
   const confirmDelete = async () => {
@@ -117,10 +116,10 @@ const CartPage = () => {
         await cartService.deleteCart(deleteModal.targetId);
         toast.success("Delete cart item success.");
       } else if (deleteModal.type === "BULK") {
-        await cartService.deleteSeletedCarts(selectedItems);
+        await cartService.deleteSeletedCarts(selectedCartItemIds);
         toast.success("Selected items removed.");
         // อย่าลืมเคลียร์ checkbox ด้วยนะ
-        setSelectedItems([]);
+        setSelectedCartItemIds([]);
       }
 
       await fetchCart();
@@ -137,14 +136,14 @@ const CartPage = () => {
 
   const handleCheckout = () => {
     // เช็คก่อนว่ามีการเลือกของไหม
-    if (selectedItems.length === 0) {
+    if (selectedCartItemIds.length === 0) {
       return;
     }
     // กรองเอา ข้อมูลสินค้าตัวเต็ม จาก cartItems โดยใช้ ID ที่เลือก
     // เอา quantity และ variant info ไปด้วย
     const itemsToCheckout = cartItems
       .filter(
-        (item) => selectedItems.includes(item.cart_item_id) // เช็คว่า item นี้ถูกเลือกไหม
+        (item) => selectedCartItemIds.includes(item.cart_item_id) // เช็คว่า item นี้ถูกเลือกไหม
       )
       .map((item) => ({
         // จัด Format ให้หน้า Checkout ใช้ง่ายๆ
@@ -167,7 +166,7 @@ const CartPage = () => {
     return (
       cartItems
         // เช็คดูว่าของในตระกร้า ถูกเลือกไว้ไหม
-        .filter((item) => selectedItems.includes(item.cart_item_id))
+        .filter((item) => selectedCartItemIds.includes(item.cart_item_id))
         // เอาของที่เลือกไว้มาบวกเลขเข้าไปทีละชิ้น
         .reduce((total, item) => total + Number(item.price) * item.quantity, 0)
     );
@@ -197,7 +196,7 @@ const CartPage = () => {
                 {/* Checkbox */}
                 <input
                   type="checkbox"
-                  checked={selectedItems.includes(item.cart_item_id)}
+                  checked={selectedCartItemIds.includes(item.cart_item_id)}
                   onChange={() => toggleSelect(item.cart_item_id)}
                   className="w-4 h-4 sm:w-5 sm:h-5 rounded border-gray-300 cursor-pointer"
                 />
@@ -338,7 +337,7 @@ const CartPage = () => {
                   type="checkbox"
                   checked={
                     cartItems.length > 0 &&
-                    selectedItems.length === cartItems.length
+                    selectedCartItemIds.length === cartItems.length
                   }
                   onChange={toggleSelectAll}
                   className="w-5 h-5 rounded border-gray-600 cursor-pointer"
@@ -384,7 +383,7 @@ const CartPage = () => {
 
               <button
                 onClick={() => handleCheckout()}
-                disabled={selectedItems.length === 0}
+                disabled={selectedCartItemIds.length === 0}
                 className="bg-secondary text-text_inverse text-h3xl px-10 py-5 rounded-[25px] hover:bg-yellow-500 hover:scale-105 active:scale-95 transition-all shadow-custombutton w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Order Products

@@ -14,6 +14,8 @@ interface CartContextType {
   cartCount: number; // เอาไว้โชว์เลขที่ Navbar
   isLoading: boolean;
   fetchCart: () => Promise<void>; // สั่งให้ดึงข้อมูลใหม่ (เช่น ตอน Login เสร็จ หรือตอน Add ของ)
+  selectedCartItemIds: number[]; 
+  setSelectedCartItemIds: React.Dispatch<React.SetStateAction<number[]>>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -22,7 +24,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth(); // ดึง User จาก AuthContext
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [selectedCartItemIds, setSelectedCartItemIds] = useState<number[]>([]);
   // ฟังก์ชันดึงข้อมูลตะกร้า
   const fetchCart = async () => {
     if (!user) {
@@ -51,7 +53,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <CartContext.Provider
-      value={{ cartItems, cartCount, isLoading, fetchCart }}
+      value={{
+        cartItems,
+        cartCount,
+        isLoading,
+        fetchCart,
+        selectedCartItemIds,
+        setSelectedCartItemIds,
+      }}
     >
       {children}
     </CartContext.Provider>
