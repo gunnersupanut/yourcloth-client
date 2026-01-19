@@ -12,15 +12,15 @@ export const addressService = {
         return response.data;
     },
     updateAddress: async (addressId: number, data: UpdateAddressPayload) => {
-        const response = await api.put(`/${addressId}`, data);
+        const response = await api.put(`/addresses/${addressId}`, data);
         return response.data;
     },
     deleteAddress: async (addressId: number,) => {
-        const response = await api.delete(`/${addressId}`);
+        const response = await api.delete(`/addresses/${addressId}`);
         return response.data;
     },
     setDefault: async (addressId: number,) => {
-        const response = await api.delete(`/default/${addressId}`);
+        const response = await api.delete(`/addresses/default/${addressId}`);
         return response.data;
     },
 };

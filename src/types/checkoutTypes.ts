@@ -1,3 +1,5 @@
+import type { Address } from "./addressTypes";
+
 export interface CheckoutItem {
     // ข้อมูลจาก Server (Product Service)
     id: number;
@@ -14,8 +16,10 @@ export interface CheckoutItem {
     lineTotal?: number;
 }
 export interface CheckoutUIState {
+    isAddAddressModalOpen: boolean;
     isAddressModalOpen: boolean;
     shippingMethod: "standard" | "express";
     paymentMethod: "bank" | "cod";
     selectedAddressId: number | null;
+    editingAddress: Address | null;
 }

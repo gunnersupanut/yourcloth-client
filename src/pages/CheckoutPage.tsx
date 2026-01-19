@@ -7,6 +7,7 @@ import AddressSelectionModal from "../components/AddressSelectionModal";
 import type { CheckoutItem, CheckoutUIState } from "../types/checkoutTypes";
 import type { Address } from "../types/addressTypes";
 import { addressService } from "../services/addressService";
+import AddNewAddressModal from "../components/AddNewAddressModal";
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -15,10 +16,12 @@ const CheckoutPage = () => {
   const selectedItemsRaw = location.state?.selectedItems || [];
   // State
   const [uiState, setUiState] = useState<CheckoutUIState>({
+    isAddAddressModalOpen: false,
     isAddressModalOpen: false,
     shippingMethod: "standard",
     paymentMethod: "bank",
     selectedAddressId: 1,
+    editingAddress: null,
   });
   const [checkoutItems, setCheckoutItems] = useState<CheckoutItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,7 +33,7 @@ const CheckoutPage = () => {
 
   const defaultAddress =
     addresses.find((addr) => addr.id === uiState.selectedAddressId) ||
-    addresses.find((i) => i.isDefault) ||
+    addresses.find((i) => i.is_default) ||
     addresses[0];
   // Helper Function เอาไว้เปลี่ยนค่า
   // รับ key ที่จะแก้ และ value ใหม่
@@ -84,27 +87,68 @@ const CheckoutPage = () => {
     fetchLatestPrices();
   }, [selectedItemsRaw, navigate]);
 
-  // FetchAddresses
   useEffect(() => {
-    const fetchAddresses = async () => {
-      try {
-        setLoadingAddr(true);
-        const myAddresses = await addressService.getMyAddresses();
-        setAddresses(myAddresses);
-        console.log("Fetch Address:", myAddresses);
-        // Auto Select ถ้ายังไม่ได้เลือกที่อยู่ ให้เลือกตัวแรกอัตโนมัติ (Default)
-        if (uiState.selectedAddressId === null && myAddresses.length > 0) {
-          updateUi("selectedAddressId", myAddresses[0].id);
-        }
-      } catch (error) {
-        console.error("Failed to load addresses");
-      } finally {
-        setLoadingAddr(false);
-      }
-    };
     fetchAddresses();
   }, []);
+  // FetchAddresses
+  const fetchAddresses = async () => {
+    try {
+      setLoadingAddr(true);
+      const myAddresses = await addressService.getMyAddresses();
+      setAddresses(myAddresses);
+      console.log("Fetch Address:", myAddresses);
+      // Auto Select ถ้ายังไม่ได้เลือกที่อยู่ ให้เลือกตัวแรกอัตโนมัติ (Default)
+      if (uiState.selectedAddressId === null && myAddresses.length > 0) {
+        updateUi("selectedAddressId", myAddresses[0].id);
+      }
+    } catch (error) {
+      console.error("Failed to load addresses");
+    } finally {
+      setLoadingAddr(false);
+    }
+  };
+  const handleManageAddress = (addr?: Address) => {
+    setUiState((prev) => ({
+      ...prev,
+      isAddAddressModalOpen: true,
+      editingAddress: addr || null, //  ถ้ามีของส่งมา = Edit, ถ้าไม่มี = null (Create)
+    }));
+  };
+  const handleAddOrEditAddress = async (formData: any) => {
+    if (uiState.editingAddress) {
+      try {
+        // เรียก Service สร้างที่อยู่
+        await addressService.updateAddress(uiState.editingAddress.id, formData);
 
+        toast.success("Address updated successfully.");
+
+        //  โหลดข้อมูลที่อยู่ใหม่ทันที เพื่อให้มันโผล่ขึ้นมาให้เลือก
+        fetchAddresses();
+
+        // (Optional) ถ้าอยากให้เลือกตัวใหม่ทันทีเลยก็ทำได้
+        // updateUi("selectedAddressId", newAddress.id);
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to update address.");
+      }
+    } else {
+      try {
+        // เรียก Service สร้างที่อยู่
+        await addressService.createAddress(formData);
+
+        toast.success("Address added successfully!");
+
+        //  โหลดข้อมูลที่อยู่ใหม่ทันที เพื่อให้มันโผล่ขึ้นมาให้เลือก
+        fetchAddresses();
+
+        // (Optional) ถ้าอยากให้เลือกตัวใหม่ทันทีเลยก็ทำได้
+        // updateUi("selectedAddressId", newAddress.id);
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to add address");
+      }
+    }
+  };
   // คำนวณเงิน
   const subtotal = checkoutItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -114,7 +158,7 @@ const CheckoutPage = () => {
   const discount = 0;
   const totalNet = subtotal + shippingCost - discount;
 
-  // 🔥 ฟังก์ชันจำลองการสั่งซื้อ (Mock Logic)
+  // ฟังก์ชันจำลองการสั่งซื้อ (Mock Logic)
   const handlePlaceOrder = async () => {
     try {
       setConfirm(true);
@@ -212,7 +256,7 @@ const CheckoutPage = () => {
       <hr className="border-gray-800 mb-8" />
 
       {/* 🟣 Zone Header: Address & Options (Full Width Background) */}
-      <div className="w-screen relative left-1/2 -translate-x-1/2 bg-[#A795AD] pt-10 pb-16 mb-[-40px]">
+      <div className="w-screen relative left-1/2 -translate-x-1/2 bg-[#A795AD] pt-10 pb-16 mb-[-60px]">
         <div className="container mx-auto px-4 md:px-8">
           {/* 🔥 Grid แบ่ง 2 ฝั่ง: ซ้าย (Address) | ขวา (Options) */}
           <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8 items-center">
@@ -250,27 +294,30 @@ const CheckoutPage = () => {
                       {defaultAddress.recipient_name}
                     </p>
                     <p className="text-sm opacity-80 font-medium">
-                      {defaultAddress.phone}
+                      {defaultAddress.phone_number}
                     </p>
                   </div>
 
                   {/* ฝั่งขวา: รายละเอียดที่อยู่ */}
                   <div className="p-6 pr-4 flex-1 flex flex-col justify-center text-gray-600 text-sm">
                     <p className="line-clamp-2 leading-relaxed font-medium">
-                      {defaultAddress.address}
+                      {defaultAddress.address_detail}{" "}
+                      {defaultAddress.sub_district} {defaultAddress.district}
+                      <br />
+                      {defaultAddress.province} {defaultAddress.zip_code}
                     </p>
                   </div>
 
                   {/* ปุ่ม Change Address (ลอยขวาล่าง) */}
                   <button
-                    className="absolute bottom-3 right-5 text-xs text-gray-400 underline decoration-gray-400 hover:text-[#6B4B6E] hover:decoration-[#6B4B6E] transition font-bold"
+                    className="absolute bottom-3 right-5 text-button text-gray-400 underline decoration-gray-400 hover:text-[#6B4B6E] hover:decoration-[#6B4B6E] transition font-bold"
                     onClick={() => updateUi("isAddressModalOpen", true)}
                   >
                     Change Address
                   </button>
                 </div>
               ) : (
-                // ❌ Case ไม่มีที่อยู่
+                // Case ไม่มีที่อยู่
                 <div
                   onClick={() => updateUi("isAddressModalOpen", true)}
                   className="flex flex-col items-center justify-center h-32 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-[#563F58] hover:bg-[#563F58]/5 transition group"
@@ -487,15 +534,19 @@ const CheckoutPage = () => {
       </div>
       <AddressSelectionModal
         isOpen={uiState.isAddressModalOpen} // ดึงจากก้อน
-        onClose={() => updateUi("isAddressModalOpen", false)} // สั่งปิด
         addresses={addresses}
         selectedId={defaultAddress?.id}
+        onClose={() => updateUi("isAddressModalOpen", false)} // สั่งปิด
         onConfirm={(newAddress) => {
-          setUiState((prev) => ({
-            ...prev,
-            selectedAddressId: newAddress.id,
-          }));
+          updateUi("selectedAddressId", newAddress.id);
         }}
+        AddnewAddress={(addr) => handleManageAddress(addr)}
+      />
+      <AddNewAddressModal
+        isOpen={uiState.isAddAddressModalOpen}
+        onClose={() => updateUi("isAddAddressModalOpen", false)}
+        onConfirm={handleAddOrEditAddress}
+        initialData={uiState.editingAddress}
       />
     </div>
   );

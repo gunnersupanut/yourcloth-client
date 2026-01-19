@@ -4,7 +4,8 @@ interface DropdownFilterProps {
   label: string; // ชื่อปุ่ม
   options: string[]; // ตัวเลือกข้างใน
   selected: string; // ค่าที่เลือกอยู่
-  defaultValue?: string; // ค่าเริ่มต้น (เช่น "Newest") เอาไว้เช็คว่าเลือกหรือยัง
+  defaultValue?: string; // ค่าเริ่มต้น (เช่น "Newest") เอาไว้เช็คว่าเลือกหรือยังฃ
+  disabled?: boolean;
   onChange: (value: string) => void; // ฟังก์ชันส่งค่ากลับเมื่อเลือก
 }
 
@@ -12,7 +13,8 @@ const DropdownFilter = ({
   label,
   options,
   selected,
-  defaultValue = "All",
+  defaultValue = "",
+  disabled = false,
   onChange,
 }: DropdownFilterProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,13 +43,17 @@ const DropdownFilter = ({
   };
 
   return (
-    <div className="relative inline-block text-left" ref={dropdownRef}>
+    <div className="relative w-full" ref={dropdownRef}>
       {/* ปุ่ม */}
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-6 px-10 py-4 rounded-full border shadow-sm transition-all text-button whitespace-nowrap
+        disabled={disabled}
+        className={`flex items-center justify-between w-full px-4 py-3 rounded-xl border-2 shadow-sm transition-all whitespace-nowrap
           ${
-            isActive
+            disabled
+              ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed" // 💀 สภาพตอนพิการ (Disabled)
+              : isActive
               ? "bg-secondary border-secondary text-white hover:opacity-80" // สถานะเลือกแล้ว
               : "bg-white border-gray-300 text-secondary hover:border-secondary" // สถานะปกติ
           }
@@ -100,8 +106,8 @@ const DropdownFilter = ({
       </button>
 
       {/* ---เมนูตัวเลือก*/}
-      {isOpen && (
-        <div className="absolute left-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
+      {isOpen && !disabled && (
+        <div className="absolute left-0 mt-2 w-full bg-white rounded-xl shadow-xl border-2 border-gray-100 overflow-hidden z-[70]">
           <ul className="max-h-60 overflow-y-auto py-1">
             {options.map((option) => (
               <li key={option}>

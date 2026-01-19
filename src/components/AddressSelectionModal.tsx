@@ -1,16 +1,15 @@
 import { useState, useEffect } from "react";
 import type { Address } from "../types/addressTypes";
-import toast from "react-hot-toast";
-import { addressService } from "../services/addressService";
-
+import { Pencil } from "lucide-react";
 // Type
 
 interface AddressSelectionModalProps {
   isOpen: boolean;
-  onClose: () => void;
   addresses: Address[]; // รับรายการที่อยู่เข้ามา
   selectedId: number | null; // ID ที่ถูกเลือกอยู่ปัจจุบัน
   onConfirm: (address: Address) => void; // ส่งค่ากลับเมื่อกด Confirm
+  onClose: () => void;
+  AddnewAddress: (addr?: Address) => void;
 }
 
 const AddressSelectionModal = ({
@@ -19,6 +18,7 @@ const AddressSelectionModal = ({
   addresses,
   selectedId,
   onConfirm,
+  AddnewAddress,
 }: AddressSelectionModalProps) => {
   // State สำหรับเลือกใน Modal (ยังไม่กระทบของจริงจนกว่าจะกด Confirm)
   const [tempSelectedId, setTempSelectedId] = useState<number | null>(
@@ -32,13 +32,19 @@ const AddressSelectionModal = ({
 
   if (!isOpen) return null;
 
+  const handleEditClick = (addr: Address) => {
+    AddnewAddress(addr);
+  };
+  const handleAddNewAddress = () => {
+    AddnewAddress();
+  };
   const handleConfirm = () => {
-    // 1. หา Object ที่อยู่จาก ID ที่เลือกไว้
+    // หา Object ที่อยู่จาก ID ที่เลือกไว้
     const selectedAddress = addresses.find(
       (addr) => addr.id === tempSelectedId
     );
 
-    // 2. ถ้าเจอ ก็ส่งกลับไปหน้าแม่ (Parent) เลย จบ! ไม่ต้องรอ API
+    //ถ้าเจอ ก็ส่งกลับไปหน้าหลัก
     if (selectedAddress) {
       onConfirm(selectedAddress);
       onClose();
@@ -105,14 +111,24 @@ const AddressSelectionModal = ({
                   <p className="text-body leading-tight">
                     {addr.recipient_name}
                   </p>
-                  <p className="text-body">{addr.phone}</p>
+                  <p className="text-body">{addr.phone_number}</p>
                 </div>
 
                 {/* Address Detail */}
-                <div className="w-[60%] p-5 flex items-center bg-white rounded-r-[14px]">
-                  <p className="text-gray-600 text-body font-medium leading-relaxed">
-                    {addr.address}
+                <div className="w-[60%] p-5 flex items-center bg-white rounded-r-[14px] relative group">
+                  <p className="text-gray-600 text-body font-medium leading-relaxed pr-10">
+                    {addr.address_detail} {addr.sub_district} {addr.district}
+                    <br />
+                    {addr.province} {addr.zip_code}
                   </p>
+                  <button
+                    onClick={() => handleEditClick(addr)}
+                    className="absolute bottom-3 right-3 p-2 text-gray-400 hover:text-[#FFD700] hover:bg-yellow-50 rounded-full transition-all duration-200 shadow-sm opacity-80 hover:opacity-100 hover:scale-105"
+                    title="Edit address"
+                    type="button" // กันเหนียว ไม่ให้ submit form
+                  >
+                    <Pencil size={18} strokeWidth={2.5} />
+                  </button>
                 </div>
               </div>
             );
@@ -122,7 +138,10 @@ const AddressSelectionModal = ({
         {/* Footer Buttons */}
         <div className="p-6 pt-2 flex flex-col gap-4">
           {/* Add New Address Button */}
-          <button className="w-full text-button py-6 rounded-full border-2 border-primary text-primary flex items-center justify-center gap-2 hover:bg-purple-50 transition">
+          <button
+            className="w-full text-button py-6 rounded-full border-2 border-primary text-primary flex items-center justify-center gap-2 hover:bg-purple-50 transition"
+            onClick={handleAddNewAddress}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5"
