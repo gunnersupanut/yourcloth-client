@@ -16,10 +16,10 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import ScrollToTop from "./components/ScrollToTop";
-import SettingLayout from "./pages/setting/SettingLayout";
-import MyAccount from "./pages/setting/MyAccount";
-import Addresses from "./pages/setting/Addresses";
-import Orders from "./pages/setting/Orders";
+import SettingLayout from "./pages/setting/SettingPageLayout";
+import MyAccount from "./pages/setting/MyAccountPage";
+import Addresses from "./pages/setting/AddressesPage";
+import Orders from "./pages/setting/OrdersPage";
 const AboutPage = () => <div className="text-xl">🔐 หน้า About (รอทำ)</div>;
 const ContactPage = () => <div className="text-xl">🔐 หน้า Contact (รอทำ)</div>;
 
