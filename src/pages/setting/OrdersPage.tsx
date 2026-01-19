@@ -3,7 +3,6 @@ import type { OrderHistoryEntry } from "../../types/orderTypes";
 import { orderService } from "../../services/orderService";
 import toast from "react-hot-toast";
 import PageLoading from "../../components/ui/PageLoading";
-import { getStatusColor } from "../../utils/orderHelpers";
 import { Link } from "react-router-dom";
 import { Search } from "lucide-react";
 // Mapping จาก UI Tab -> Database Status
