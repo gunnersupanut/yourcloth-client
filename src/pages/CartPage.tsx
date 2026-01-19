@@ -149,9 +149,6 @@ const CartPage = () => {
         // จัด Format ให้หน้า Checkout ใช้ง่ายๆ
         variantId: item.variant_id,
         quantity: item.quantity,
-        name: item.product_name,
-        price: item.price,
-        image: item.image_url,
       }));
 
     // ส่ง Object นี้ไปหน้า Checkout

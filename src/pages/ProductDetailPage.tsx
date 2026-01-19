@@ -182,16 +182,42 @@ const ProductDetailPage = () => {
     }
   };
   const handleBuy = () => {
+    // 1. เช็ค Auth
     if (!isAuthenticated) {
       setIsAuthModalOpen(true);
       return;
     }
-    try {
-    } catch (error) {
-      console.error("Buy Failed.", error);
+
+    // 2. หา Variant (เหมือนเดิม)
+    const targetVariant = product.variants.find(
+      (v) => v.size === selectedSize && v.color_name === selectedColor
+    );
+
+    if (!targetVariant) {
+      toast.error("This option is unavailable");
+      return;
     }
-    toast.success(`Buy ${quantity} item(s) Coming Soon.`, {
-      icon: "🔜",
+
+    // เช็ค Stock (เทียบกับจำนวนที่จะซื้อ)
+    if (targetVariant.stock < quantity) {
+      toast.error("Out of Stock!");
+      return;
+    }
+
+    // จัดทรงข้อมูล
+    // หน้า Checkout selectedItemsRaw = ... || []
+    const itemsToCheckout = [
+      {
+        variantId: targetVariant.variant_id,
+        quantity: quantity,
+      },
+    ];
+
+    // ส่งไปหน้า Checkout
+    navigate("/checkout", {
+      state: {
+        selectedItems: itemsToCheckout,
+      },
     });
   };
   return (
