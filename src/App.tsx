@@ -63,7 +63,7 @@ function App() {
               <Route path="account" element={<MyAccount />} />
               <Route path="addresses" element={<Addresses />} />
               <Route path="orders" element={<Orders />} />
-              <Route path="orders/:id" element={<OrderDetail />} />
+              <Route path="orders/:orderId" element={<OrderDetail />} />
             </Route>
           </Route>
           {/* ---------------------------------------------------------- */}

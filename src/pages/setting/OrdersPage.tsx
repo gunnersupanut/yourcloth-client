@@ -191,7 +191,7 @@ const Orders = () => {
                             </h4>
                             {/* คำอธิบายเสริม (ถ้ามี หรือจะใส่ Size/Color) */}
                             <p className="text-body text-text_primary">
-                              Product from latest collection
+                              {item.description}
                             </p>
                             {/* Quantity (X1) */}
                             <p className="text-lg font-bold text-gray-800 mt-2 sm:hidden">

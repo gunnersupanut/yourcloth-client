@@ -10,6 +10,15 @@ export const orderService = {
             throw error;
         }
     },
+    getOrderById: async (orderId: string) => {
+        try {
+            const response = await api.get(`/orders/${orderId}`);
+            return response.data;
+        } catch (error) {
+            console.error("Error creating order:", error);
+            throw error;
+        }
+    },
     createOrder: async (payload: CreateOrderPayload) => {
         try {
             const response = await api.post("/orders/", payload);

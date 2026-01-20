@@ -20,6 +20,8 @@ export interface OrderHistoryItem {
   quantity: number;
   price: number;
   image: string;
+  description: string;
+  net_total: number;
 }
 export interface OrderReceiver {
   name: string;
@@ -32,6 +34,7 @@ export interface OrderHistoryEntry {
   status: string;
   orderedAt: Date; // หรือ string แล้วแต่ Database return
   totalAmount: number;
+  shippingCost: number
   receiver: OrderReceiver; //  (1 ออเดอร์ มี 1 ที่อยู่)
   items: OrderHistoryItem[];
 }
