@@ -51,7 +51,6 @@ export default function OrderDetail() {
   const fetchOrder = async () => {
     if (!orderId) {
       toast.error("Invalid data can't find OrderId");
-      console.error("Can't find orderId")
       return;
     }
     try {
