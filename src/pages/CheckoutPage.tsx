@@ -63,7 +63,7 @@ const CheckoutPage = () => {
             // เอาของใหม่มารวมกับจำนวนที่ User เลือก
             // หาคู่ของมันจากข้อมูล Server
             const freshItem = serverData.find(
-              (p: any) => p.id === cartItem.variantId
+              (p: any) => p.id === cartItem.variantId,
             );
 
             // ถ้าไม่เจอ (Backend อาจจะลบไปแล้ว) ก็ข้ามไป
@@ -155,7 +155,7 @@ const CheckoutPage = () => {
   // คำนวณเงิน
   const subtotal = checkoutItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
   const shippingCost = 50;
   const discount = 0;
@@ -182,8 +182,10 @@ const CheckoutPage = () => {
           quantity: item.quantity,
         })),
         cartItemIds: selectedCartItemIds, // ส่ง Array ID ไปลบในตะกร้า (จาก Context)
-        paymentMethod: "BANK_TRANSFER", // Hardcode ไปก่อน (ตามแผน)
-        shippingMethod: "STANDARD", // Hardcode ไปก่อน
+        // Hardcode ไปก่อน
+        paymentMethod: "BANK_TRANSFER",
+        shippingMethod: "STANDARD",
+        shippingCost:50
       };
 
       const res = await orderService.createOrder(payload);

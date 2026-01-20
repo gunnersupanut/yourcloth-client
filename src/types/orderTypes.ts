@@ -12,6 +12,7 @@ export interface CreateOrderPayload {
   cartItemIds?: number[];       // Optional 
   paymentMethod: string;        // "BANK_TRANSFER" | "COD" (ตอนนี้รับ string ไปก่อน)
   shippingMethod: string;       // "STANDARD" | "EMS"
+  shippingCost: number;
 }
 
 // ของ 1 ชิ้น

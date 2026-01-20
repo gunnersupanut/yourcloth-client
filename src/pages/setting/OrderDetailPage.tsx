@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   MapPin,
@@ -38,6 +38,7 @@ const ORDER_STEPS = [
 ];
 
 export default function OrderDetail() {
+  const navigate = useNavigate();
   const { orderId } = useParams();
   const [order, setOrder] = useState<OrderHistoryEntry>(DEFAULT_ORDER); // ใช้ Mock ไปก่อน
   const [loading, setLoading] = useState(true);
@@ -57,6 +58,7 @@ export default function OrderDetail() {
     } catch (error) {
       console.error("Fetch orders failed", error);
       toast.error("Get orders data failed.");
+      navigate("/setting/orders");
     } finally {
       setLoading(false);
     }
