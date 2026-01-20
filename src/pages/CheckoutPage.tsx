@@ -185,17 +185,20 @@ const CheckoutPage = () => {
         // Hardcode ไปก่อน
         paymentMethod: "BANK_TRANSFER",
         shippingMethod: "STANDARD",
-        shippingCost:50
+        shippingCost: 50,
       };
 
       const res = await orderService.createOrder(payload);
-      toast.success(`Order completed Order ID: ${res.data.orderId}`);
+      const newOrderId = res.data.orderId;
+      toast.success(`Order completed.`);
       // รออัปเดตตะกร้าให้เสร็จก่อน
       await fetchCart();
       // ล้างของที่เลือกทิ้ง
       setSelectedCartItemIds([]);
-      // ย้ายหน้าไปดูบิล
-      navigate(`/cart`);
+      // ย้านไปหน้า order Detail พร้อมเปิด modal จ่ายเงิน
+      navigate(`/setting/orders/${newOrderId}`, {
+        state: { openPayModal: true },
+      });
     } catch (error: any) {
       console.error("Order Error:", error);
 

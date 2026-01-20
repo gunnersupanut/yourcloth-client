@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   MapPin,
@@ -13,6 +13,7 @@ import type { OrderHistoryEntry } from "../../types/orderTypes";
 import toast from "react-hot-toast";
 import { orderService } from "../../services/orderService";
 import PageLoading from "../../components/ui/PageLoading";
+import PaymentModal from "../../components/PaymentModal";
 
 const DEFAULT_ORDER: OrderHistoryEntry = {
   orderId: 0,
@@ -39,15 +40,18 @@ const ORDER_STEPS = [
 
 export default function OrderDetail() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { orderId } = useParams();
   const [order, setOrder] = useState<OrderHistoryEntry>(DEFAULT_ORDER); // ใช้ Mock ไปก่อน
   const [loading, setLoading] = useState(true);
+  const [isPayModalOpen, setPayModalOpen] = useState(false);
   useEffect(() => {
     fetchOrder();
   }, [orderId]);
   const fetchOrder = async () => {
     if (!orderId) {
       toast.error("Invalid data can't find OrderId");
+      console.error("Can't find orderId")
       return;
     }
     try {
@@ -63,11 +67,25 @@ export default function OrderDetail() {
       setLoading(false);
     }
   };
+  // เปิด Modal อัตโนมัติ
+  useEffect(() => {
+    // เช็ค 2 เงื่อนไข
+    // 1. มีโพย 'openPayModal' ส่งมาไหม?
+    // 2. ข้อมูล order โหลดเสร็จหรือยัง? (ต้องมี id และ totalAmount ถึงจะเปิดได้)
+    if (location.state?.openPayModal && order.orderId !== 0) {
+      setPayModalOpen(true);
 
+      // ล้าง state ทิ้ง เพื่อไม่ให้มันเปิดซ้ำเวลากด refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, order]); // ใส่ dependency ให้ครบ
   // Logic คำนวณ Step ปัจจุบัน
   const currentStepIndex = ORDER_STEPS.findIndex(
     (step) => step.status === order?.status,
   );
+  const handlePayNow = () => {
+    setPayModalOpen(true);
+  };
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4 font-kanit pb-20">
       {loading ? (
@@ -164,7 +182,10 @@ export default function OrderDetail() {
             {/* Action ตามสถานะ */}
             {order.status === "PENDING" && (
               <div className="fixed bottom-0 hidden left-0 w-full bg-white border-t p-4 md:flex justify-end shadow-lg md:static md:shadow-none md:border-0 md:bg-transparent md:p-0 mt-8">
-                <button className="bg-yellow-400 text-white font-bold py-3 px-14 rounded-xl shadow-lg hover:bg-yellow-500 transition-all w-full md:w-auto">
+                <button
+                  className="bg-yellow-400 text-white font-bold py-3 px-14 rounded-xl shadow-lg hover:bg-yellow-500 transition-all w-full md:w-auto"
+                  onClick={() => handlePayNow()}
+                >
                   Pay Now
                 </button>
               </div>
@@ -297,6 +318,12 @@ export default function OrderDetail() {
           )}
         </>
       )}
+      <PaymentModal
+        isOpen={isPayModalOpen}
+        onClose={() => setPayModalOpen(false)}
+        orderId={order.orderId}
+        totalAmount={order.totalAmount}
+      />
     </div>
   );
 }
