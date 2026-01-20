@@ -20,7 +20,7 @@ import SettingLayout from "./pages/setting/SettingPageLayout";
 import MyAccount from "./pages/setting/MyAccountPage";
 import Addresses from "./pages/setting/AddressesPage";
 import Orders from "./pages/setting/OrdersPage";
-import OrderDetail from "./pages/setting/OrderDetail";
+import OrderDetail from "./pages/setting/OrderDetailPage";
 const AboutPage = () => <div className="text-xl">🔐 หน้า About (รอทำ)</div>;
 const ContactPage = () => <div className="text-xl">🔐 หน้า Contact (รอทำ)</div>;
 
