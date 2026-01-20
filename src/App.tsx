@@ -20,6 +20,7 @@ import SettingLayout from "./pages/setting/SettingPageLayout";
 import MyAccount from "./pages/setting/MyAccountPage";
 import Addresses from "./pages/setting/AddressesPage";
 import Orders from "./pages/setting/OrdersPage";
+import OrderDetail from "./pages/setting/OrderDetail";
 const AboutPage = () => <div className="text-xl">🔐 หน้า About (รอทำ)</div>;
 const ContactPage = () => <div className="text-xl">🔐 หน้า Contact (รอทำ)</div>;
 
@@ -50,8 +51,8 @@ function App() {
 
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactPage />} />
+          {/* ---โซน ต้อง Login ถึงจะเข้าได้--- */}
           <Route element={<ProtectedRoute />}>
-            {/* โซน ต้อง Login ถึงจะเข้าได้ */}
             <Route path="cart" element={<CartPage />} />
             <Route path="checkout" element={<CheckoutPage />} />{" "}
             <Route path="/setting" element={<SettingLayout />}>
@@ -62,8 +63,10 @@ function App() {
               <Route path="account" element={<MyAccount />} />
               <Route path="addresses" element={<Addresses />} />
               <Route path="orders" element={<Orders />} />
+              <Route path="orders/:id" element={<OrderDetail />} />
             </Route>
           </Route>
+          {/* ---------------------------------------------------------- */}
         </Route>
       </Routes>
     </>

@@ -3,7 +3,7 @@ import type { OrderHistoryEntry } from "../../types/orderTypes";
 import { orderService } from "../../services/orderService";
 import toast from "react-hot-toast";
 import PageLoading from "../../components/ui/PageLoading";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 // Mapping จาก UI Tab -> Database Status
 const TAB_STATUS_MAP: Record<string, string[]> = {
@@ -17,7 +17,9 @@ const TAB_STATUS_MAP: Record<string, string[]> = {
 };
 
 const TABS = Object.keys(TAB_STATUS_MAP);
+
 const Orders = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<OrderHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   // สำหรับ Filter
@@ -27,7 +29,6 @@ const Orders = () => {
   const fetchOrders = async () => {
     try {
       const res = await orderService.getAllOrder();
-      console.log("res data:", res);
       setOrders(res.data);
     } catch (error) {
       console.error("Fetch orders failed", error);
@@ -55,6 +56,9 @@ const Orders = () => {
 
     return isStatusMatch && isSearchMatch;
   });
+  const handleViewDetail = (orderId: number) => {
+    navigate(`/setting/orders/${orderId}`);
+  };
   return (
     <div className="space-y-6 font-kanit">
       {loading ? (
@@ -228,7 +232,10 @@ const Orders = () => {
                       </button>
                     )}
                     {/*---ปุ่ม View Details */}
-                    <button className="px-6 py-3 rounded-lg bg-tertiary text-white text-button hover:scale-105 transition-all duration-200 shadow-sm">
+                    <button
+                      className="px-6 py-3 rounded-lg bg-tertiary text-white text-button hover:scale-105 transition-all duration-200 shadow-sm"
+                      onClick={() => handleViewDetail(order.orderId)}
+                    >
                       View Details
                     </button>
                   </div>
