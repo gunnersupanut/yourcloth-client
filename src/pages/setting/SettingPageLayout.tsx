@@ -1,5 +1,5 @@
 import { MapPin, Receipt, User } from "lucide-react";
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Outlet, NavLink} from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 export default function SettingLayout() {
   const { user, logout } = useAuth();
