@@ -298,23 +298,26 @@ export default function OrderDetail() {
                 ฿{order.totalAmount.toLocaleString()}
               </span>
             </div>
-          </div>
 
-          {/* Footer Action*/}
-          {order.status === "SHIPPING" && (
-            <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 flex justify-end shadow-lg md:static md:shadow-none md:border-0 md:bg-transparent md:p-0">
-              <button className="bg-yellow-400 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:bg-yellow-500 transition-all w-full md:w-auto">
-                Confirm Received
-              </button>
-            </div>
-          )}
-          {order.status === "PENDING" && (
-            <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 flex justify-end shadow-lg md:static md:shadow-none md:border-0 md:bg-transparent md:p-0 mt-8">
-              <button className="bg-yellow-400 text-white font-bold py-3 px-14 rounded-xl shadow-lg hover:bg-yellow-500 transition-all w-full md:w-auto">
-                Pay Now
-              </button>
-            </div>
-          )}
+            {/* Footer Action*/}
+            {order.status === "SHIPPING" && (
+              <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 flex justify-end shadow-lg md:static md:shadow-none md:border-0 md:bg-transparent md:p-0">
+                <button className="bg-yellow-400 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:bg-yellow-500 transition-all w-full md:w-auto">
+                  Confirm Received
+                </button>
+              </div>
+            )}
+            {order.status === "PENDING" && (
+              <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 flex justify-end shadow-lg md:static md:shadow-none md:border-0 md:bg-transparent md:p-0 mt-8">
+                <button
+                  className="bg-yellow-400 text-white font-bold py-3 px-14 rounded-xl shadow-lg hover:bg-yellow-500 transition-all w-full md:w-auto"
+                  onClick={() => handlePayNow()}
+                >
+                  Pay Now
+                </button>
+              </div>
+            )}
+          </div>
         </>
       )}
       <PaymentModal
@@ -322,6 +325,7 @@ export default function OrderDetail() {
         onClose={() => setPayModalOpen(false)}
         orderId={order.orderId}
         totalAmount={order.totalAmount}
+        onSuccess={fetchOrder}
       />
     </div>
   );

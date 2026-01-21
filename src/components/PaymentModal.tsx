@@ -1,20 +1,10 @@
 import React, { useState, useRef } from "react";
-import {
-  X,
-  Wallet,
-  Upload,
-  CheckCircle,
-  Copy,
-  Image as ImageIcon,
-} from "lucide-react";
-
-// --- Types ---
-interface PaymentModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  orderId: number;
-  totalAmount: number;
-}
+import { X, Wallet, Upload, CheckCircle, Copy } from "lucide-react";
+import type { PaymentModalProps } from "../types/orderTypes";
+import MyQrCode from "../assets/icons/myQRCode.jpg";
+import { uploadToCloudinary } from "../services/uploadService";
+import toast from "react-hot-toast";
+import { orderService } from "../services/orderService";
 
 type Step = "PAYMENT" | "UPLOAD" | "COMPLETE";
 
@@ -23,10 +13,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   onClose,
   orderId,
   totalAmount,
+  onSuccess,
 }) => {
   const [currentStep, setCurrentStep] = useState<Step>("PAYMENT");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const BANK_INFO = {
@@ -55,14 +47,34 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       fileInputRef.current.value = "";
     }
   };
-
-  const handleConfirmUpload = () => {
+  const handleConfirmUpload = async () => {
     if (!selectedFile) {
-      alert("Please upload slip first!"); // หรือใช้ toast
+      toast.error("Please upload slip first!");
       return;
     }
-    // ตรงนี้ Logic ยิง Cloudinary จะมาอยู่ตรงนี้ในอนาคต
-    setCurrentStep("COMPLETE");
+    try {
+      setIsLoading(true);
+      // อัปโหลดรูป
+      const image = await uploadToCloudinary(selectedFile);
+      const payload = {
+        imageObj: {
+          imageUrl: image?.url,
+          filePath: image?.publicId,
+        },
+      };
+      // ย้ายออร์เดอร์
+      await orderService.moveOrdertoinspecting(orderId, payload);
+      // รีเฟรชหน้าหลัก
+      onSuccess();
+      setCurrentStep("COMPLETE");
+      toast.success(`Payment completed.`);
+    } catch (error: any) {
+      console.error("Confirm payment Error:", error);
+
+      toast.error(error.message || "Something went wrong.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // --- Components: Stepper ---
@@ -138,21 +150,21 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2 text-center">
         Order <span className="text-yellow-500">#{orderId}</span>
       </h2>
-      <h3 className="text-lg md:text-xl font-bold text-gray-600 mb-6 md:mb-8 text-center">
+      <h3 className="text-lg md:text-xl font-bold text-gray-600 mb-4 md:mb-6 text-center">
         Total Price{" "}
         <span className="text-yellow-500">
           {totalAmount.toLocaleString()} ฿
         </span>
       </h3>
 
-      <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-center justify-center w-full mb-8">
+      <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-center justify-center w-full mb-4">
         {/* QR Code Section */}
         <div className="flex flex-col items-center gap-2">
           <p className="font-bold text-gray-700">QR CODE</p>
           <div className="p-2 border-2 border-gray-200 rounded-lg bg-white">
             {/* Mock QR - เปลี่ยนรูปจริงตรงนี้ */}
-            <div className="w-32 h-32 bg-gray-100 flex items-center justify-center rounded">
-              <ImageIcon className="w-12 h-12 text-gray-300" />
+            <div className="w-32 h-44 bg-gray-100 flex items-center justify-center rounded">
+              <img src={MyQrCode} alt="QRCode" />
             </div>
           </div>
           <p className="text-xs text-gray-400 text-center">
@@ -286,15 +298,42 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         </button>
         <button
           onClick={handleConfirmUpload}
-          disabled={!selectedFile}
-          className={`px-6 md:px-8 py-2 rounded-full font-bold shadow-md transition-all min-w-[100px]
-             ${
-               selectedFile
-                 ? "bg-yellow-400 text-white hover:bg-yellow-500 hover:scale-105"
-                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
-             }`}
+          disabled={!selectedFile || isLoading}
+          className={`px-6 md:px-8 py-2 rounded-full font-bold shadow-md transition-all min-w-[120px] flex justify-center items-center
+    ${
+      selectedFile && !isLoading
+        ? "bg-yellow-400 text-white hover:bg-yellow-500 hover:scale-105"
+        : "bg-gray-200 text-gray-400 cursor-not-allowed"
+    }`}
         >
-          Confirm
+          {isLoading ? (
+            /* Spinner */
+            <div className="flex items-center gap-2">
+              <svg
+                className="animate-spin h-5 w-5 text-current"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            </div>
+          ) : (
+            /* ข้อความปกติ */
+            "Confirm"
+          )}
         </button>
       </div>
     </div>

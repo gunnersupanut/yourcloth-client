@@ -209,7 +209,7 @@ const CheckoutPage = () => {
   };
 
   const handleChooseDiscount = () => {
-    console.log("👉 User Clicked: Choose Discount");
+    console.log(" User Clicked: Choose Discount");
     toast("Feature 'Coupons' coming soon!", { icon: "🎟️" });
   };
 

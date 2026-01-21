@@ -7,7 +7,6 @@ export interface CreateOrderItem {
 export interface CreateOrderPayload {
   addressId: number;            // ID ที่อยู่ (ต้องมี)
   items: CreateOrderItem[];     // รายการสินค้าที่จะซื้อ (ต้องมี)
-
   // ตัวใหม่ที่เราเพิ่งเพิ่ม
   cartItemIds?: number[];       // Optional 
   paymentMethod: string;        // "BANK_TRANSFER" | "COD" (ตอนนี้รับ string ไปก่อน)
@@ -38,4 +37,19 @@ export interface OrderHistoryEntry {
   shippingCost: number
   receiver: OrderReceiver; //  (1 ออเดอร์ มี 1 ที่อยู่)
   items: OrderHistoryItem[];
+}
+
+export interface PaymentModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  orderId: number;
+  totalAmount: number;
+  onSuccess: () => void;
+}
+
+export interface ConfirmPaymentPayload {
+  imageObj: {
+    imageUrl: string;
+    filePath: string;
+  }
 }
