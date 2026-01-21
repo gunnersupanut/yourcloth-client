@@ -1,8 +1,9 @@
 import { MapPin, Receipt, User } from "lucide-react";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 export default function SettingLayout() {
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   let username;
   if (user) {
     username = user.username;
@@ -15,6 +16,9 @@ export default function SettingLayout() {
         : "text-gray-500 hover:bg-gray-100"
     }`;
 
+  const handleLogout = () => {
+    logout();
+  };
   return (
     <div className="container mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6 md:gap-8 font-kanit">
       {/* Sidebar */}
@@ -47,7 +51,10 @@ export default function SettingLayout() {
           </NavLink>
 
           {/* ปุ่ม Logout ดันไปขวาสุดในมือถือ */}
-          <button className="text-red-400 p-3 hover:bg-red-50 rounded-lg md:mt-4 md:w-full text-left md:text-left ml-auto md:ml-0">
+          <button
+            className="text-red-400 p-3 hover:bg-red-50 rounded-lg md:mt-4 md:w-full text-left md:text-left ml-auto md:ml-0"
+            onClick={() => handleLogout()}
+          >
             🚪 <span className="hidden md:inline">Logout</span>
           </button>
         </nav>
