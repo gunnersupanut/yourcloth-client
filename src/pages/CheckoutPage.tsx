@@ -198,6 +198,7 @@ const CheckoutPage = () => {
       // ย้านไปหน้า order Detail พร้อมเปิด modal จ่ายเงิน
       navigate(`/setting/orders/${newOrderId}`, {
         state: { openPayModal: true },
+        replace: true,
       });
     } catch (error: any) {
       console.error("Order Error:", error);
