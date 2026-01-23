@@ -6,12 +6,14 @@ export interface Product {
   description: string;
   category: string;
   gender: string;
-  available_colors_code: string[];
-  available_colors_name: string[];
+  available_colors: {
+    name: string;
+    code: string;
+  }[];
   available_sizes: string[];
 }
 export interface ProductVariant {
-  variant_id: number; 
+  variant_id: number;
   color_code: string;
   color_name: string;
   size: string;
@@ -21,5 +23,5 @@ export interface ProductVariant {
 
 // Interface เดิม เพิ่ม field นี้เข้าไป
 export interface ProductDetail extends Product {
-  variants: ProductVariant[]; 
+  variants: ProductVariant[];
 }
