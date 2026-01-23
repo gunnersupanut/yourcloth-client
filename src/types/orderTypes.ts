@@ -32,6 +32,7 @@ export interface OrderReceiver {
 export interface OrderHistoryEntry {
   orderId: number;
   status: string;
+  rejectionReason?: string
   orderedAt: Date; // หรือ string แล้วแต่ Database return
   totalAmount: number;
   shippingCost: number

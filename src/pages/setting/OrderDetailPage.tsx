@@ -7,6 +7,7 @@ import {
   CheckCircle,
   Wallet,
   ClipboardCheck,
+  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { OrderHistoryEntry } from "../../types/orderTypes";
@@ -169,6 +170,31 @@ export default function OrderDetail() {
                 );
               })}
             </div>
+            {/* Rejection Section*/}
+            {order.status === "PENDING" && (
+              <div className="flex items-center gap-4 p-4 border border-red-500 rounded-lg bg-white shadow-sm w-full">
+                {/* Icon Wrapper: วงกลมแดง */}
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
+                    {/* Icon X สีขาว หนาหน่อย */}
+                    <X className="w-6 h-6 text-white" strokeWidth={3} />
+                  </div>
+                </div>
+
+                {/* Text Content */}
+                <div className="flex flex-col">
+                  {/* Title */}
+                  <h3 className="text-lg font-bold text-red-600 leading-tight">
+                    Previous Payment Was Declined
+                  </h3>
+                  {/* Description */}
+                  <p className="text-red-400 font-medium text-sm mt-0.5">
+                    {order.rejectionReason}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* ข้อความแจ้งเตือนตามสถานะ */}
             <div className="mt-8 text-center md:text-right  rounded-lg text-sm md:text-bodyxl text-primary">
               {order.status === "INSPECTING" &&
@@ -178,6 +204,7 @@ export default function OrderDetail() {
               {order.status === "SHIPPING" &&
                 "Your package is on the way! Get ready."}
             </div>
+
             {/* Action ตามสถานะ */}
             {order.status === "PENDING" && (
               <div className="fixed bottom-0 hidden left-0 w-full bg-white border-t p-4 md:flex justify-end shadow-lg md:static md:shadow-none md:border-0 md:bg-transparent md:p-0 mt-8">
