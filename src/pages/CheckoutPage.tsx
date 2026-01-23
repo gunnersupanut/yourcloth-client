@@ -80,6 +80,8 @@ const CheckoutPage = () => {
 
         //set ตัวที่สมบูรณ์แล้ว
         setCheckoutItems(mergedItems);
+        console.log("Server", serverData);
+        console.log("selectedItemRaw", selectedItemsRaw);
       } catch (error) {
         console.error(error);
         toast.error("Fail to loading products");
@@ -240,8 +242,8 @@ const CheckoutPage = () => {
                 {item.price}฿
               </p>
               <div className="flex checkoutItems-center gap-4 mb-2">
-                <span className="text-tertiary text-h2xl">XL</span>
-                <span className="text-h2xl">Black</span>
+                <span className="text-tertiary text-h2xl">{item.size}</span>
+                <span className="text-h2xl">{item.color}</span>
               </div>
               <p className="text-body mb-6 w-3/4">{item.description}</p>
               <div className="flex checkoutItems-center gap-4 text-h3xl">

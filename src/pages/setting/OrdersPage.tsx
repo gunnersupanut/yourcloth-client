@@ -136,7 +136,7 @@ const Orders = () => {
                         <span
                           className={`font-bold ${
                             order.status === "PENDING"
-                              ? "text-yellow-500"
+                              ? "text-secondary"
                               : order.status === "COMPLETE"
                                 ? "text-green-600"
                                 : order.status === "CANCEL"
