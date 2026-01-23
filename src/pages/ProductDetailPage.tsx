@@ -45,7 +45,9 @@ const ProductDetailPage = () => {
 
   // State ข้อมูลสินค้า
   const [product, setProduct] = useState<ProductDetail | null>(
-    cachedProduct ? ({ ...cachedProduct, variants: [] } as ProductDetail) : null
+    cachedProduct
+      ? ({ ...cachedProduct, variants: [] } as ProductDetail)
+      : null,
   );
   // loading state
   const [loading, setLoading] = useState(!cachedProduct);
@@ -89,11 +91,11 @@ const ProductDetailPage = () => {
     fetchProduct();
   }, [id, navigate]);
 
-  // useEffect: ให้เลือกสีแรก
-  useEffect(() => {
-    // เช็คว่ามีข้อมูลสีมาไหม
-    if (product?.available_colors_name?.length) {
-      setSelectedColor(product.available_colors_name[0]);
+useEffect(() => {
+    if (product?.available_colors?.length) {
+      
+      const firstColorObj = product.available_colors[0]; 
+      setSelectedColor(firstColorObj.name);
     }
   }, [product]);
 
@@ -151,7 +153,7 @@ const ProductDetailPage = () => {
     // เช็คของว่ามีไหม
     // หาตัวที่ Size ตรง และ Color ตรง
     const targetVariant = product.variants.find(
-      (v) => v.size === selectedSize && v.color_name === selectedColor
+      (v) => v.size === selectedSize && v.color_name === selectedColor,
     );
     // เช็คว่าเจอไหม
     if (!targetVariant) {
@@ -190,7 +192,7 @@ const ProductDetailPage = () => {
 
     // 2. หา Variant (เหมือนเดิม)
     const targetVariant = product.variants.find(
-      (v) => v.size === selectedSize && v.color_name === selectedColor
+      (v) => v.size === selectedSize && v.color_name === selectedColor,
     );
 
     if (!targetVariant) {
@@ -357,36 +359,29 @@ const ProductDetailPage = () => {
               </span>
             </h3>
             <div className="flex flex-wrap gap-5">
-              {/* Loop จาก "ชื่อสี" (Name) เป็นหลัก */}
-              {product?.available_colors_name?.map(
-                (colorName: string, index: number) => {
-                  // ดึงโค้ดสีออกมาโดยใช้ index เดียวกัน
-                  // ถ้า Code ไม่มี หรือ หลุด ให้ใช้สีเทา (#ccc)
-                  const colorCode =
-                    product.available_colors_code?.[index] || "#cccccc";
+              {product?.available_colors?.map((color: any) => {
+                // color ตอนคือ Object { name: "Red", code: "#FF0000" }
+                const isSelected = selectedColor === color.name;
 
-                  const isSelected = selectedColor === colorName;
-
-                  return (
-                    <button
-                      key={colorName} // ใช้ชื่อสีเป็น key
-                      onClick={() => setSelectedColor(colorName)}
-                      className={`
-                 w-10 h-10 rounded-full shadow-sm border border-gray-200 
-                 transition-all duration-300 ease-in-out relative
-                 
-                 ${
-                   isSelected
-                     ? "ring-2 ring-offset-2 ring-[#5B486B] scale-110"
-                     : "hover:scale-110 hover:border-gray-400"
-                 }
-               `}
-                      style={{ backgroundColor: colorCode }}
-                      title={colorName} // เอาเมาส์ชี้แล้วขึ้นชื่อสี
-                    ></button>
-                  );
-                }
-              )}
+                return (
+                  <button
+                    key={color.name} // ใช้ชื่อเป็น key
+                    onClick={() => setSelectedColor(color.name)}
+                    className={`
+          w-10 h-10 rounded-full shadow-sm border border-gray-200 
+          transition-all duration-300 ease-in-out relative
+          ${
+            isSelected
+              ? "ring-2 ring-offset-2 ring-[#5B486B] scale-110"
+              : "hover:scale-110 hover:border-gray-400"
+          }
+        `}
+                    // 👇 จุดพีค: ดึงสีจาก Object คู่ตัวมันเลย! ไม่ต้องกลัวสลับ!
+                    style={{ backgroundColor: color.code }}
+                    title={color.name}
+                  ></button>
+                );
+              })}
             </div>
           </div>
           {/* เลือกไซส์ */}
@@ -411,10 +406,10 @@ const ProductDetailPage = () => {
               !isAvailable // ไม่มีของ: เทาๆ + ขีดฆ่า
                 ? "bg-gray-100 text-gray-300 border-gray-200 cursor-not-allowed decoration-slice line-through"
                 : isSelected
-                ? //เลือกอยู่
-                  "bg-secondary text-text_inverse shadow-md"
-                : // มีของ (ยังไม่เลือก)
-                  "bg-tertiary text-primary  hover:scale-110 hover:text-text_inverse"
+                  ? //เลือกอยู่
+                    "bg-secondary text-text_inverse shadow-md"
+                  : // มีของ (ยังไม่เลือก)
+                    "bg-tertiary text-primary  hover:scale-110 hover:text-text_inverse"
             }
           `}
                   >

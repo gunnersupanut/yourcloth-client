@@ -29,10 +29,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </p>
         </div>
         <div className="flex mt-2 -space-x-2 overflow-hidden p-1">
-          {product.available_colors_code.map((color, index) => (
+          {product.available_colors.map((color, index) => (
             <div
               key={index}
-              style={{ backgroundColor: color }}
+              style={{ backgroundColor: color.code }}
               className="w-6 h-6 rounded-full border-2 
               border-white 
               shadow-sm ring-1 ring-inset ring-black/10"
