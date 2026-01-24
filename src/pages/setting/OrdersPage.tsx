@@ -127,7 +127,7 @@ const Orders = () => {
                     <div className="space-y-1">
                       {/* Order ID สีเหลืองทอง */}
                       <h3 className="text-h3xl text-primary font-kanit">
-                        Order{" "}
+                        Order {" "}
                         <span className="text-secondary">#{order.orderId}</span>
                       </h3>
                       {/* Status */}
@@ -144,7 +144,11 @@ const Orders = () => {
                                   : "text-blue-500"
                           }`}
                         >
-                          {order.status}
+                          {order.status === "PACKING"
+                            ? "PROCESSING"
+                            : order.status === "SHIPPING"
+                              ? "TO RECEIVE"
+                              : order.status}
                         </span>
                       </div>
                     </div>
@@ -224,12 +228,14 @@ const Orders = () => {
                         Pay Now
                       </button>
                     ) : (
-                      <button
-                        onClick={() => toast("Buy Again Coming Soon!")}
-                        className="px-6 py-3 rounded-lg bg-yellow-400 text-white text-button hover:scale-105 transition-all duration-200 shadow-sm"
-                      >
-                        Buy Again
-                      </button>
+                      order.status === "COMPLETE" && (
+                        <button
+                          onClick={() => toast("Buy Again Coming Soon!")}
+                          className="px-6 py-3 rounded-lg bg-yellow-400 text-white text-button hover:scale-105 transition-all duration-200 shadow-sm"
+                        >
+                          Buy Again
+                        </button>
+                      )
                     )}
                     {/*---ปุ่ม View Details */}
                     <button

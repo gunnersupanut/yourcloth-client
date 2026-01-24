@@ -201,8 +201,10 @@ export default function OrderDetail() {
                 "We have received your payment information. We are reviewing it within 24 hours."}
               {order.status === "PENDING" &&
                 "Please complete your payment within 24 hours to proceed with your order."}
+              {order.status === "PACKING" &&
+                "Payment confirmed! We are currently packing your order and will ship it soon."}
               {order.status === "SHIPPING" &&
-                "Your package is on the way! Get ready."}
+                "Your package is on the way Get ready."}
             </div>
 
             {/* Action ตามสถานะ */}
