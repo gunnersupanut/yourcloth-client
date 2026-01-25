@@ -63,7 +63,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         },
       };
       // ย้ายออร์เดอร์
-      await orderService.moveOrdertoinspecting(orderId, payload);
+      await orderService.moveOrdertoInspecting(orderId, payload);
       // รีเฟรชหน้าหลัก
       onSuccess();
       setCurrentStep("COMPLETE");

@@ -9,6 +9,7 @@ import {
   ClipboardCheck,
   X,
   Copy,
+  Loader2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { OrderHistoryEntry } from "../../types/orderTypes";
@@ -46,6 +47,7 @@ export default function OrderDetail() {
   const { orderId } = useParams();
   const [order, setOrder] = useState<OrderHistoryEntry>(DEFAULT_ORDER); // ใช้ Mock ไปก่อน
   const [loading, setLoading] = useState(true);
+  const [isConfirmRecived, setIsConfirmRecived] = useState(false);
   const [isPayModalOpen, setPayModalOpen] = useState(false);
   useEffect(() => {
     fetchOrder();
@@ -91,8 +93,21 @@ export default function OrderDetail() {
   const handleReportProblem = () => {
     toast.success("Report Problem CommingSoon.");
   };
-  const handleConfirmReceived = () => {
-    toast.success("Confirm Received CommingSoon.");
+  const handleConfirmReceived = async () => {
+    setIsConfirmRecived(true);
+    // ย้ายออร์เดอร์
+    await orderService.confirmReceived(order.orderId);
+    // รีเฟรชหน้าหลัก
+    fetchOrder();
+    toast.success("Confirm Received.");
+    try {
+    } catch (error: any) {
+      console.error("Confirm payment Error:", error);
+
+      toast.error(error.message || "Something went wrong.");
+    } finally {
+      setIsConfirmRecived(false);
+    }
   };
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4 font-kanit pb-20">
@@ -227,7 +242,7 @@ export default function OrderDetail() {
               </div>
             )}
             {order.status === "SHIPPING" && (
-              <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 flex justify-end shadow-lg md:static md:shadow-none md:border-0 md:bg-transparent md:p-0 gap-8 -z-50">
+              <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 flex justify-end shadow-lg md:static md:shadow-none md:border-0 md:bg-transparent md:p-0 gap-8 z-50">
                 <button
                   className="bg-transparent text-primary font-bold border-2 border-primary py-3 px-8 rounded-xl shadow-lg hover:scale-105 transition-all w-full md:w-auto"
                   onClick={() => handleReportProblem()}
@@ -235,10 +250,24 @@ export default function OrderDetail() {
                   Report Problem
                 </button>
                 <button
-                  className="bg-yellow-400 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:hover:scale-105  transition-all w-full md:w-auto"
+                  className={`
+    bg-yellow-400 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all w-full md:w-auto flex items-center justify-center gap-2
+    ${
+      isConfirmRecived
+        ? "opacity-70 cursor-not-allowed" // จางลง + เมาส์ห้ามกด
+        : "hover:scale-105" // ขยายตอนเมาส์ชี้
+    }
+  `}
                   onClick={() => handleConfirmReceived()}
+                  disabled={isConfirmRecived}
                 >
-                  Confirm Received
+                  {isConfirmRecived ? (
+                    <div className="px-12">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    </div>
+                  ) : (
+                    "Confirm Received"
+                  )}
                 </button>
               </div>
             )}
@@ -246,13 +275,13 @@ export default function OrderDetail() {
 
           {/* === Card 2 Address === */}
           <div className="bg-white p-6 border-b-2 border-primary shadow-sm">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col md:flex-row md:justify-between items-center">
               <p className="text-h3xl text-primary mb-4 flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-yellow-500  text-bodyxl" />{" "}
                 Shipping Address
               </p>
-              <div className="flex flex-col text-h3xl text-secondary items-center gap-2">
-                <p>{order.parcelDetail?.shipping_carrier}</p>
+              <div className="flex flex-col text-h3xl text-secondary items-center gap-1 mb-4 md:mb-0">
+                <p className="mr-3">{order.parcelDetail?.shipping_carrier}</p>
                 <div className="flex gap-2">
                   <p>{order.parcelDetail?.parcel_number}</p>
                   <button
@@ -262,7 +291,7 @@ export default function OrderDetail() {
                       );
                       toast.success("Copy Parcel number.");
                     }}
-                    className="p-1 hover:bg-gray-100 rounded-md transition-colors" // แต่งปุ่มนิดนึงเวลามีเมาส์ชี้
+                    className="p-1 hover:bg-gray-100 rounded-md transition-colors" 
                     title="Copy Parcel Number"
                   >
                     <Copy className="w-4 h-4 text-secondary cursor-pointer" />

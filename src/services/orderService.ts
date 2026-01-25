@@ -29,13 +29,22 @@ export const orderService = {
         }
 
     },
-    moveOrdertoinspecting: async (orderId: number, payload: ConfirmPaymentPayload) => {
+    moveOrdertoInspecting: async (orderId: number, payload: ConfirmPaymentPayload) => {
         try {
-            const response = await api.post(`/orders/${orderId}/confirm-payment`, payload);
+            const response = await api.patch(`/orders/${orderId}/confirm-payment`, payload);
             return response.data;
         } catch (error) {
             console.error("Error move order to inpecting:", error);
             throw error;
         }
-    }
+    },
+    confirmReceived: async (orderId: number) => {
+        try {
+            const response = await api.patch(`/orders/${orderId}/confirm-received`);
+            return response.data;
+        } catch (error) {
+            console.error("Error move order to inpecting:", error);
+            throw error;
+        }
+    },
 }
