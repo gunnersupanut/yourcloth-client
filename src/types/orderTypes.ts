@@ -60,6 +60,7 @@ export interface ReportModalProps {
     photos: File[];
     video: File | null;
   }) => void;
+  isLoading: boolean;
 }
 
 export interface ConfirmPaymentPayload {

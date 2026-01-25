@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import type { ReportModalProps } from "../types/orderTypes";
 import toast from "react-hot-toast";
 
@@ -7,6 +7,7 @@ const ReportModal: React.FC<ReportModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
+  isLoading,
 }) => {
   // State เก็บข้อมูล
   const [description, setDescription] = useState("");
@@ -219,9 +220,25 @@ const ReportModal: React.FC<ReportModalProps> = ({
           </button>
           <button
             onClick={handleSubmit}
-            className="flex-1 py-3 rounded-lg bg-[#FFC107] text-white font-bold hover:bg-[#ffcd38] shadow-md transition-all active:scale-95"
+            disabled={isLoading}
+            className={`
+    flex-1 py-3 rounded-lg font-bold shadow-md transition-all 
+    flex items-center justify-center gap-2 
+    ${
+      isLoading
+        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+        : "bg-secondary text-white hover:scale-105 active:scale-95"
+    }
+  `}
           >
-            Submit
+            {isLoading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Sending...</span>{" "}
+              </>
+            ) : (
+              "Submit"
+            )}
           </button>
         </div>
       </div>

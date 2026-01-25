@@ -9,7 +9,6 @@ const PRESETS = {
 };
 
 export const uploadService = {
-
     upload: async (file: File, orderId: number, type: "SLIP" | "PROBLEM") => {
         // ---เลือก Preset ตาม Type
         const selectedPreset = PRESETS[type];
@@ -33,12 +32,15 @@ export const uploadService = {
                 `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
                 formData
             );
-
+            const rawType = response.data.resource_type;
+            // เอาตัวแรกมาทำตัวใหญ่ + ต่อด้วยหางที่เหลือ
+            const capitalizedType = rawType.charAt(0).toUpperCase() + rawType.slice(1);
+            console.log(`Upload file to cloudinary successfully.`, formData)
             // คืนค่าที่จำเป็นกลับไป
             return {
                 file_url: response.data.secure_url,     // เอาไว้โชว์
                 file_path: response.data.public_id,     // เอาไว้ลบ
-                media_type: response.data.resource_type // 'image' หรือ 'video'
+                media_type: capitalizedType as "Image" | "Video" // 'image' หรือ 'video'
             };
 
         } catch (error) {

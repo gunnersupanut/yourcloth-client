@@ -18,6 +18,7 @@ import { orderService } from "../../services/orderService";
 import PageLoading from "../../components/ui/PageLoading";
 import PaymentModal from "../../components/PaymentModal";
 import ReportModal from "../../components/ReportModal";
+import { uploadService } from "../../services/uploadService";
 
 const DEFAULT_ORDER: OrderHistoryEntry = {
   orderId: 0,
@@ -49,6 +50,7 @@ export default function OrderDetail() {
   const [order, setOrder] = useState<OrderHistoryEntry>(DEFAULT_ORDER); // ใช้ Mock ไปก่อน
   const [loading, setLoading] = useState(true);
   const [isConfirmRecived, setIsConfirmRecived] = useState(false);
+  const [isReporting, setIsReporting] = useState(false);
   const [isPayModalOpen, setPayModalOpen] = useState(false);
   const [isReportModalOpen, setReportModalOpen] = useState(true);
   useEffect(() => {
@@ -93,7 +95,7 @@ export default function OrderDetail() {
     setPayModalOpen(true);
   };
   const handleReportProblem = () => {
-    toast.success("Report Problem CommingSoon.");
+    setReportModalOpen(true);
   };
   const handleConfirmReceived = async () => {
     setIsConfirmRecived(true);
@@ -114,12 +116,38 @@ export default function OrderDetail() {
   const handleBuyAgain = () => {
     navigate("/shop");
   };
-  const handleReportSubmit = (dataFromModal: any) => {
+  const handleReportSubmit = async (dataFromModal: any) => {
     try {
+      setIsReporting(true);
+      // รวมไฟล์ทั้งหมดเข้าด้วยกัน (Photos + Video)
+      const allFiles: File[] = [...dataFromModal.photos]; // แตก Array รูปออกมาก่อน
+      if (dataFromModal.video) {
+        allFiles.push(dataFromModal.video); // ยัดวิดีโอตามเข้าไป (ถ้ามี)
+      }
+      // ยิงไป Cloudinary
+      let uploadedAttachments: any[] = [];
+      if (allFiles.length > 0) {
+        uploadedAttachments = await uploadService.uploadMultiple(
+          allFiles,
+          order.orderId,
+          "PROBLEM",
+        );
+      }
+      // เตรียม Payload ส่งให้ Backend
+      const payload = {
+        problemDescription: dataFromModal.description,
+        attachments: uploadedAttachments, // ส่งของที่ได้จาก Cloudinary ไปเลย
+      };
+      await orderService.cancelOrder(order.orderId, payload);
+      toast.success("Order cancelled successfully.");
+      setReportModalOpen(false);
+      fetchOrder();
       console.log("Upload data:", dataFromModal);
     } catch (error) {
-      toast.error("Report failed.");
+      toast.error("Failed to submit report. Please try again.");
       console.error("Report failed", error);
+    } finally {
+      setIsReporting(false);
     }
   };
   return (
@@ -459,6 +487,7 @@ export default function OrderDetail() {
         isOpen={isReportModalOpen}
         onClose={() => setReportModalOpen(false)}
         onSubmit={handleReportSubmit}
+        isLoading={isReporting}
       />
     </div>
   );
