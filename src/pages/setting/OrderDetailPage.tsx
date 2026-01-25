@@ -109,6 +109,9 @@ export default function OrderDetail() {
       setIsConfirmRecived(false);
     }
   };
+  const handleBuyAgain = () => {
+    navigate("/shop");
+  };
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4 font-kanit pb-20">
       {loading ? (
@@ -151,8 +154,15 @@ export default function OrderDetail() {
               {/* ---Icons Loop ---*/}
               {ORDER_STEPS.map((step, idx) => {
                 const Icon = step.icon;
-                const isCompleted = idx < currentStepIndex;
-                const isCurrent = idx === currentStepIndex;
+                // เช็คก่อนว่าสถานะออร์เดอร์ตอนนี้คือ COMPLETE หรือยัง
+                const isFinished = order.status === "COMPLETE";
+                //  "ผ่านมาแล้ว" หรือ "เป็นตัวปัจจุบันแต่ COMPLETE"
+                const isCompleted =
+                  idx < currentStepIndex ||
+                  (idx === currentStepIndex && isFinished);
+                //  "อยู่ตรงนี้" และ "ยังไม่จบงาน"
+                const isCurrent = idx === currentStepIndex && !isFinished;
+                // ยังมาไม่ถึง
                 const isPending = idx > currentStepIndex;
 
                 return (
@@ -271,8 +281,18 @@ export default function OrderDetail() {
                 </button>
               </div>
             )}
+            {/* Action ตามสถานะ */}
+            {order.status === "COMPLETE" && (
+              <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 md:flex justify-end shadow-lg md:static md:shadow-none md:border-0 md:bg-transparent md:p-0 mt-8 z-50">
+                <button
+                  className="bg-yellow-400 text-white font-bold py-3 px-14 rounded-xl shadow-lg hover:bg-yellow-500 transition-all w-full md:w-auto shadow-custombutton"
+                  onClick={() => handleBuyAgain()}
+                >
+                  BUY AGAIN
+                </button>
+              </div>
+            )}
           </div>
-
           {/* === Card 2 Address === */}
           <div className="bg-white p-6 border-b-2 border-primary shadow-sm">
             <div className="flex flex-col md:flex-row md:justify-between items-center">
@@ -291,7 +311,7 @@ export default function OrderDetail() {
                       );
                       toast.success("Copy Parcel number.");
                     }}
-                    className="p-1 hover:bg-gray-100 rounded-md transition-colors" 
+                    className="p-1 hover:bg-gray-100 rounded-md transition-colors"
                     title="Copy Parcel Number"
                   >
                     <Copy className="w-4 h-4 text-secondary cursor-pointer" />

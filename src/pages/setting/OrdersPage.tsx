@@ -59,6 +59,12 @@ const Orders = () => {
   const handleViewDetail = (orderId: number) => {
     navigate(`/setting/orders/${orderId}`);
   };
+  const handleBuyAgain = () => {
+    navigate("/shop");
+  };
+  const handlePayNow = (orderId: number) => {
+    navigate(`/setting/orders/${orderId}`, { state: { openPayModal: true } });
+  };
   return (
     <div className="space-y-6 font-kanit">
       {loading ? (
@@ -127,7 +133,7 @@ const Orders = () => {
                     <div className="space-y-1">
                       {/* Order ID สีเหลืองทอง */}
                       <h3 className="text-h3xl text-primary font-kanit">
-                        Order {" "}
+                        Order{" "}
                         <span className="text-secondary">#{order.orderId}</span>
                       </h3>
                       {/* Status */}
@@ -222,7 +228,7 @@ const Orders = () => {
                     {/* ปุ่ม Action หลัก (เปลี่ยนตามสถานะ) */}
                     {order.status === "PENDING" ? (
                       <button
-                        onClick={() => toast("Upload Slip Coming Soon!")}
+                        onClick={() => handlePayNow(order.orderId)}
                         className="px-6 py-3 rounded-lg bg-yellow-400 text-white text-button hover:scale-105 transition-all duration-200 shadow-sm flex items-center gap-2"
                       >
                         Pay Now
@@ -230,7 +236,7 @@ const Orders = () => {
                     ) : (
                       order.status === "COMPLETE" && (
                         <button
-                          onClick={() => toast("Buy Again Coming Soon!")}
+                          onClick={() => handleBuyAgain()}
                           className="px-6 py-3 rounded-lg bg-yellow-400 text-white text-button hover:scale-105 transition-all duration-200 shadow-sm"
                         >
                           Buy Again
