@@ -1,31 +1,56 @@
+// services/uploadService.ts
+import axios from 'axios';
 
-const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+// ใส่ Cloud Name ตรงนี้ (หรือดึงจาก ENV)
+const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+const PRESETS = {
+    SLIP: import.meta.env.VITE_CLOUDINARY_PRESET_SLIP,
+    PROBLEM: import.meta.env.VITE_CLOUDINARY_PRESET_PROBLEM
+};
 
-export const uploadToCloudinary = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", UPLOAD_PRESET);
-    try {
-        const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-            {
-                method: "POST",
-                body: formData,
-            }
-        );
+export const uploadService = {
 
-        if (!response.ok) {
-            throw new Error("Upload failed");
+    upload: async (file: File, orderId: number, type: "SLIP" | "PROBLEM") => {
+        // ---เลือก Preset ตาม Type
+        const selectedPreset = PRESETS[type];
+
+        if (!selectedPreset) {
+            throw new Error(`Preset not found for type: ${type}`);
         }
 
-        const data = await response.json();
-        return {
-            url: data.secure_url,       // Link
-            publicId: data.public_id    // public_id 
-        };
-    } catch (error) {
-        console.error("Error uploading image:", error);
-        throw error;
+        // ---กำหนด Folder (แยกกันให้เป็นระเบียบ)
+        // - SLIP: เก็บใน slips/order_123
+        // - PROBLEM: เก็บใน problems/order_123
+        const folderName = type === 'SLIP' ? 'slips' : 'problems';
+        const finalFolder = `my-shop/${folderName}/order_${orderId}`;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', selectedPreset);
+        formData.append('folder', finalFolder);
+
+        try {
+            const response = await axios.post(
+                `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
+                formData
+            );
+
+            // คืนค่าที่จำเป็นกลับไป
+            return {
+                file_url: response.data.secure_url,     // เอาไว้โชว์
+                file_path: response.data.public_id,     // เอาไว้ลบ
+                media_type: response.data.resource_type // 'image' หรือ 'video'
+            };
+
+        } catch (error) {
+            console.error("Upload Failed:", error);
+            throw error;
+        }
+    },
+
+    // ลูปอัปโหลดหลายไฟล์
+    uploadMultiple: async (files: File[], orderId: number, type: "SLIP" | "PROBLEM") => {
+        // ใช้ Promise.all ยิงพร้อมกันรัวๆ เร็วกว่ารอยิงทีละรูป
+        const uploadPromises = files.map(file => uploadService.upload(file, orderId, type));
+        return await Promise.all(uploadPromises);
     }
 };

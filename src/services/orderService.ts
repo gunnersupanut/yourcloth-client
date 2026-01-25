@@ -31,7 +31,7 @@ export const orderService = {
     },
     moveOrdertoInspecting: async (orderId: number, payload: ConfirmPaymentPayload) => {
         try {
-            const response = await api.patch(`/orders/${orderId}/confirm-payment`, payload);
+            const response = await api.post(`/orders/${orderId}/confirm-payment`, payload);
             return response.data;
         } catch (error) {
             console.error("Error move order to inpecting:", error);
@@ -40,10 +40,26 @@ export const orderService = {
     },
     confirmReceived: async (orderId: number) => {
         try {
-            const response = await api.patch(`/orders/${orderId}/confirm-received`);
+            const response = await api.post(`/orders/${orderId}/confirm-received`);
             return response.data;
         } catch (error) {
             console.error("Error move order to inpecting:", error);
+            throw error;
+        }
+    },
+    cancelOrder: async (
+        orderId: number,
+        data: {
+            problemDescription: string;
+            attachments: { file_url: string; file_path: string; media_type: "Image" | "Video" }[]
+        }
+    ) => {
+        try {
+            // ยิง POST พร้อมแนบ Body (data) ไปด้วย
+            const response = await api.post(`/orders/${orderId}/cancel`, data);
+            return response.data;
+        } catch (error) {
+            console.error("Error cancelling order:", error);
             throw error;
         }
     },

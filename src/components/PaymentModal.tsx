@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { X, Wallet, Upload, CheckCircle, Copy } from "lucide-react";
 import type { PaymentModalProps } from "../types/orderTypes";
 import MyQrCode from "../assets/icons/myQRCode.jpg";
-import { uploadToCloudinary } from "../services/uploadService";
+import { uploadService } from "../services/uploadService";
 import toast from "react-hot-toast";
 import { orderService } from "../services/orderService";
 
@@ -55,11 +55,11 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     try {
       setIsLoading(true);
       // อัปโหลดรูป
-      const image = await uploadToCloudinary(selectedFile);
+      const image = await uploadService.upload(selectedFile, orderId, "SLIP");
       const payload = {
         imageObj: {
-          imageUrl: image?.url,
-          filePath: image?.publicId,
+          imageUrl: image?.file_url,
+          filePath: image?.file_path,
         },
       };
       // ย้ายออร์เดอร์

@@ -17,6 +17,7 @@ import toast from "react-hot-toast";
 import { orderService } from "../../services/orderService";
 import PageLoading from "../../components/ui/PageLoading";
 import PaymentModal from "../../components/PaymentModal";
+import ReportModal from "../../components/ReportModal";
 
 const DEFAULT_ORDER: OrderHistoryEntry = {
   orderId: 0,
@@ -49,6 +50,7 @@ export default function OrderDetail() {
   const [loading, setLoading] = useState(true);
   const [isConfirmRecived, setIsConfirmRecived] = useState(false);
   const [isPayModalOpen, setPayModalOpen] = useState(false);
+  const [isReportModalOpen, setReportModalOpen] = useState(true);
   useEffect(() => {
     fetchOrder();
   }, [orderId]);
@@ -111,6 +113,14 @@ export default function OrderDetail() {
   };
   const handleBuyAgain = () => {
     navigate("/shop");
+  };
+  const handleReportSubmit = (dataFromModal: any) => {
+    try {
+      console.log("Upload data:", dataFromModal);
+    } catch (error) {
+      toast.error("Report failed.");
+      console.error("Report failed", error);
+    }
   };
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4 font-kanit pb-20">
@@ -444,6 +454,11 @@ export default function OrderDetail() {
         orderId={order.orderId}
         totalAmount={order.totalAmount}
         onSuccess={fetchOrder}
+      />
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+        onSubmit={handleReportSubmit}
       />
     </div>
   );

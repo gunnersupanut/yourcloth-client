@@ -52,6 +52,16 @@ export interface PaymentModalProps {
   onSuccess: () => void;
 }
 
+export interface ReportModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: {
+    description: string;
+    photos: File[];
+    video: File | null;
+  }) => void;
+}
+
 export interface ConfirmPaymentPayload {
   imageObj: {
     imageUrl: string;
