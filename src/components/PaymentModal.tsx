@@ -208,7 +208,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 <span className="text-yellow-500 text-lg">
                   {BANK_INFO.accNumber}
                 </span>
-                <Copy className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600 active:scale-90 transition-transform" />
+                <Copy
+                  className="w-4 h-4 text-secondary cursor-pointer hover:text-gray-600 active:scale-90 transition-transform"
+                  onClick={() => {
+                    navigator.clipboard.writeText(BANK_INFO.accNumber || "");
+                    toast.success("Copy Bank Account Number.");
+                  }}
+                />
               </span>
             </p>
           </div>
