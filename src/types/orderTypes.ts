@@ -33,6 +33,10 @@ export interface OrderHistoryEntry {
   orderId: number;
   status: string;
   rejectionReason?: string
+  parcelDetail?: {
+    shipping_carrier: string;
+    parcel_number: string;
+  }
   orderedAt: Date; // หรือ string แล้วแต่ Database return
   totalAmount: number;
   shippingCost: number

@@ -8,6 +8,7 @@ import {
   Wallet,
   ClipboardCheck,
   X,
+  Copy,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { OrderHistoryEntry } from "../../types/orderTypes";
@@ -83,8 +84,15 @@ export default function OrderDetail() {
   const currentStepIndex = ORDER_STEPS.findIndex(
     (step) => step.status === order?.status,
   );
+  // --ฟังก์ชั่น ปุ่ม
   const handlePayNow = () => {
     setPayModalOpen(true);
+  };
+  const handleReportProblem = () => {
+    toast.success("Report Problem CommingSoon.");
+  };
+  const handleConfirmReceived = () => {
+    toast.success("Confirm Received CommingSoon.");
   };
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4 font-kanit pb-20">
@@ -171,7 +179,7 @@ export default function OrderDetail() {
               })}
             </div>
             {/* Rejection Section*/}
-            {order.status === "PENDING" && (
+            {order.status === "PENDING" && order.rejectionReason && (
               <div className="flex items-center gap-4 p-4 border border-red-500 rounded-lg bg-white shadow-sm w-full">
                 {/* Icon Wrapper: วงกลมแดง */}
                 <div className="flex-shrink-0">
@@ -196,7 +204,7 @@ export default function OrderDetail() {
             )}
 
             {/* ข้อความแจ้งเตือนตามสถานะ */}
-            <div className="mt-8 text-center md:text-right  rounded-lg text-sm md:text-bodyxl text-primary">
+            <div className="my-8 text-center md:text-right  rounded-lg text-sm md:text-bodyxl text-primary">
               {order.status === "INSPECTING" &&
                 "We have received your payment information. We are reviewing it within 24 hours."}
               {order.status === "PENDING" &&
@@ -209,7 +217,7 @@ export default function OrderDetail() {
 
             {/* Action ตามสถานะ */}
             {order.status === "PENDING" && (
-              <div className="fixed bottom-0 hidden left-0 w-full bg-white border-t p-4 md:flex justify-end shadow-lg md:static md:shadow-none md:border-0 md:bg-transparent md:p-0 mt-8">
+              <div className="fixed bottom-0 hidden left-0 w-full bg-white border-t p-4 md:flex justify-end shadow-lg md:static md:shadow-none md:border-0 md:bg-transparent md:p-0 mt-8 z-50">
                 <button
                   className="bg-yellow-400 text-white font-bold py-3 px-14 rounded-xl shadow-lg hover:bg-yellow-500 transition-all w-full md:w-auto"
                   onClick={() => handlePayNow()}
@@ -218,16 +226,55 @@ export default function OrderDetail() {
                 </button>
               </div>
             )}
+            {order.status === "SHIPPING" && (
+              <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 flex justify-end shadow-lg md:static md:shadow-none md:border-0 md:bg-transparent md:p-0 gap-8 -z-50">
+                <button
+                  className="bg-transparent text-primary font-bold border-2 border-primary py-3 px-8 rounded-xl shadow-lg hover:scale-105 transition-all w-full md:w-auto"
+                  onClick={() => handleReportProblem()}
+                >
+                  Report Problem
+                </button>
+                <button
+                  className="bg-yellow-400 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:hover:scale-105  transition-all w-full md:w-auto"
+                  onClick={() => handleConfirmReceived()}
+                >
+                  Confirm Received
+                </button>
+              </div>
+            )}
           </div>
 
           {/* === Card 2 Address === */}
           <div className="bg-white p-6 border-b-2 border-primary shadow-sm">
-            <p className="font-bold text-primary mb-4 flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-yellow-500  text-bodyxl" />{" "}
-              Shipping Address
-            </p>
+            <div className="flex justify-between items-center">
+              <p className="text-h3xl text-primary mb-4 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-yellow-500  text-bodyxl" />{" "}
+                Shipping Address
+              </p>
+              <div className="flex flex-col text-h3xl text-secondary items-center gap-2">
+                <p>{order.parcelDetail?.shipping_carrier}</p>
+                <div className="flex gap-2">
+                  <p>{order.parcelDetail?.parcel_number}</p>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        order.parcelDetail?.parcel_number || "",
+                      );
+                      toast.success("Copy Parcel number.");
+                    }}
+                    className="p-1 hover:bg-gray-100 rounded-md transition-colors" // แต่งปุ่มนิดนึงเวลามีเมาส์ชี้
+                    title="Copy Parcel Number"
+                  >
+                    <Copy className="w-4 h-4 text-secondary cursor-pointer" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <div className="pl-7">
-              <p className="font-bold text-primary">{order.receiver.name}</p>
+              <p className="text-bodyxl font-bold text-primary">
+                {order.receiver.name}
+              </p>
               <p className="text-primary text-bodyxl mt-1">
                 {order.receiver.phone}
               </p>
@@ -329,17 +376,10 @@ export default function OrderDetail() {
             </div>
 
             {/* Footer Action*/}
-            {order.status === "SHIPPING" && (
-              <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 flex justify-end shadow-lg md:static md:shadow-none md:border-0 md:bg-transparent md:p-0">
-                <button className="bg-yellow-400 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:bg-yellow-500 transition-all w-full md:w-auto">
-                  Confirm Received
-                </button>
-              </div>
-            )}
             {order.status === "PENDING" && (
               <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 flex justify-end shadow-lg md:static md:shadow-none md:border-0 md:bg-transparent md:p-0 mt-8">
                 <button
-                  className="bg-yellow-400 text-white font-bold py-3 px-14 rounded-xl shadow-lg hover:bg-yellow-500 transition-all w-full md:w-auto"
+                  className="bg-yellow-400 text-white font-bold py-3 px-14 rounded-xl shadow-lg hover:scale-105  transition-all w-full md:w-auto"
                   onClick={() => handlePayNow()}
                 >
                   Pay Now
