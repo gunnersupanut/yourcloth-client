@@ -16,6 +16,10 @@ export const authService = {
       throw error;
     }
   },
+  adminLogin: async (credentials: { username: string; password: string }) => {
+    const response = await api.post(`/admin/auth/login`, credentials);
+    return response.data;
+  },
   logout() { localStorage.removeItem("token") },
   register: async (userData: RegisterReq): Promise<RegisterRes> => {
     // axios ไป api
@@ -45,7 +49,7 @@ export const authService = {
     });
     return response.data
   },
-  resetPassword: async (password: string,token: string) => {
+  resetPassword: async (password: string, token: string) => {
     const response = await api.post('/auth/resetpassword', { password, token });
     return response.data
   },

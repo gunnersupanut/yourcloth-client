@@ -22,5 +22,7 @@ export interface RegisterRes {
 export interface DecodedToken {
     id: number;
     username: string;
+    role: string;
+    name?: string;
     exp: number;
 }

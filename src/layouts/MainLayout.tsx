@@ -7,10 +7,14 @@ import Breadcrumbs from "../components/Breadcrumbs";
 
 const MainLayout = () => {
   const location = useLocation();
+  const isAdminPath = location.pathname.startsWith("/admin");
   // เช็คว่าอยู่หน้า Cart/Checkout ไหม
   const isCartPage = location.pathname === "/cart";
   const isCheckoutPage = location.pathname === "/checkout";
   const hasStickyFooter = isCartPage || isCheckoutPage;
+  if (isAdminPath) {
+    return <Outlet />;
+  }
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Nav(Header) */}
@@ -23,7 +27,7 @@ const MainLayout = () => {
       </main>
 
       {/* Footer*/}
-      <div className={`${hasStickyFooter && 'pb-[210px]'}`}> 
+      <div className={`${hasStickyFooter && "pb-[210px]"}`}>
         <Footer />
       </div>
     </div>

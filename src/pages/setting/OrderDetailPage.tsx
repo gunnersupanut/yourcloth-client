@@ -53,7 +53,7 @@ export default function OrderDetail() {
   const [isConfirmRecived, setIsConfirmRecived] = useState(false);
   const [isReporting, setIsReporting] = useState(false);
   const [isPayModalOpen, setPayModalOpen] = useState(false);
-  const [isReportModalOpen, setReportModalOpen] = useState(true);
+  const [isReportModalOpen, setReportModalOpen] = useState(false);
   useEffect(() => {
     fetchOrder();
   }, [orderId]);

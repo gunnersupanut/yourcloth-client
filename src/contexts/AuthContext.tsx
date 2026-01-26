@@ -19,6 +19,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<DecodedToken | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  // elper function สำหรับ Decode และ Set User
+  const handleUserSet = (token: string) => {
+    const decoded: any = jwtDecode(token);
+
+    // เช็ค Role ตรงนี้ได้เลย ถ้า Token ไม่มี role ให้ default เป็น CUSTOMER
+    const userRole = decoded.role || "CUSTOMER";
+
+    setUser({
+      username: decoded.username,
+      id: decoded.id,
+      role: userRole,
+      name: decoded.name,
+      exp: decoded.exp,
+    });
+  };
   // โหลดครั้งแรก เช็คว่ามี Token ในเครื่องไหม
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -27,11 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const decoded: any = jwtDecode(token);
         // เช็คว่าหมดอายุยัง? (ถ้า exp เป็นวินาที * 1000 เป็น ms)
         if (decoded.exp * 1000 > Date.now()) {
-          setUser({
-            username: decoded.username,
-            id: decoded.id,
-            exp: decoded.exp,
-          });
+          handleUserSet(token);
         } else {
           localStorage.removeItem("token"); // หมดอายุก็ลบทิ้ง
         }
@@ -44,14 +55,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // ฟังก์ชั่น Login
   const login = (token: string) => {
     localStorage.setItem("token", token); // เก็บลงเครื่อง
+    handleUserSet(token);
+    // เช็ค Role แล้วดีดไปหน้าบ้านที่ถูกต้อง
     const decoded: any = jwtDecode(token);
-    setUser({ username: decoded.username, id: decoded.id, exp: decoded.exp }); // อัปเดต State ทันที
+    if (decoded.role === "ADMIN") {
+      navigate("/admin/dashboard");
+    } else {
+      navigate("/");
+    }
   };
   // ฟังก์ชั่น Logout
   const logout = () => {
+    // เช็คว่าเป็นใคร
+    const currentRole = user?.role;
     authService.logout(); // เคลียร์ localStorage
     setUser(null); // เคลียร์ State
-    navigate("/login"); // ดีดไปหน้า Login
+    // ถ้าเป็น Admin ให้กลับไปหน้า Login Admin
+    if (currentRole === "ADMIN") {
+      navigate("/admin/login");
+    } else {
+      navigate("/login");
+    }
   };
   return (
     <AuthContext.Provider

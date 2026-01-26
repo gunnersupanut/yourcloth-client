@@ -1,7 +1,7 @@
 // src/App.tsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { ProtectedRoute } from "./components/ProtectedRoute";
+import { ProtectedRoute } from "../src/components/auth/ProtectedRoute";
 // import layouts and pages
 import MainLayout from "./layouts/MainLayout";
 import Homepage from "./pages/HomePage";
@@ -21,6 +21,8 @@ import MyAccount from "./pages/setting/MyAccountPage";
 import Addresses from "./pages/setting/AddressesPage";
 import Orders from "./pages/setting/OrdersPage";
 import OrderDetail from "./pages/setting/OrderDetailPage";
+import AdminLoginPage from "./pages/admin/AdminLoginPage";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 const AboutPage = () => <div className="text-xl">🔐 หน้า About (รอทำ)</div>;
 const ContactPage = () => <div className="text-xl">🔐 หน้า Contact (รอทำ)</div>;
 
@@ -30,29 +32,41 @@ function App() {
       <ScrollToTop />
       <Toaster position="top-center" reverseOrder={false} />
       <Routes>
-        {/* ครอบด้วย MainLayout */}
+        {/* Admin */}
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        {/* ---โซน Admin only---- */}
+        <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+          {/* Redirect: ถ้าเข้า /admin เฉยๆ ให้เด้งไป /admin/dashboard */}
+          <Route
+            path="/admin"
+            element={<Navigate to="/admin/dashboard" replace />}
+          />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        </Route>
+        {/* --------------- */}
+        {/* User/Costumer ครอบด้วย MainLayout */}
+        {/* ---โซนใครเข้าก็ได้--- */}
         <Route path="/" element={<MainLayout />}>
-          {/* หน้าลูกๆ ที่จะไปโผล่ตรง <Outlet /> */}
           <Route index element={<Homepage />} />
           {/* Shop */}
           <Route path="shop">
             <Route index element={<ShopPage />} />
             {/* :category คือตัวแปรที่เราตั้งชื่อขึ้นมาเอง */}
             <Route path=":category" element={<ShopPage />} />
-            <Route path="/shop/:category/:id" element={<ProductDetailPage />} />
+            <Route path=":category/:id" element={<ProductDetailPage />} />
           </Route>
-          <Route path="login" element={<LoginPage />} />
           {/* User */}
+          <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
           <Route path="verify" element={<VerifyPage />} />
           <Route path="verified" element={<VerifiedPage />} />
           <Route path="forgotpassword" element={<ForgotPasswordPage />} />
           <Route path="resetpassword" element={<ResetPasswordPage />} />
-
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactPage />} />
-          {/* ---โซน ต้อง Login ถึงจะเข้าได้--- */}
-          <Route element={<ProtectedRoute />}>
+          {/* -------------- */}
+          {/* ---โซน Customer ต้อง Login ถึงจะเข้าได้--- */}
+          <Route element={<ProtectedRoute allowedRoles={["CUSTOMER"]} />}>
             <Route path="cart" element={<CartPage />} />
             <Route path="checkout" element={<CheckoutPage />} />{" "}
             <Route path="/setting" element={<SettingLayout />}>
