@@ -23,6 +23,8 @@ import Orders from "./pages/setting/OrdersPage";
 import OrderDetail from "./pages/setting/OrderDetailPage";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminLayout from "./layouts/AdminLayout";
+import AdminOrderList from "./pages/admin/AdminOrderList";
 const AboutPage = () => <div className="text-xl">🔐 หน้า About (รอทำ)</div>;
 const ContactPage = () => <div className="text-xl">🔐 หน้า Contact (รอทำ)</div>;
 
@@ -36,12 +38,15 @@ function App() {
         <Route path="/admin/login" element={<AdminLoginPage />} />
         {/* ---โซน Admin only---- */}
         <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
-          {/* Redirect: ถ้าเข้า /admin เฉยๆ ให้เด้งไป /admin/dashboard */}
-          <Route
-            path="/admin"
-            element={<Navigate to="/admin/dashboard" replace />}
-          />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route element={<AdminLayout />}>
+            {/* Redirect: ถ้าเข้า /admin เฉยๆ ให้เด้งไป /admin/dashboard */}
+            <Route
+              path="/admin"
+              element={<Navigate to="/admin/dashboard" replace />}
+            />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/orders" element={<AdminOrderList/>} />
+          </Route>
         </Route>
         {/* --------------- */}
         {/* User/Costumer ครอบด้วย MainLayout */}

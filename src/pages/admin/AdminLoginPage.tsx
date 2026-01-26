@@ -30,8 +30,8 @@ const AdminLoginPage = () => {
 
     toast.promise(loginPromise, {
       loading: "Verifying Access...",
-      success: "Welcome back, Boss! 😎",
-      error: (err) => err.response?.data?.message || "Access Denied!",
+      success: "Login.",
+      error: (err) => err.response?.data?.message || "Access Denied",
     });
 
     try {
