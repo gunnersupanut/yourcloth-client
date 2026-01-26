@@ -36,12 +36,13 @@ export const adminOrderService = {
         return response.data;
     },
 
-    // อัปเดตสถานะ แยกยิงตาม Route
+    // อัปเดตสถานะ 
     updateOrderStatus: async (
         orderId: number,
         status: string,
         reason?: string,       // สำหรับ Reject
-        parcelNumber?: string  // สำหรับ Shipping (เผื่ออนาคต)
+        parcelNumber?: string, // สำหรับ Shipping 
+        shippingCarrier?: string  
     ) => {
         let response;
 
@@ -57,7 +58,7 @@ export const adminOrderService = {
                 // Route: POST /:orderId/reject
                 // ส่ง reason ไปใน Body
                 response = await api.post(`/admin/orders/${orderId}/reject`, {
-                    reason: reason || "No reason provided"
+                    reason: reason
                 });
                 break;
 
@@ -66,7 +67,8 @@ export const adminOrderService = {
                 // Route: POST /:orderId/shipping
                 // ต้องส่งเลขพัสดุไปด้วย (เดี๋ยวนายต้องไปแก้ Modal ให้กรอกเลขพัสดุก่อนส่งนะ)
                 response = await api.post(`/admin/orders/${orderId}/shipping`, {
-                    parcelNumber: parcelNumber || ""
+                    parcelNumber: parcelNumber || "",
+                    shippingCarrier: shippingCarrier || "Other"
                 });
                 break;
 
