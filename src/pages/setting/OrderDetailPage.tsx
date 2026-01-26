@@ -10,6 +10,7 @@ import {
   X,
   Copy,
   Loader2,
+  Info,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { OrderHistoryEntry } from "../../types/orderTypes";
@@ -90,6 +91,14 @@ export default function OrderDetail() {
   const currentStepIndex = ORDER_STEPS.findIndex(
     (step) => step.status === order?.status,
   );
+  // Order Problem
+  const problem = order.problemDetail;
+  const problemImages =
+    problem?.attachments.filter((f) => f.media_type === "Image") || [];
+  const problemVideo = problem?.attachments.find(
+    (f) => f.media_type === "Video",
+  );
+
   // --ฟังก์ชั่น ปุ่ม
   const handlePayNow = () => {
     setPayModalOpen(true);
@@ -266,7 +275,7 @@ export default function OrderDetail() {
               </div>
             )}
 
-            {/* ข้อความแจ้งเตือนตามสถานะ */}
+            {/* ---ข้อความแจ้งเตือนตามสถานะ */}
             <div className="my-8 text-center md:text-right  rounded-lg text-sm md:text-bodyxl text-primary">
               {order.status === "INSPECTING" &&
                 "We have received your payment information. We are reviewing it within 24 hours."}
@@ -276,9 +285,11 @@ export default function OrderDetail() {
                 "Payment confirmed! We are currently packing your order and will ship it soon."}
               {order.status === "SHIPPING" &&
                 "Your package is on the way Get ready."}
+              {order.status === "CANCEL" &&
+                "We have received your request. We will investigate and contact you."}
             </div>
 
-            {/* Action ตามสถานะ */}
+            {/* ---Action ตามสถานะ */}
             {order.status === "PENDING" && (
               <div className="fixed bottom-0 hidden left-0 w-full bg-white border-t p-4 md:flex justify-end shadow-lg md:static md:shadow-none md:border-0 md:bg-transparent md:p-0 mt-8 z-50">
                 <button
@@ -299,13 +310,12 @@ export default function OrderDetail() {
                 </button>
                 <button
                   className={`
-    bg-yellow-400 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all w-full md:w-auto flex items-center justify-center gap-2
-    ${
-      isConfirmRecived
-        ? "opacity-70 cursor-not-allowed" // จางลง + เมาส์ห้ามกด
-        : "hover:scale-105" // ขยายตอนเมาส์ชี้
-    }
-  `}
+                 bg-yellow-400 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all w-full md:w-auto flex items-center justify-center gap-2
+                  ${
+                    isConfirmRecived
+                      ? "opacity-70 cursor-not-allowed" // จางลง + เมาส์ห้ามกด
+                      : "hover:scale-105" // ขยายตอนเมาส์ชี้
+                  }`}
                   onClick={() => handleConfirmReceived()}
                   disabled={isConfirmRecived}
                 >
@@ -319,7 +329,6 @@ export default function OrderDetail() {
                 </button>
               </div>
             )}
-            {/* Action ตามสถานะ */}
             {order.status === "COMPLETE" && (
               <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 md:flex justify-end shadow-lg md:static md:shadow-none md:border-0 md:bg-transparent md:p-0 mt-8 z-50">
                 <button
@@ -331,6 +340,79 @@ export default function OrderDetail() {
               </div>
             )}
           </div>
+          {/* ---แสดงเฉพาะตอนมีปัญหา */}
+          {problem && (
+            <div className="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500 p-6  border-b-2 border-primary">
+              {/* Header Title */}
+              <div className="flex items-center gap-2 mb-4">
+                <Info className="w-6 h-6 text-yellow-500" />{" "}
+                {/* ไอคอนตัว i สีเหลือง */}
+                <h3 className="text-h3xl text-primary">Problem Details</h3>
+              </div>
+
+              {/* Description Text */}
+              <div className="mb-8">
+                <p className="text-bodyxl text-text_primary">
+                  {problem.description}
+                </p>
+              </div>
+
+              {/* Layout แยก 2 ฝั่ง (รูป | วิดีโอ) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* --- ฝั่ง Photos --- */}
+                <div>
+                  <h4 className="text-bodyxl font-bold text-primary mb-3">
+                    Photos
+                  </h4>
+
+                  {problemImages.length > 0 ? (
+                    <div className="flex flex-wrap gap-4">
+                      {problemImages.map((img, idx) => (
+                        <div
+                          key={idx}
+                          className="w-36 h-36 rounded-lg overflow-hidden border border-gray-200 shadow-sm"
+                        >
+                          <img
+                            src={img.file_url}
+                            alt={`evidence-${idx}`}
+                            className="w-full h-full object-cover hover:scale-110 transition-transform duration-300 cursor-pointer"
+                            onClick={() => window.open(img.file_url, "_blank")}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 italic">No photos attached.</p>
+                  )}
+                </div>
+
+                {/* --- ฝั่ง Video --- */}
+                <div>
+                  <h4 className="text-bodyxl font-bold text-primary mb-3">
+                    Video
+                  </h4>
+
+                  {problemVideo ? (
+                    // กรณีมีวิดีโอ -> โชว์ Player
+                    <div className="w-full h-48 bg-black rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                      <video
+                        src={problemVideo.file_url}
+                        controls
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  ) : (
+                    // กรณีไม่มีวิดีโอ -> โชว์กล่องเปล่า (ตาม Ref เป๊ะๆ)
+                    <div className="w-full h-48 border border-[#4A3B55]/30 rounded-lg flex items-center justify-center">
+                      <span className="font-bold text-lg text-black">
+                        You didn't attach the video.
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
           {/* === Card 2 Address === */}
           <div className="bg-white p-6 border-b-2 border-primary shadow-sm">
             <div className="flex flex-col md:flex-row md:justify-between items-center">

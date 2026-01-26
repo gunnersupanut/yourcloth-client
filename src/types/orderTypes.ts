@@ -37,11 +37,20 @@ export interface OrderHistoryEntry {
     shipping_carrier: string;
     parcel_number: string;
   }
+  problemDetail?: {
+    description: string;
+    attachments: ProblemAttachment[];
+    reportedAt: string;
+  };
   orderedAt: Date; // หรือ string แล้วแต่ Database return
   totalAmount: number;
   shippingCost: number
   receiver: OrderReceiver; //  (1 ออเดอร์ มี 1 ที่อยู่)
   items: OrderHistoryItem[];
+}
+interface ProblemAttachment {
+  file_url: string;
+  media_type: 'Image' | 'Video';
 }
 
 export interface PaymentModalProps {
