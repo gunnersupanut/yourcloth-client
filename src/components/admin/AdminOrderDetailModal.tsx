@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { X, Truck, AlertCircle } from "lucide-react";
+import { X, Truck, AlertCircle, CheckCircle } from "lucide-react";
 import { adminOrderService } from "../../services/adminOrderService";
 import toast from "react-hot-toast";
+import ConfirmModal from "../ui/ConfirmModal";
 
 interface AdminOrderDetailModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ const AdminOrderDetailModal = ({
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
+  const [isConfirmCompleteOpen, setIsConfirmCompleteOpen] = useState(false);
   // State ควบคุมโหมด (ปกติ / กรอกเหตุผล / กรอกเลขพัสดุ)
   const [actionMode, setActionMode] = useState<
     "IDLE" | "REJECTING" | "SHIPPING"
@@ -102,7 +104,25 @@ const AdminOrderDetailModal = ({
       toast.error("Approve failed");
     }
   };
-
+  // บังคับยืนยัน
+  const handleForceCompleteClick = () => {
+    setIsConfirmCompleteOpen(true);
+  };
+  const handleConfirmForceComplete = async () => {
+    if (!orderId) return;
+    setLoading(true); // หรือจะสร้าง state loading แยกสำหรับ modal ก็ได้
+    try {
+      await adminOrderService.updateOrderStatus(orderId, "COMPLETE");
+      toast.success("Order marked as Completed! 🎉");
+      onUpdateSuccess();
+      setIsConfirmCompleteOpen(false); // ปิด Confirm Modal
+      onClose(); // ปิด Drawer ใหญ่
+    } catch (error) {
+      toast.error("Action failed");
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleCancel = async () => {
     if (!confirm("Are you sure you want to cancel this order?")) return;
     if (!orderId) return;
@@ -527,7 +547,21 @@ const AdminOrderDetailModal = ({
                       Ship Order
                     </button>
                   )}
+                  {order.status === "SHIPPING" && (
+                    <div className="space-y-3">
+                      <button
+                        onClick={handleForceCompleteClick}
+                        className="w-full bg-green-600 text-white font-bold py-4 rounded-full hover:bg-green-700 shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all text-lg"
+                      >
+                        <CheckCircle className="w-6 h-6" /> Mark as Received
+                      </button>
 
+                      <p className="text-xs text-gray-400 text-center">
+                        *Click this if customer received the item but forgot to
+                        confirm.
+                      </p>
+                    </div>
+                  )}
                   {/* Cancel Text Link */}
                   {!["COMPLETE", "CANCEL", "REJECTED"].includes(
                     order.status,
@@ -547,6 +581,16 @@ const AdminOrderDetailModal = ({
           </div>
         )}
       </div>
+      <ConfirmModal
+        isOpen={isConfirmCompleteOpen}
+        onClose={() => setIsConfirmCompleteOpen(false)}
+        onConfirm={handleConfirmForceComplete}
+        title="Confirm Completion"
+        message="Are you sure you want to force complete this order? This means the customer has received the item."
+        variant="success" 
+        confirmText="Yes, Complete Order"
+        isLoading={loading}
+      />
     </div>
   );
 };

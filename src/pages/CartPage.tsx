@@ -4,7 +4,7 @@ import { Trash2, Minus, Plus, Info, Ticket } from "lucide-react"; // ไอค�
 import { useCart } from "../contexts/CartContext";
 import toast from "react-hot-toast";
 import { cartService } from "../services/cart.service";
-import DeleteModal from "../components/ui/DeleteModal";
+import DeleteModal from "../components/ui/ConfirmModal";
 import type { DeleteModalState } from "../types/modalTypes";
 const CartPage = () => {
   const navigate = useNavigate();

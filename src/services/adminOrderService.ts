@@ -42,7 +42,7 @@ export const adminOrderService = {
         status: string,
         reason?: string,       // สำหรับ Reject
         parcelNumber?: string, // สำหรับ Shipping 
-        shippingCarrier?: string  
+        shippingCarrier?: string
     ) => {
         let response;
 
@@ -73,13 +73,16 @@ export const adminOrderService = {
                 break;
 
             case 'CANCEL':
-                // กรณี Cancel (นายยังไม่ได้ให้ Route มา พี่สมมติว่าเป็นแบบนี้นะ)
+                // กรณี Cancel 
                 // ถ้ายังไม่มี Route นี้ ให้ไปเพิ่มที่ Backend ด้วย!
                 response = await api.post(`/admin/orders/${orderId}/cancel`);
                 break;
-
+                
+            case 'COMPLETE':
+                response = await api.post(`/admin/orders/${orderId}/confirm-received`);
+                break;
             default:
-                // กรณีอื่นๆ (เผื่อมี)
+                // กรณีอื่นๆ
                 throw new Error(`Unknown status action: ${status}`);
         }
 
