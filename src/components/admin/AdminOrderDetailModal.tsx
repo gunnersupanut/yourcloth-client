@@ -3,6 +3,7 @@ import { X, Truck, AlertCircle, CheckCircle } from "lucide-react";
 import { adminOrderService } from "../../services/adminOrderService";
 import toast from "react-hot-toast";
 import ConfirmModal from "../ui/ConfirmModal";
+import { formatDate } from "../../utils/dateUtils";
 
 interface AdminOrderDetailModalProps {
   isOpen: boolean;
@@ -179,12 +180,12 @@ const AdminOrderDetailModal = ({
         {/* --- 1. Header --- */}
         <div className="px-6 pt-8 pb-5 flex justify-between items-start bg-white sticky top-0 z-10">
           <div className="space-y-1">
-            <h2 className="text-h2xl font-bold text-black tracking-tight">
+            <h2 className="text-h1xl font-bold text-black tracking-tight">
               Order Detail
             </h2>
             {!loading && order && (
               <div className="flex items-center gap-3">
-                <span className="text-xl font-bold text-gray-400">
+                <span className="text-xl font-bold text-admin-secondary">
                   #{order.orderId}
                 </span>
                 <span className="text-sm text-gray-400 font-normal">
@@ -348,22 +349,25 @@ const AdminOrderDetailModal = ({
               )}
               {/* Customer Info (White Background) */}
               <div className="px-8 mt-6">
+                <h3 className="text-admin-primary text-h2xl mb-4">
+                  Customer Info
+                </h3>
                 <div className="grid grid-cols-3 gap-y-4 text-sm">
-                  <div className="col-span-1 text-gray-400 font-medium">
+                  <div className="col-span-1 text-admin-primary font-medium">
                     Receiver
                   </div>
                   <div className="col-span-2 text-black font-medium text-right">
                     {order.receiver?.name}
                   </div>
 
-                  <div className="col-span-1 text-gray-400 font-medium">
+                  <div className="col-span-1 text-admin-primary font-medium">
                     Phone
                   </div>
                   <div className="col-span-2 text-black font-medium text-right">
                     {order.receiver?.phone}
                   </div>
 
-                  <div className="col-span-1 text-gray-400 font-medium">
+                  <div className="col-span-1 text-admin-primary font-medium">
                     Address
                   </div>
                   <div className="col-span-2 text-black font-medium text-right leading-relaxed">
@@ -375,7 +379,7 @@ const AdminOrderDetailModal = ({
               <div className="px-10 mt-8 pt-6 border-t border-gray-100 space-y-3">
                 {/* Subtotal */}
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-400 font-medium">
+                  <span className="text-admin-primary font-medium">
                     Subtotal ({order.itemCount} items)
                   </span>
                   <span className="text-black font-bold">
@@ -385,7 +389,9 @@ const AdminOrderDetailModal = ({
 
                 {/* Shipping */}
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-400 font-medium">Shipping</span>
+                  <span className="text-admin-primary font-medium">
+                    Shipping
+                  </span>
                   <span className="text-black font-bold">
                     ฿{order.shippingCost.toLocaleString()}
                   </span>
@@ -400,7 +406,7 @@ const AdminOrderDetailModal = ({
 
                 {/* Payment Method */}
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-400 font-medium">
+                  <span className="text-admin-primary font-medium">
                     Payment Method
                   </span>
                   <span className="text-black font-bold uppercase">
@@ -409,52 +415,175 @@ const AdminOrderDetailModal = ({
                 </div>
               </div>
 
-              {/* Slip / Tracking / Reject Info */}
-              <div className="px-8 mt-6 space-y-4">
-                {/* Slip */}
-                {["INSPECTING", "PACKING", "SHIPPING", "COMPLETE"].includes(
-                  order.status,
-                ) &&
-                  order?.slip && (
-                    <div>
-                      <h3 className="text-sm text-black font-bold mb-2">
-                        Attached Slip
-                      </h3>
-                      <div className="border border-gray-200 rounded-lg overflow-hidden w-full max-w-[200px]">
-                        <img
-                          src={order.slip}
-                          alt="Slip"
-                          className="w-full h-auto cursor-pointer hover:opacity-90 transition-opacity"
-                          onClick={() => window.open(order.slip, "_blank")}
-                        />
+              {/* Evidence & History (Grid Layout) --- */}
+              <div className="px-8 mt-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-start pb-8">
+                {/* LEFT COLUMN Reason / Slip / Tracking */}
+                <div className="space-y-5">
+                  {/* Rejection Reason (โชว์เฉพาะตอน PENDING ที่โดนดีดกลับมา) */}
+                  {order.status === "PENDING" && order.rejectionReason && (
+                    <div className="bg-red-50 p-4 rounded-xl border border-red-100 text-red-700 text-sm animate-in fade-in slide-in-from-left-2">
+                      <div className="flex items-center gap-2 mb-2 border-b border-red-200 pb-2">
+                        <AlertCircle className="w-4 h-4" />
+                        <strong className="font-bold">
+                          Last Rejection Reason
+                        </strong>
+                      </div>
+                      <p className="leading-relaxed font-medium">
+                        "{order.rejectionReason}"
+                      </p>
+                      <p className="text-xs text-red-400 mt-2">
+                        *Waiting for user to re-upload slip.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Slip Section (โชว์เมื่อ Inspecting ขึ้นไป) */}
+                  {[
+                    "INSPECTING",
+                    "PACKING",
+                    "SHIPPING",
+                    "COMPLETE",
+                    "CANCEL",
+                  ].includes(order.status) &&
+                    order?.slip && (
+                      <div>
+                        <h3 className="text-h3xl text-admin-primary font-bold mb-3 flex items-center gap-2">
+                          Attached Slip
+                        </h3>
+                        <div className="border border-gray-200 rounded-xl overflow-hidden w-full max-w-[280px] shadow-sm hover:shadow-md transition-all group relative">
+                          <img
+                            src={order.slip}
+                            alt="Slip"
+                            className="w-full h-auto cursor-pointer hover:opacity-95 transition-opacity"
+                            onClick={() => window.open(order.slip, "_blank")}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                  {/* Tracking Number (โชว์เมื่อ Shipping/Complete) */}
+                  {order.parcelDetail?.parcel_number && (
+                    <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-100 text-yellow-900 text-sm">
+                      {/* Header */}
+                      <div className="flex items-center gap-2 border-b border-yellow-200 pb-2 mb-3">
+                        <Truck className="w-4 h-4" />
+                        <strong className="font-bold">Shipping Info</strong>
+                      </div>
+
+                      <div className="space-y-3">
+                        {/* Carrier Section */}
+                        <div>
+                          <span className="text-xs text-yellow-600 font-bold uppercase tracking-wide block mb-1">
+                            Carrier
+                          </span>
+                          <span className="text-base font-bold text-black">
+                            {order.parcelDetail.shipping_carrier || "-"}
+                          </span>
+                        </div>
+
+                        {/* Tracking Section */}
+                        <div>
+                          <span className="text-xs text-yellow-600 font-bold uppercase tracking-wide block mb-1">
+                            Tracking Number
+                          </span>
+                          <div className="bg-white/60 p-2.5 rounded-lg border border-yellow-200/50">
+                            <span className="font-mono text-lg font-bold tracking-wider text-black break-all">
+                              {order.parcelDetail.parcel_number}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
-                {/* Tracking */}
-                {order.parcelDetail?.parcel_number && (
-                  <div className="flex flex-row md:flex-col bg-yellow-50 p-3 gap-3 rounded-lg">
-                    <div className="flex justify-between text-yellow-800 text-sm">
-                      <strong>Shipping Carrier</strong>{" "}
-                      {order.parcelDetail.shipping_carrier}
-                    </div>
-                    <div className="flex justify-between text-yellow-800 text-sm">
-                      <strong>Tracking Number</strong>{" "}
-                      {order.parcelDetail.parcel_number}
-                    </div>
+                </div>
+
+                {/*RIGHT COLUMN: Order Timeline (Logs) */}
+                <div className="bg-gray-50 rounded-2xl border border-gray-100 h-full max-h-[400px] overflow-y-auto custom-scrollbar md:mt-10">
+                  <h3
+                    className="sticky top-0 z-20 flex items-center gap-2 
+      -mt-5  px-5 p-5 mb-4 
+      bg-gray-50 backdrop-blur-sm rounded-t-xl
+      border-b border-gray-200 text-sm text-black font-bold shadow-sm"
+                  >
+                    Order History
+                  </h3>
+
+                  <div className="relative ml-2 p-5">
+                    {/* เส้น Timeline */}
+                    <div className="absolute left-[5px] top-2 bottom-2 w-[2px] bg-gray-200"></div>
+
+                    {order?.orderLog &&
+                      order?.orderLog.map((log: any, index: number) => {
+                        // แยกสีจุดตาม Action
+                        let dotColor = "bg-gray-300";
+                        if (log.action_type.includes("CREATED"))
+                          dotColor = "bg-blue-400";
+                        if (log.action_type.includes("PAID"))
+                          dotColor = "bg-purple-500"; // จ่ายเงิน = ม่วง (Slip เข้า)
+                        if (log.action_type.includes("APPROVE"))
+                          dotColor = "bg-black"; // Admin Approve
+                        if (log.action_type.includes("SHIPPING"))
+                          dotColor = "bg-yellow-400";
+                        if (log.action_type.includes("COMPLETE"))
+                          dotColor = "bg-green-600";
+                        if (
+                          log.action_type.includes("REJECT") ||
+                          log.action_type.includes("CANCEL")
+                        )
+                          dotColor = "bg-red-500";
+
+                        return (
+                          <div
+                            key={index}
+                            className="relative pl-6 pb-6 last:pb-0 group"
+                          >
+                            {/* Dot */}
+                            <div
+                              className={`absolute left-0 top-1.5 w-3 h-3 rounded-full border-2 border-white shadow-sm z-10 ${dotColor}`}
+                            ></div>
+
+                            {/* Content */}
+                            <div className="flex flex-col items-start">
+                              <div className="flex justify-between w-full items-center mb-0.5 gap-2">
+                                <span className="text-xs font-bold text-gray-700 uppercase tracking-tight truncate">
+                                  {log.action_type
+                                    .replace("ORDER_", "")
+                                    .replace(/_/g, " ")}
+                                </span>
+                                <span className="text-[10px] text-gray-400 font-mono whitespace-nowrap">
+                                  {formatDate(log.created_at)}
+                                </span>
+                              </div>
+
+                              <p className="text-xs text-gray-500 leading-relaxed mb-1">
+                                {log.description}
+                              </p>
+
+                              {/* Actor Badge */}
+                              <div
+                                className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border font-medium
+                                        ${
+                                          log.actor_name
+                                            .toUpperCase()
+                                            .includes("ADMIN")
+                                            ? "bg-admin-primary/10 border-admin-primary/20 text-admin-primary"
+                                            : "bg-white border-gray-200 text-gray-500"
+                                        }`}
+                              >
+                                {log.actor_name}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                   </div>
-                )}
-                {/* Reason */}
-                {order.rejectionReason && (
-                  <div className="bg-red-50 p-3 rounded-lg border border-red-100 text-red-600 text-sm">
-                    <strong>Reason:</strong> {order.rejectionReason}
-                  </div>
-                )}
+                </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* --- 3. Footer (Fixed Bottom) --- */}
+        {/* --- Footer (Fixed Bottom) --- */}
         {!loading && order && (
           <div className="p-6 bg-white border-t border-gray-100 space-y-6">
             {/* Total */}
@@ -470,7 +599,7 @@ const AdminOrderDetailModal = ({
               {/* INPUT MODE */}
               {actionMode !== "IDLE" ? (
                 <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
-                  {/* 🔥 ถ้าเป็น Shipping ให้โชว์ช่องกรอกชื่อขนส่งเพิ่ม */}
+                  {/* ถ้าเป็น Shipping ให้โชว์ช่องกรอกชื่อขนส่งเพิ่ม */}
                   {actionMode === "SHIPPING" && (
                     <input
                       type="text"
@@ -587,7 +716,7 @@ const AdminOrderDetailModal = ({
         onConfirm={handleConfirmForceComplete}
         title="Confirm Completion"
         message="Are you sure you want to force complete this order? This means the customer has received the item."
-        variant="success" 
+        variant="success"
         confirmText="Yes, Complete Order"
         isLoading={loading}
       />
