@@ -74,10 +74,11 @@ export const adminOrderService = {
 
             case 'CANCEL':
                 // กรณี Cancel 
-                // ถ้ายังไม่มี Route นี้ ให้ไปเพิ่มที่ Backend ด้วย!
-                response = await api.post(`/admin/orders/${orderId}/cancel`);
+                response = await api.post(`/admin/orders/${orderId}/cancel`, {
+                    reason: reason
+                });
                 break;
-                
+
             case 'COMPLETE':
                 response = await api.post(`/admin/orders/${orderId}/confirm-received`);
                 break;

@@ -24,7 +24,7 @@ const AdminOrderDetailModal = ({
   const [isConfirmCompleteOpen, setIsConfirmCompleteOpen] = useState(false);
   // State ควบคุมโหมด (ปกติ / กรอกเหตุผล / กรอกเลขพัสดุ)
   const [actionMode, setActionMode] = useState<
-    "IDLE" | "REJECTING" | "SHIPPING"
+    "IDLE" | "REJECTING" | "SHIPPING" | "CANCEL"
   >("IDLE");
   const [inputValue, setInputValue] = useState(""); // ใช้เก็บ Reason หรือ Tracking Number
   const [carrier, setCarrier] = useState(""); // เก็บชื่อขนส่ง
@@ -86,6 +86,16 @@ const AdminOrderDetailModal = ({
           carrier,
         );
         toast.success("Order Shipped!");
+      } else if (actionMode === "CANCEL") {
+        if (!inputValue.trim())
+          return toast.error("Please enter cancellation reason.");
+        await adminOrderService.updateOrderStatus(
+          orderId,
+          "CANCEL",
+          inputValue,
+        );
+
+        toast.success("Order Cancelled Successfully 🚫");
       }
       onUpdateSuccess();
       onClose();
@@ -122,18 +132,6 @@ const AdminOrderDetailModal = ({
       toast.error("Action failed");
     } finally {
       setLoading(false);
-    }
-  };
-  const handleCancel = async () => {
-    if (!confirm("Are you sure you want to cancel this order?")) return;
-    if (!orderId) return;
-    try {
-      await adminOrderService.updateOrderStatus(orderId, "CANCEL");
-      toast.success("Order Cancelled");
-      onUpdateSuccess();
-      onClose();
-    } catch (error) {
-      toast.error("Cancel failed");
     }
   };
 
@@ -189,13 +187,7 @@ const AdminOrderDetailModal = ({
                   #{order.orderId}
                 </span>
                 <span className="text-sm text-gray-400 font-normal">
-                  {new Date(order.orderedAt).toLocaleString("en-GB", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {formatDate(order.orderedAt)}
                 </span>
               </div>
             )}
@@ -281,15 +273,13 @@ const AdminOrderDetailModal = ({
                       <AlertCircle className="w-5 h-5" />
                       <h3 className="font-bold">Cancellation Request</h3>
                       <span className="text-xs text-red-500 ml-auto">
-                        {new Date(
-                          order.problemDetail.reportedAt,
-                        ).toLocaleString("en-GB")}
+                        {formatDate(order.problemDetail.reportedAt)}
                       </span>
                     </div>
 
                     {/* Description */}
                     <div>
-                      <span className="text-xs text-red-500 font-bold uppercase tracking-wider block mb-1">
+                      <span className="text-bodyxl text-red-500 font-bold uppercase tracking-wider block mb-1">
                         Reason
                       </span>
                       <p className="text-red-900 leading-relaxed font-medium">
@@ -588,8 +578,8 @@ const AdminOrderDetailModal = ({
           <div className="p-6 bg-white border-t border-gray-100 space-y-6">
             {/* Total */}
             <div className="flex justify-between items-end">
-              <span className="text-xl font-bold text-gray-400">Total</span>
-              <span className="text-3xl font-extrabold text-gray-400">
+              <span className="text-h3xl font-bold text-admin-primary">Total</span>
+              <span className="text-h2xl font-extrabold text-admin-secondary">
                 ฿{order.totalAmount}
               </span>
             </div>
@@ -620,7 +610,9 @@ const AdminOrderDetailModal = ({
                     placeholder={
                       actionMode === "REJECTING"
                         ? "Reason for rejection..."
-                        : "Tracking Number (e.g. TH123...)"
+                        : actionMode === "CANCEL"
+                          ? "Reason for cancellation..."
+                          : "Tracking Number (e.g. TH123...)"
                     }
                     // ถ้าเป็น Shipping ไม่ต้อง AutoFocus ช่องนี้ (ไป Focus Carrier แทน)
                     autoFocus={actionMode === "REJECTING"}
@@ -635,9 +627,15 @@ const AdminOrderDetailModal = ({
                     </button>
                     <button
                       onClick={handleSubmitAction}
-                      className="py-4 rounded-full font-bold bg-admin-primary text-white hover:bg-admin-secondary transition-all shadow-lg"
+                      className={`py-4 rounded-full font-bold text-white shadow-lg transition-all active:scale-95
+                        ${
+                          actionMode === "CANCEL"
+                            ? "bg-red-600 hover:bg-red-700"
+                            : "bg-admin-primary hover:bg-admin-secondary"
+                        }
+                      `}
                     >
-                      Confirm
+                      {actionMode === "CANCEL" ? "Confirm Cancel" : "Confirm"}
                     </button>
                   </div>
                 </div>
@@ -695,10 +693,13 @@ const AdminOrderDetailModal = ({
                   {!["COMPLETE", "CANCEL", "REJECTED"].includes(
                     order.status,
                   ) && (
-                    <div className="text-center">
+                    <div className="text-right pt-2">
                       <button
-                        onClick={handleCancel}
-                        className="text-xs text-red-500 underline font-medium hover:text-red-700 transition-colors"
+                        onClick={() => {
+                          setActionMode("CANCEL");
+                          setInputValue(""); // เคลียร์ค่า input รอรับเหตุผล
+                        }}
+                        className="text-ui text-red-500 font-bold hover:text-red-700 px-4 py-2 rounded-full transition-all flex items-end justify-end gap-2 w-full"
                       >
                         Cancel Order
                       </button>
