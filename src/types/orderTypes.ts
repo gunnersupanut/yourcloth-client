@@ -42,6 +42,7 @@ export interface OrderHistoryEntry {
     attachments: ProblemAttachment[];
     reportedAt: string;
   };
+  cancelledBy: string;
   orderedAt: Date; // หรือ string แล้วแต่ Database return
   totalAmount: number;
   shippingCost: number
