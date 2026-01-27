@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, Truck } from "lucide-react";
+import { X, Truck, AlertCircle } from "lucide-react";
 import { adminOrderService } from "../../services/adminOrderService";
 import toast from "react-hot-toast";
 
@@ -251,7 +251,81 @@ const AdminOrderDetailModal = ({
                   </div>
                 ))}
               </div>
+              {/* --- Problem / Cancellation Detail Section --- */}
+              {order.problemDetail && (
+                <div className=" mt-3">
+                  <div className="bg-red-50 border border-red-100 p-5 space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                    {/* Header */}
+                    <div className="flex items-center gap-2 text-red-800 border-b border-red-200 pb-2">
+                      <AlertCircle className="w-5 h-5" />
+                      <h3 className="font-bold">Cancellation Request</h3>
+                      <span className="text-xs text-red-500 ml-auto">
+                        {new Date(
+                          order.problemDetail.reportedAt,
+                        ).toLocaleString("en-GB")}
+                      </span>
+                    </div>
 
+                    {/* Description */}
+                    <div>
+                      <span className="text-xs text-red-500 font-bold uppercase tracking-wider block mb-1">
+                        Reason
+                      </span>
+                      <p className="text-red-900 leading-relaxed font-medium">
+                        {order.problemDetail.description}
+                      </p>
+                    </div>
+
+                    {/* Attachments (Image & Video) */}
+                    {order.problemDetail.attachments &&
+                      order.problemDetail.attachments.length > 0 && (
+                        <div>
+                          <span className="text-xs text-red-500 font-bold uppercase tracking-wider block mb-2">
+                            Evidence
+                          </span>
+                          <div className="flex flex-wrap gap-3">
+                            {order.problemDetail.attachments.map(
+                              (file: any, idx: number) => {
+                                // เช็คประเภทไฟล์เพื่อแสดงผลให้ถูก
+                                const isVideo =
+                                  file.media_type?.startsWith("video") ||
+                                  /\.(mp4|mov|webm|avi|mkv)$/i.test(
+                                    file.file_url,
+                                  );
+
+                                return (
+                                  <div
+                                    key={idx}
+                                    className="relative group rounded-lg overflow-hidden border border-red-200 shadow-sm w-32 h-32 bg-white flex-shrink-0"
+                                  >
+                                    {isVideo ? (
+                                      // Video Player
+                                      <video
+                                        src={file.file_url}
+                                        controls
+                                        className="w-full h-full object-cover"
+                                      />
+                                    ) : (
+                                      // Image Preview
+                                      <img
+                                        src={file.file_url}
+                                        alt="Evidence"
+                                        className="w-full h-full object-cover cursor-pointer hover:scale-110 transition-transform duration-300"
+                                        onClick={() =>
+                                          window.open(file.file_url, "_blank")
+                                        }
+                                      />
+                                    )}
+                                  </div>
+                                );
+                              },
+                            )}
+                          </div>
+                        </div>
+                      )}
+                  </div>
+                </div>
+              )}
               {/* Customer Info (White Background) */}
               <div className="px-8 mt-6">
                 <div className="grid grid-cols-3 gap-y-4 text-sm">
@@ -320,26 +394,33 @@ const AdminOrderDetailModal = ({
                 {/* Slip */}
                 {["INSPECTING", "PACKING", "SHIPPING", "COMPLETE"].includes(
                   order.status,
-                ) && order?.slip && (
-                  <div>
-                    <h3 className="text-sm text-black font-bold mb-2">
-                      Attached Slip
-                    </h3>
-                    <div className="border border-gray-200 rounded-lg overflow-hidden w-full max-w-[200px]">
-                      <img
-                        src={order.slip}
-                        alt="Slip"
-                        className="w-full h-auto cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={() => window.open(order.slip, "_blank")}
-                      />
+                ) &&
+                  order?.slip && (
+                    <div>
+                      <h3 className="text-sm text-black font-bold mb-2">
+                        Attached Slip
+                      </h3>
+                      <div className="border border-gray-200 rounded-lg overflow-hidden w-full max-w-[200px]">
+                        <img
+                          src={order.slip}
+                          alt="Slip"
+                          className="w-full h-auto cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => window.open(order.slip, "_blank")}
+                        />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
                 {/* Tracking */}
                 {order.parcelDetail?.parcel_number && (
-                  <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-100 text-yellow-800 text-sm">
-                    <strong>Tracking Number:</strong>{" "}
-                    {order.parcelDetail.parcel_number}
+                  <div className="flex flex-row md:flex-col bg-yellow-50 p-3 gap-3 rounded-lg">
+                    <div className="flex justify-between text-yellow-800 text-sm">
+                      <strong>Shipping Carrier</strong>{" "}
+                      {order.parcelDetail.shipping_carrier}
+                    </div>
+                    <div className="flex justify-between text-yellow-800 text-sm">
+                      <strong>Tracking Number</strong>{" "}
+                      {order.parcelDetail.parcel_number}
+                    </div>
                   </div>
                 )}
                 {/* Reason */}
