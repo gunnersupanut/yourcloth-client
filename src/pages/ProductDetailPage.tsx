@@ -113,15 +113,6 @@ const ProductDetailPage = () => {
       }
     }
   };
-  //  Render Guard Clauses
-  if (loading) return <div className="p-10 text-center">Loading...</div>;
-  if (!product)
-    return <div className="p-10 text-center">Product not found</div>;
-  // รวมรายการรูปภาพ (เอารูปจริง + รูป Mock มาต่อกันให้ดูเยอะๆ)
-  const galleryImages = product.image_url
-    ? [product.image_url, ...MOCK_GALLERY]
-    : MOCK_GALLERY;
-
   // ฟังก์ชันหา Variant ที่ตรงกับที่เลือก
   const currentVariant = useMemo(() => {
     if (!product || !selectedColor || !selectedSize) return null;
@@ -133,7 +124,16 @@ const ProductDetailPage = () => {
   // ตัวแปรราคาที่จะเอาไปโชว์
   // ถ้าเลือกครบแล้ว ให้ใช้ราคาของ Variant นั้น
   // ถ้ายังเลือกไม่ครบ ให้โชว์ราคาเริ่มต้น (min_price)
-  const displayPrice = currentVariant ? currentVariant.price : product.price;
+  const displayPrice = currentVariant ? currentVariant.price : product?.price;
+  //  Render Guard Clauses
+  if (loading) return <div className="p-10 text-center">Loading...</div>;
+  if (!product)
+    return <div className="p-10 text-center">Product not found</div>;
+  // รวมรายการรูปภาพ (เอารูปจริง + รูป Mock มาต่อกันให้ดูเยอะๆ)
+  const galleryImages = product.image_url
+    ? [product.image_url, ...MOCK_GALLERY]
+    : MOCK_GALLERY;
+
   // ฟังก์ชันปรับจำนวน
   const handleQuantity = (type: "inc" | "dec") => {
     if (type === "dec" && quantity > 1) setQuantity(quantity - 1);
@@ -233,6 +233,7 @@ const ProductDetailPage = () => {
       },
     });
   };
+
   return (
     <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 pb-16 pt-10 font-kanit ">
       {/*BREADCRUMB*/}

@@ -20,6 +20,15 @@ export const productService = {
             throw error;
         }
     },
+    getAdmin: async (): Promise<Product[]> => {
+        try {
+            const response = await api.get('/products/admin');
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching products:", error);
+            throw error;
+        }
+    },
     validateCheckout: async (variantIds: number[]) => {
         try {
             const response = await api.post(`/products/validate-checkout`, {
