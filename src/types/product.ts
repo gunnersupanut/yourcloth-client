@@ -18,7 +18,7 @@ export interface ProductVariant {
   color_name: string;
   size: string;
   stock: number;      // เอาไว้เช็คว่าของหมดไหม
-  price_modifier: number; // เผื่อไซส์ XXL แพงกว่าปกติ
+  price: number; // เผื่อไซส์ XXL แพงกว่าปกติ
 }
 
 // Interface เดิม เพิ่ม field นี้เข้าไป

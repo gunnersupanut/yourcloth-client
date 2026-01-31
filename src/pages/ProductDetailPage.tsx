@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { productService } from "../services/product.service";
 import type { ProductDetail } from "../types/product";
@@ -91,10 +91,9 @@ const ProductDetailPage = () => {
     fetchProduct();
   }, [id, navigate]);
 
-useEffect(() => {
+  useEffect(() => {
     if (product?.available_colors?.length) {
-      
-      const firstColorObj = product.available_colors[0]; 
+      const firstColorObj = product.available_colors[0];
       setSelectedColor(firstColorObj.name);
     }
   }, [product]);
@@ -123,6 +122,18 @@ useEffect(() => {
     ? [product.image_url, ...MOCK_GALLERY]
     : MOCK_GALLERY;
 
+  // ฟังก์ชันหา Variant ที่ตรงกับที่เลือก
+  const currentVariant = useMemo(() => {
+    if (!product || !selectedColor || !selectedSize) return null;
+
+    return product.variants.find(
+      (v) => v.color_name === selectedColor && v.size === selectedSize,
+    );
+  }, [product, selectedColor, selectedSize]);
+  // ตัวแปรราคาที่จะเอาไปโชว์
+  // ถ้าเลือกครบแล้ว ให้ใช้ราคาของ Variant นั้น
+  // ถ้ายังเลือกไม่ครบ ให้โชว์ราคาเริ่มต้น (min_price)
+  const displayPrice = currentVariant ? currentVariant.price : product.price;
   // ฟังก์ชันปรับจำนวน
   const handleQuantity = (type: "inc" | "dec") => {
     if (type === "dec" && quantity > 1) setQuantity(quantity - 1);
@@ -348,7 +359,11 @@ useEffect(() => {
         <div className="flex flex-col">
           {/* ราคา */}
           <div className="text-h2xl text-text_secondary mb-12">
-            {Number(product.price).toLocaleString()} ฿
+            {Number(displayPrice).toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}{" "}
+            ฿
           </div>
           {/*---สี*/}
           <div className="mb-4">
