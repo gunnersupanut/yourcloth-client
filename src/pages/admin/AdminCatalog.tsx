@@ -5,10 +5,10 @@ import { Package, Image as ImageIcon, TicketPercent, Plus } from "lucide-react";
 // import AdminDiscountList from "../features/admin/AdminDiscountList";
 
 const AdminCatalog = () => {
-  // 1. State สำหรับเก็บ Tab ที่เลือกอยู่ (Default เป็น 'products')
+  // State สำหรับเก็บ Tab ที่เลือกอยู่ (Default เป็น 'products')
   const [activeTab, setActiveTab] = useState<'products' | 'banners' | 'discounts'>('products');
 
-  // 2. ข้อมูล Tab เมนู
+  // ข้อมูล Tab เมนู
   const tabs = [
     { id: 'products', label: 'Products', icon: <Package size={18} /> },
     { id: 'banners', label: 'Banners', icon: <ImageIcon size={18} /> },
