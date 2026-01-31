@@ -70,7 +70,6 @@ export default function OrderDetail() {
       setLoading(true);
       const res = await orderService.getOrderById(orderId);
       setOrder(res.data);
-      console.log("Order Data", res.data);
     } catch (error) {
       console.error("Fetch orders failed", error);
       toast.error("Get orders data failed.");
@@ -341,7 +340,6 @@ export default function OrderDetail() {
             {/* ---แสดงเฉพาะตอนมีปัญหา */}
             {order.problemDetail && (
               <div className="px-4 mt-6">
-                {/* ลด margin-top ไม่ให้ห่างเกิน */}
                 <div className="bg-red-50 border border-red-100 rounded-xl p-5 space-y-3 animate-in fade-in slide-in-from-bottom-2">
                   {/* Header */}
                   <div className="flex items-center gap-2 text-red-800 border-b border-red-200 pb-2">
@@ -351,9 +349,9 @@ export default function OrderDetail() {
                       className={`ml-auto text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide
           ${
             order.cancelledBy === "ADMIN"
-              ? "bg-red-600 text-white" // ร้านยกเลิก -> สีแดงเข้ม
+              ? "bg-red-600 text-white"
               : "bg-gray-200 text-gray-600"
-          } // ลูกค้ายกเลิกเอง -> สีเทาๆ พอ
+          }
        `}
                     >
                       By {order.cancelledBy === "ADMIN" ? "Shop" : "You"}
@@ -371,7 +369,7 @@ export default function OrderDetail() {
                     </p>
                   </div>
 
-                  {/* Attachments: 🔥 โชว์เฉพาะตอนมีของเท่านั้น!! */}
+                  {/* โชว์เฉพาะตอนมีของเท่านั้น!! */}
                   <div className="flex flex-wrap gap-3">
                     {order.problemDetail.attachments.map(
                       (file: any, idx: number) => {
@@ -386,7 +384,6 @@ export default function OrderDetail() {
                         return (
                           <div
                             key={idx}
-                            // 🔥 1. ย้าย onClick มาไว้ที่กล่องแม่เลย (กดตรงไหนก็ติดชัวร์)
                             onClick={() =>
                               setPreviewAttachment({
                                 url: file.file_url,
@@ -398,14 +395,12 @@ export default function OrderDetail() {
                             {isVideo ? (
                               <video
                                 src={file.file_url}
-                                // 🔥 2. ใส่ pointer-events-none กัน video แย่งคลิก
                                 className="w-full h-full object-cover opacity-80 pointer-events-none"
                                 muted
                               />
                             ) : (
                               <img
                                 src={file.file_url}
-                                // 🔥 3. ใส่ pointer-events-none เหมือนกัน
                                 className="w-full h-full object-cover pointer-events-none"
                                 alt="evidence"
                               />
