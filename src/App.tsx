@@ -26,7 +26,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminOrderList from "./pages/admin/AdminOrderList";
 import AdminCatalog from "./pages/admin/AdminCatalog";
-import AdminCreateProduct from "./pages/admin/AdminCreateProduct";
+import AdminProductForm from "./pages/admin/AdminProductForm";
 const AboutPage = () => <div className="text-xl">🔐 หน้า About (รอทำ)</div>;
 const ContactPage = () => <div className="text-xl">🔐 หน้า Contact (รอทำ)</div>;
 
@@ -49,7 +49,8 @@ function App() {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/orders" element={<AdminOrderList />} />
             <Route path="/admin/catalog" element={<AdminCatalog />} />
-            <Route path="/admin/product/create" element={<AdminCreateProduct />} />
+            <Route path="/admin/product/create" element={<AdminProductForm />} />
+            <Route path="/admin/product/edit/:id" element={<AdminProductForm />} />
           </Route>
         </Route>
         {/* --------------- */}

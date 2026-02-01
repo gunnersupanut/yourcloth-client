@@ -9,20 +9,28 @@ import {
   X,
   Check,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { productService } from "../../services/product.service";
 import { uploadService } from "../../services/uploadService";
 import { masterService } from "../../services/masterService";
 
-// --- Interface (Type Safety หน่อย จะได้ไม่แดง) ---
+// --- Interface ---
 interface MasterData {
   id: number;
   name: string;
-  code?: string; // เฉพาะ Color
+  code?: string;
 }
 
-// 🔥 Component ย่อย: ปุ่มเลือกสี (Color Swatch)
+interface VariantData {
+  variant_id?: number; //  มีเฉพาะตอน Edit
+  color_id: number;
+  size_id: number;
+  price: number;
+  stock_quantity: number;
+}
+
+//  Component ย่อย ปุ่มเลือกสี
 const ColorSelector = ({
   colors,
   selectedId,
@@ -36,7 +44,6 @@ const ColorSelector = ({
     <div className="flex flex-wrap gap-2 mt-2">
       {colors.map((c) => {
         const isSelected = selectedId === c.id;
-        // เช็คว่าเป็นสีขาว/เหลืองไหม (เพื่อเปลี่ยนสี icon ให้มองเห็น)
         const isLightColor =
           c.code?.toUpperCase() === "#FFFFFF" ||
           c.code?.toUpperCase() === "#FFFF00";
@@ -56,7 +63,6 @@ const ColorSelector = ({
             `}
             style={{ backgroundColor: c.code }}
           >
-            {/* ติ๊กถูกเมื่อเลือก */}
             {isSelected && (
               <span
                 className={`absolute inset-0 flex items-center justify-center ${
@@ -73,14 +79,17 @@ const ColorSelector = ({
   );
 };
 
-const AdminCreateProduct = () => {
+const AdminProductForm = () => {
   const navigate = useNavigate();
+  const { id } = useParams(); // ดึง ID จาก URL
+  const isEditMode = Boolean(id); // เช็คโหมด: ถ้ามี ID = Edit, ไม่มี = Create
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isDataLoading, setIsDataLoading] = useState(true); // เช็คว่าโหลด Master Data เสร็จยัง
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
-  // --- 🔥 Master Data States (ดึงจาก DB) ---
+  // --- Master Data States ---
   const [categories, setCategories] = useState<MasterData[]>([]);
   const [genders, setGenders] = useState<MasterData[]>([]);
   const [colors, setColors] = useState<MasterData[]>([]);
@@ -94,52 +103,93 @@ const AdminCreateProduct = () => {
     product_name: "",
     description: "",
     image_url: "",
-    category_id: 0, // รอโหลดเสร็จค่อย set default
+    file_path: "", // เพิ่ม file_path
+    category_id: 0,
     gender_id: 0,
+    is_active: true,
   });
 
-  const [variants, setVariants] = useState([
+  const [variants, setVariants] = useState<VariantData[]>([
     { color_id: 0, size_id: 0, price: 0, stock_quantity: 0 },
   ]);
 
-  // --- Fetch Master Data ---
+  // --- Fetch Data (Master + Product if Edit) ---
   useEffect(() => {
-    const fetchMasterData = async () => {
+    const initData = async () => {
       try {
-        const data = await masterService.getMetadata();
+        setIsDataLoading(true);
 
-        const cats = data.categories || [];
-        const gens = data.genders || [];
-        const cols = data.colors || [];
-        const szs = data.sizes || [];
-        // --- Default Value ---
+        // โหลด Master Data ก่อน
+        const masterData = await masterService.getMetadata();
+        const cats = masterData.categories || [];
+        const gens = masterData.genders || [];
+        const cols = masterData.colors || [];
+        const szs = masterData.sizes || [];
+
         setCategories(cats);
         setGenders(gens);
         setColors(cols);
         setSizes(szs);
-        setFormData((prev) => ({
-          ...prev,
-          category_id: cats.length > 0 ? cats[0].id : prev.category_id,
-          gender_id: gens.length > 0 ? gens[0].id : prev.gender_id,
-        }));
-        // Set Default ให้ Variant แรกด้วย
-        if (cols.length > 0 && szs.length > 0) {
-            setVariants(prev => [{
-                ...prev[0], 
+
+        // เช็คว่า Edit หรือ Create
+        if (isEditMode && id) {
+          // 🔥 EDIT MODE: ดึงข้อมูลสินค้าเดิม
+          const product = await productService.getAdminById(Number(id));
+
+          // Map เข้า Form
+          setFormData({
+            product_name: product.product_name,
+            description: product.description || "",
+            image_url: product.image_url,
+            file_path: product.file_path || "", // รับมาด้วย
+            category_id:
+              product.category_id || (cats.length > 0 ? cats[0].id : 0),
+            gender_id: product.gender_id || (gens.length > 0 ? gens[0].id : 0),
+            is_active: product.is_active ?? true,
+          });
+
+          // Map Variants
+          if (product.variants && product.variants.length > 0) {
+            setVariants(
+              product.variants.map((v: any) => ({
+                variant_id: v.variant_id || v.id, // สำคัญ ต้องเก็บ ID ไว้เช็คว่าเป็นของเก่า
+                color_id: v.color_id,
+                size_id: v.size_id,
+                price: Number(v.price),
+                stock_quantity: Number(v.stock_quantity),
+              })),
+            );
+          }
+        } else {
+          // CREATE MODE: Set Default Values
+          setFormData((prev) => ({
+            ...prev,
+            category_id: cats.length > 0 ? cats[0].id : 0,
+            gender_id: gens.length > 0 ? gens[0].id : 0,
+          }));
+
+          if (cols.length > 0 && szs.length > 0) {
+            setVariants([
+              {
                 color_id: cols[0].id,
-                size_id: szs[0].id
-            }]);
+                size_id: szs[0].id,
+                price: 0,
+                stock_quantity: 0,
+              },
+            ]);
+          }
         }
       } catch (error) {
-        console.error("Error fetching master data:", error);
-        toast.error("Failed to load options from server.");
+        console.error("Error loading data:", error);
+        toast.error("Failed to load data.");
+        navigate("/admin/catalog"); // เด้งออกถ้าพัง
       } finally {
         setIsDataLoading(false);
       }
     };
 
-    fetchMasterData();
-  }, []);
+    initData();
+  }, [id, isEditMode, navigate]);
 
   // --- Clean up memory ---
   useEffect(() => {
@@ -149,7 +199,6 @@ const AdminCreateProduct = () => {
   }, [previewUrl, selectedFile]);
 
   // --- Handlers ---
-
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -166,7 +215,6 @@ const AdminCreateProduct = () => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (file.size > 5 * 1024 * 1024)
       return toast.error("File is too large! (Max 5MB)");
 
@@ -209,11 +257,12 @@ const AdminCreateProduct = () => {
     setVariants(variants.filter((_, i) => i !== index));
   };
 
-  // --- Submit ---
+  // --- Submit Logic (Create + Update) ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.product_name) return toast.error("Product name is required!");
+    // Edit mode: ยอมให้ image_url เดิมค้างอยู่ได้
     if (!selectedFile && !formData.image_url)
       return toast.error("Product image is required!");
     if (variants.some((v) => v.price <= 0))
@@ -221,12 +270,16 @@ const AdminCreateProduct = () => {
 
     setIsLoading(true);
     try {
-      let finalImageUrl;
+      let finalImageUrl = formData.image_url;
+      let finalFilePath = formData.file_path; // เก็บ path เดิมไว้ก่อน
 
-      // 1. Upload Image (ถ้ามี)
+      // 1. Upload Image (ถ้ามีการเลือกใหม่)
       if (selectedFile) {
         try {
-          finalImageUrl = await uploadService.uploadProductImage(selectedFile);
+          const uploadRes =
+            await uploadService.uploadProductImage(selectedFile);
+          finalImageUrl = uploadRes.url;
+          finalFilePath = uploadRes.publicId;
         } catch (uploadError) {
           console.error(uploadError);
           toast.error("Image upload failed");
@@ -235,33 +288,44 @@ const AdminCreateProduct = () => {
         }
       }
 
-      // 2. Create Product
+      // 2Prepare Payload
       const payload = {
         ...formData,
-        image_url: finalImageUrl?.url,
-        file_path: finalImageUrl?.publicId,
+        image_url: finalImageUrl,
+        file_path: finalFilePath,
         category_id: Number(formData.category_id),
         gender_id: Number(formData.gender_id),
-        variants: variants,
+        variants: variants, // ส่ง variants ที่มี variant_id (ของเก่า) และไม่มี (ของใหม่) ไปให้ backend จัดการ
       };
 
-      await productService.create(payload);
+      // Call API
+      if (isEditMode && id) {
+        // UPDATE
+        await productService.update(Number(id), payload);
+        toast.success("Product Updated Successfully.");
+      } else {
+        // CREATE
+        await productService.create(payload);
+        toast.success("Product Created Successfully.");
+      }
 
-      toast.success("Product Created Successfully.");
       navigate("/admin/catalog");
     } catch (error) {
       console.error(error);
-      toast.error("Failed to create product.");
+      toast.error(
+        isEditMode ? "Failed to update product" : "Failed to create product",
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  // --- Loading State ---
+  // --- Loading UI ---
   if (isDataLoading) {
     return (
       <div className="flex h-[500px] items-center justify-center text-white">
-        <Loader2 className="animate-spin mr-2" /> Loading System Data...
+        <Loader2 className="animate-spin mr-2" /> Loading{" "}
+        {isEditMode ? "Product" : "System"} Data...
       </div>
     );
   }
@@ -283,10 +347,12 @@ const AdminCreateProduct = () => {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-white">
-              Create New Product
+              {isEditMode ? "Edit Product" : "Create New Product"}
             </h1>
             <p className="text-gray-400 text-sm">
-              Add a new item to your store.
+              {isEditMode
+                ? "Modify existing item details."
+                : "Add a new item to your store."}
             </p>
           </div>
         </div>
@@ -301,7 +367,11 @@ const AdminCreateProduct = () => {
           ) : (
             <Save size={20} />
           )}
-          {isLoading ? "Saving..." : "Save Product"}
+          {isLoading
+            ? "Saving..."
+            : isEditMode
+              ? "Update Product"
+              : "Save Product"}
         </button>
       </div>
 
@@ -309,10 +379,38 @@ const AdminCreateProduct = () => {
         {/* --- LEFT COLUMN --- */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-admin-card border border-gray-700 rounded-2xl p-6 shadow-sm space-y-4">
-            <h2 className="text-lg font-bold text-white mb-4 border-b border-gray-700 pb-2">
-              General Information
-            </h2>
+            <div className="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
+              <h2 className="text-lg font-bold text-white">
+                General Information
+              </h2>
 
+              {/* Switch Toggle */}
+              {isEditMode && (
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`text-sm font-bold ${formData.is_active ? "text-green-400" : "text-gray-500"}`}
+                  >
+                    {formData.is_active
+                      ? "Active (Selling)"
+                      : "Inactive (Hidden)"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        is_active: !prev.is_active,
+                      }))
+                    }
+                    className={`relative w-12 h-6 rounded-full transition-colors duration-200 ease-in-out ${formData.is_active ? "bg-green-500" : "bg-gray-600"}`}
+                  >
+                    <span
+                      className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 shadow-md ${formData.is_active ? "translate-x-6" : "translate-x-0"}`}
+                    />
+                  </button>
+                </div>
+              )}
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1">
                 Product Name *
@@ -322,7 +420,6 @@ const AdminCreateProduct = () => {
                 value={formData.product_name}
                 onChange={handleInputChange}
                 className="w-full bg-admin-bg border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-admin-primary outline-none"
-                placeholder="e.g. Streetwear T-Shirt"
                 required
               />
             </div>
@@ -337,12 +434,10 @@ const AdminCreateProduct = () => {
                 onChange={handleInputChange}
                 rows={4}
                 className="w-full bg-admin-bg border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-admin-primary outline-none"
-                placeholder="Product details..."
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {/* Dynamic Category */}
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-1">
                   Category
@@ -360,7 +455,6 @@ const AdminCreateProduct = () => {
                   ))}
                 </select>
               </div>
-              {/* Dynamic Gender */}
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-1">
                   Gender
@@ -397,9 +491,9 @@ const AdminCreateProduct = () => {
               {variants.map((variant, index) => (
                 <div
                   key={index}
-                  className="grid grid-cols-12 gap-4 items-start bg-admin-bg p-4 rounded-xl border border-gray-700"
+                  className="grid grid-cols-12 gap-4 items-start bg-admin-bg p-4 rounded-xl border border-gray-700 animate-in fade-in"
                 >
-                  {/* 🔥 Color Selector (New UI) */}
+                  {/* Color Selector */}
                   <div className="col-span-12 md:col-span-5">
                     <label className="block text-xs text-gray-500 mb-1">
                       Color:{" "}
@@ -416,7 +510,6 @@ const AdminCreateProduct = () => {
                     />
                   </div>
 
-                  {/* Dynamic Size */}
                   <div className="col-span-4 md:col-span-2">
                     <label className="block text-xs text-gray-500 mb-1">
                       Size
@@ -436,7 +529,6 @@ const AdminCreateProduct = () => {
                     </select>
                   </div>
 
-                  {/* Price */}
                   <div className="col-span-4 md:col-span-2">
                     <label className="block text-xs text-gray-500 mb-1">
                       Price
@@ -448,12 +540,10 @@ const AdminCreateProduct = () => {
                         handleVariantChange(index, "price", e.target.value)
                       }
                       className="w-full bg-admin-card border border-gray-600 rounded-lg px-3 py-2 text-white text-sm"
-                      placeholder="0"
                       min="0"
                     />
                   </div>
 
-                  {/* Stock */}
                   <div className="col-span-3 md:col-span-2">
                     <label className="block text-xs text-gray-500 mb-1">
                       Stock
@@ -469,12 +559,10 @@ const AdminCreateProduct = () => {
                         )
                       }
                       className="w-full bg-admin-card border border-gray-600 rounded-lg px-3 py-2 text-white text-sm"
-                      placeholder="0"
                       min="0"
                     />
                   </div>
 
-                  {/* Delete */}
                   <div className="col-span-1 flex justify-center pt-6">
                     <button
                       type="button"
@@ -521,13 +609,11 @@ const AdminCreateProduct = () => {
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <button
-                        type="button"
+                      <X
+                        className="text-white bg-red-500 rounded-full p-1"
+                        size={24}
                         onClick={handleRemoveImage}
-                        className="bg-red-500/80 text-white p-2 rounded-full hover:bg-red-600"
-                      >
-                        <X size={20} />
-                      </button>
+                      />
                     </div>
                   </>
                 ) : formData.image_url ? (
@@ -536,19 +622,13 @@ const AdminCreateProduct = () => {
                       src={formData.image_url}
                       alt="Preview"
                       className="w-full h-full object-cover"
-                      onError={(e) =>
-                        (e.currentTarget.src =
-                          "https://via.placeholder.com/300?text=Invalid+URL")
-                      }
                     />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <button
-                        type="button"
+                      <X
+                        className="text-white bg-red-500 rounded-full p-1"
+                        size={24}
                         onClick={handleRemoveImage}
-                        className="bg-red-500/80 text-white p-2 rounded-full hover:bg-red-600"
-                      >
-                        <X size={20} />
-                      </button>
+                      />
                     </div>
                   </>
                 ) : (
@@ -556,7 +636,9 @@ const AdminCreateProduct = () => {
                     <Upload className="mx-auto mb-2" size={32} />
                     <p className="text-sm font-bold">Click to Select</p>
                     <p className="text-xs text-gray-600 mt-1">
-                      Image will upload on Save
+                      {isEditMode
+                        ? "Change image"
+                        : "Image will upload on Save"}
                     </p>
                   </div>
                 )}
@@ -582,4 +664,4 @@ const AdminCreateProduct = () => {
   );
 };
 
-export default AdminCreateProduct;
+export default AdminProductForm;

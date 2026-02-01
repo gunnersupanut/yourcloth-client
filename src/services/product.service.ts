@@ -29,6 +29,24 @@ export const productService = {
             throw error;
         }
     },
+    getAdminById: async (id: number) => {
+        try {
+            const response = await api.get(`/products/admin/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching product for admin:", error);
+            throw error;
+        }
+    },
+    update: async (id: number, data: any) => {
+        try {
+            const response = await api.put(`/products/admin/${id}`, data);
+            return response.data;
+        } catch (error) {
+            console.error("Error updating product:", error);
+            throw error;
+        }
+    },
     create: async (data: any) => {
         try {
             const response = await api.post('/products/admin/create',
@@ -45,6 +63,16 @@ export const productService = {
             const response = await api.post(`/products/validate-checkout`, {
                 variantIds
             }
+            );
+            return response.data.data;
+        } catch (error) {
+            console.error("Error fetching products:", error);
+            throw error;
+        }
+    },
+    delete: async (id: number) => {
+        try {
+            const response = await api.delete(`/products/admin/${id}`
             );
             return response.data.data;
         } catch (error) {

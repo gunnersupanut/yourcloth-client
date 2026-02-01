@@ -2,8 +2,11 @@ import { useEffect, useState, useMemo } from "react";
 import { Edit, Trash2, Eye, Search, Filter } from "lucide-react";
 import toast from "react-hot-toast";
 import { productService } from "../../services/product.service";
+import { useNavigate } from "react-router-dom";
+import ConfirmModal from "../../components/ui/ConfirmModal";
 
 const AdminProductList = () => {
+  const navigate = useNavigate();
   // --- States ---
   const [products, setProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -13,7 +16,10 @@ const AdminProductList = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false); // เปิด/ปิดเมนู Filter
   const [statusFilter, setStatusFilter] = useState("All"); // All | Active | Out of Stock
   const [categoryFilter, setCategoryFilter] = useState("All");
-
+  // Modal States
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   // --- Fetch Data ---
   useEffect(() => {
     fetchProducts();
@@ -33,6 +39,33 @@ const AdminProductList = () => {
     }
   };
 
+  const handleDeleteClick = (product: any) => {
+    setProductToDelete(product);
+    setIsDeleteModalOpen(true);
+  };
+
+  const onConfirmDelete = async () => {
+    if (!productToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await productService.delete(productToDelete.id);
+
+      toast.success(
+        `Delete product "${productToDelete.product_name}" successfully.`,
+      );
+
+      // อัปเดต State โดยไม่ต้องโหลดใหม่ (Optimistic Update)
+      setProducts((prev) => prev.filter((p) => p.id !== productToDelete.id));
+    } catch (error) {
+      console.error(error);
+      toast.error("Delete Product Fail");
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteModalOpen(false);
+      setProductToDelete(null);
+    }
+  };
   // --- Helpers ---
   const formatPrice = (min: number, max: number) => {
     const options = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
@@ -183,7 +216,7 @@ const AdminProductList = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700">
-              {/* 🔥 CASE 1: Loading (Skeleton) */}
+              {/* ---Loading (Skeleton) */}
               {isLoading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
@@ -210,7 +243,7 @@ const AdminProductList = () => {
                   </tr>
                 ))
               ) : filteredProducts.length === 0 ? (
-                /* 🔥 CASE 2: No Data (หลัง Filter) */
+                /* ---No Data (หลัง Filter) */
                 <tr>
                   <td
                     colSpan={6}
@@ -231,13 +264,12 @@ const AdminProductList = () => {
                   </td>
                 </tr>
               ) : (
-                /* Real Data */
+                /* ---Real Data */
                 filteredProducts.map((product) => (
                   <tr
                     key={product.id}
                     className="hover:bg-white/5 transition-colors group"
                   >
-                    {/* ... (Render Logic เดิม) ... */}
                     {/* Image & Name */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
@@ -278,7 +310,8 @@ const AdminProductList = () => {
                     <td className="px-6 py-4 text-center">
                       {parseInt(product.total_stock) === 0 ? (
                         <span className="text-red-500 font-bold text-xl">
-                          -
+                          {" "}
+                          -{" "}
                         </span>
                       ) : (
                         <span className="text-white font-bold">
@@ -287,12 +320,15 @@ const AdminProductList = () => {
                       )}
                     </td>
 
+                    {/* ส่วนแสดงผล Status (แก้ตรงนี้) */}
                     <td className="px-6 py-4 text-center">
                       <span
                         className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize border ${
                           product.calculated_status === "Active"
-                            ? "bg-green-500/10 text-green-400 border-green-500/20"
-                            : "bg-red-500/10 text-red-400 border-red-500/20"
+                            ? "bg-green-500/10 text-green-400 border-green-500/20" // เขียว = ขายอยู่
+                            : product.calculated_status === "Inactive"
+                              ? "bg-gray-500/10 text-gray-400 border-gray-500/20" // เทา = ปิดการขาย (Inactive)
+                              : "bg-red-500/10 text-red-400 border-red-500/20" // แดง = ของหมด (Out of Stock)
                         }`}
                       >
                         {product.calculated_status}
@@ -300,15 +336,14 @@ const AdminProductList = () => {
                     </td>
                     {/* Action */}
                     <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex justify-end gap-2 opacity-100 group-hover:scale-105 transition-opacity">
                         <button
                           className="p-2 hover:bg-admin-primary/20 text-admin-primary rounded-lg transition-colors"
                           title="View Details"
                           onClick={() => {
-                            //  เปิด Tab ใหม่ ไปยังหน้าสินค้าจริง (หน้าบ้าน)
-                            // สมมติ Route หน้าบ้านคือ /product/:id
+                            //  เปิด Tab ใหม่ ไปยังหน้าสินค้าจริง
                             window.open(
-                              `/shop/${product.category}/${product.id}`,
+                              `/shop/${product.category}/${product.iInactived}`,
                               "_blank",
                             );
                           }}
@@ -318,13 +353,16 @@ const AdminProductList = () => {
                         <button
                           className="p-2 hover:bg-yellow-500/20 text-yellow-400 rounded-lg transition-colors"
                           title="Edit"
-                          onClick={() => console.log("Edit", product.id)}
+                          onClick={() =>
+                            navigate(`/admin/product/edit/${product.id}`)
+                          }
                         >
                           <Edit size={18} />
                         </button>
                         <button
                           className="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors"
-                          title="Delete"
+                          title="Delete (Soft Delete)"
+                          onClick={() => handleDeleteClick(product)} // เรียก Modal
                         >
                           <Trash2 size={18} />
                         </button>
@@ -347,6 +385,16 @@ const AdminProductList = () => {
           </div>
         )}
       </div>
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={onConfirmDelete}
+        title="Delete Product?"
+        message={`Are you sure you want to remove "${productToDelete?.product_name}"? \nThis will hide the product from the shop but keep sales history.`}
+        variant="danger" // ใช้สีแดง
+        confirmText="Yes, Delete it"
+        isLoading={isDeleting}
+      />
     </div>
   );
 };
