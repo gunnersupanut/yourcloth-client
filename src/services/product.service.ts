@@ -29,6 +29,17 @@ export const productService = {
             throw error;
         }
     },
+    create: async (data: any) => {
+        try {
+            const response = await api.post('/products/admin/create',
+                data
+            );
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching products:", error);
+            throw error;
+        }
+    },
     validateCheckout: async (variantIds: number[]) => {
         try {
             const response = await api.post(`/products/validate-checkout`, {

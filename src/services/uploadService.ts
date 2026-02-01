@@ -5,7 +5,8 @@ import axios from 'axios';
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
 const PRESETS = {
     SLIP: import.meta.env.VITE_CLOUDINARY_PRESET_SLIP,
-    PROBLEM: import.meta.env.VITE_CLOUDINARY_PRESET_PROBLEM
+    PROBLEM: import.meta.env.VITE_CLOUDINARY_PRESET_PROBLEM,
+    PRODUCT: import.meta.env.VITE_CLOUDINARY_PRESET_PRODUCT
 };
 
 export const uploadService = {
@@ -54,5 +55,26 @@ export const uploadService = {
         // ใช้ Promise.all ยิงพร้อมกันรัวๆ เร็วกว่ารอยิงทีละรูป
         const uploadPromises = files.map(file => uploadService.upload(file, orderId, type));
         return await Promise.all(uploadPromises);
+    },
+    uploadProductImage: async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', PRESETS.PRODUCT);
+        formData.append('folder', 'my-shop/products'); // แยกโฟลเดอร์ให้เป็นระเบียบ
+
+        try {
+            const response = await axios.post(
+                `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, // บังคับ image only
+                formData
+            );
+            console.log("Product Image Uploaded:", response.data.secure_url);
+            return {
+                url: response.data.secure_url,
+                publicId: response.data.public_id
+            }
+        } catch (error) {
+            console.error("Product Upload Failed:", error);
+            throw error;
+        }
     }
 };

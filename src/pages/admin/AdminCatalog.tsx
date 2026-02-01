@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Package, Image as ImageIcon, TicketPercent, Plus } from "lucide-react";
 import AdminProductList from "../admin/AdminProductList";
+import { useNavigate } from "react-router-dom";
 // import AdminBannerList from "../features/admin/AdminBannerList";
 // import AdminDiscountList from "../features/admin/AdminDiscountList";
 
 const AdminCatalog = () => {
+  const navigate = useNavigate();
   // State สำหรับเก็บ Tab ที่เลือกอยู่ (Default เป็น 'products')
   const [activeTab, setActiveTab] = useState<
     "products" | "banners" | "discounts"
@@ -16,7 +18,13 @@ const AdminCatalog = () => {
     { id: "banners", label: "Banners", icon: <ImageIcon size={18} /> },
     { id: "discounts", label: "Discounts", icon: <TicketPercent size={18} /> }, // ทำทีหลังได้
   ];
-
+  const handleCreate = () => {
+    if (activeTab === "products") {
+      navigate("/admin/product/create"); // วาร์ปไปหน้าสร้างสินค้า
+    } else {
+      console.log(`Create ${activeTab} feature coming soon!`);
+    }
+  };
   return (
     <div className="space-y-6 animate-in fade-in zoom-in duration-300">
       {/* --- Header Section --- */}
@@ -33,7 +41,7 @@ const AdminCatalog = () => {
         {/* ปุ่ม Add จะเปลี่ยน Action ไปตาม Tab ที่เลือก */}
         <button
           className="flex items-center gap-2 bg-admin-primary text-admin-secondary px-5 py-2.5 rounded-xl font-bold hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-blue-900/20"
-          onClick={() => console.log(`Create new ${activeTab}`)}
+          onClick={handleCreate}
         >
           <Plus size={20} />
           Create {activeTab.charAt(0).toUpperCase() + activeTab.slice(1, -1)}
