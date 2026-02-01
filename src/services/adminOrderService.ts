@@ -4,26 +4,9 @@ import { api } from "./api"; // เช็ค path import api ให้ตรง�
 // Service Object
 export const adminOrderService = {
     // ดึงรายการทั้งหมด
-    getOrders: async (
-        page: number = 1,
-        limit: number = 10,
-        status: string = "ALL",
-        search: string = "",
-        sortBy: string = 'newest',
-        startDate: string = '',
-        endDate: string = ''
-    ) => {
-        const response = await api.get<AdminOrderResponse>("/admin/orders", {
-            params: {
-                page,
-                limit,
-                status,
-                search,
-                sortBy,
-                startDate,
-                endDate
-            },
-        });
+    getOrders: async (params?: any) => {
+        const response = await api.get<AdminOrderResponse>("/admin/orders",
+            { params });
         return response.data;
     },
 

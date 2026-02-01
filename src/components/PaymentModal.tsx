@@ -5,6 +5,7 @@ import MyQrCode from "../assets/icons/myQRCode.jpg";
 import { uploadService } from "../services/uploadService";
 import toast from "react-hot-toast";
 import { orderService } from "../services/orderService";
+import { useNavigate } from "react-router-dom";
 
 type Step = "PAYMENT" | "UPLOAD" | "COMPLETE";
 
@@ -15,6 +16,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   totalAmount,
   onSuccess,
 }) => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<Step>("PAYMENT");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -364,7 +366,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
       <div className="flex flex-col md:flex-row gap-3 md:gap-4 w-full justify-center px-8">
         <button
-          onClick={onClose}
+          onClick={() => navigate("/")}
           className="px-6 py-2 rounded-full border-2 border-gray-300 text-gray-600 font-bold hover:bg-gray-50 transition-colors w-full md:w-auto"
         >
           Home Page

@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { Toaster, toast } from "react-hot-toast";
+import { io } from "socket.io-client";
 import {
   LayoutDashboard,
   Package,
@@ -18,7 +20,51 @@ const AdminLayout = () => {
   const { user, logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  // รายการเมนูตาม Wireframe เป๊ะๆ
+  // ฝัง Socket Logic ไว้ตรงนี้
+  useEffect(() => {
+    // ต่อสายไปหา Server
+    const socket = io(import.meta.env.VITE_SERVER_URL);
+
+    // ฟัง Event "ADMIN_UPDATE" จากทุกหน้า
+    socket.on("ADMIN_UPDATE", (data: any) => {
+      console.log("Notification Received:", data);
+
+      // แยกประเภทการแจ้งเตือน
+      if (data.type === "NEW_ORDER") {
+        // เล่นเสียงแจ้งเตือน (Optional)
+        // new Audio("/sounds/ping.mp3").play().catch(() => {});
+
+        toast.success(
+          (t) => (
+            <div onClick={() => toast.dismiss(t.id)} className="cursor-pointer">
+              <p className="font-bold">New Order #{data.orderId}</p>
+              <p className="text-sm">The customer has placed an order</p>
+            </div>
+          ),
+          { duration: 5000, position: "top-right" },
+        );
+      } else if (data.type === "NEW_SLIP") {
+        toast(
+          (t) => (
+            <div onClick={() => toast.dismiss(t.id)} className="cursor-pointer">
+              <p className="font-bold">Slip Attached #{data.orderId}</p>
+              <p className="text-sm">
+                The customer has attached the payment slip.
+              </p>
+            </div>
+          ),
+          { icon: "👀", duration: 5000, position: "top-right" },
+        );
+      }
+    });
+
+    // Cleanup เมื่อปิดหน้าเว็บ
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  // รายการเมนู (เหมือนเดิม)
   const menuItems = [
     {
       name: "Dashboard",
@@ -34,14 +80,14 @@ const AdminLayout = () => {
 
   return (
     <div className="flex min-h-screen bg-admin-bg font-kanit text-text_inverse">
-      {/* Sidebar (ยุบ-ขยายได้) */}
+      {/*  ใส่ Toaster ไว้ตรงนี้เพื่อให้แจ้งเตือนเด้งได้ */}
+      <Toaster />
+
+      {/* Sidebar (เหมือนเดิมเป๊ะ) */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-admin-card border-r border-gray-700 transition-all duration-300 shadow-admin
-        ${isSidebarOpen ? "w-64" : "w-20"}`}
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-admin-card border-r border-gray-700 transition-all duration-300 shadow-admin ${isSidebarOpen ? "w-64" : "w-20"}`}
       >
-        {/* Header: Logo & Toggle */}
         <div className="flex items-center justify-between h-20 px-4 border-b border-gray-700/50">
-          {/* โชว์ Logo เฉพาะตอนขยาย */}
           {isSidebarOpen ? (
             <span className="font-logo text-3xl text-admin-secondary font-black tracking-tighter truncate">
               YOURCLOTH
@@ -51,8 +97,6 @@ const AdminLayout = () => {
               YC
             </span>
           )}
-
-          {/* ปุ่ม Hamburger Toggle */}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors absolute right-2 top-6"
@@ -65,7 +109,6 @@ const AdminLayout = () => {
           </button>
         </div>
 
-        {/* Navigation Items */}
         <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto custom-scrollbar">
           {menuItems.map((item) => (
             <NavLink
@@ -74,14 +117,9 @@ const AdminLayout = () => {
               title={!isSidebarOpen ? item.name : ""}
               className={({ isActive }) => `
                 flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden
-                ${
-                  isActive
-                    ? "bg-admin-primary text-admin-secondary shadow-lg shadow-blue-900/40 font-bold"
-                    : "text-gray-400 hover:bg-white/5 hover:text-white"
-                }
+                ${isActive ? "bg-admin-primary text-admin-secondary shadow-lg shadow-blue-900/40 font-bold" : "text-gray-400 hover:bg-white/5 hover:text-white"}
               `}
             >
-              {/* Active Indicator Bar */}
               {({ isActive }) => (
                 <>
                   {isActive && (
@@ -92,15 +130,11 @@ const AdminLayout = () => {
                   >
                     {item.icon}
                   </div>
-
-                  {/* Text (ซ่อนถ้ายุบ) */}
                   <div
                     className={`whitespace-nowrap transition-all duration-300 ${isSidebarOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10 w-0 hidden"}`}
                   >
                     {item.name}
                   </div>
-
-                  {/* Arrow Icon for Active State */}
                   {isActive && isSidebarOpen && (
                     <ChevronRight size={16} className="ml-auto opacity-50" />
                   )}
@@ -110,7 +144,6 @@ const AdminLayout = () => {
           ))}
         </nav>
 
-        {/* Footer Logout */}
         <div className="p-3 border-t border-gray-700/50 bg-black/20">
           <button
             onClick={logout}
@@ -126,12 +159,10 @@ const AdminLayout = () => {
         </div>
       </aside>
 
-      {/* Main Content Area */}
+      {/* Main Content Area (เหมือนเดิม) */}
       <main
-        className={`flex-1 transition-all duration-300 min-h-screen flex flex-col
-        ${isSidebarOpen ? "ml-64" : "ml-20"}`}
+        className={`flex-1 transition-all duration-300 min-h-screen flex flex-col ${isSidebarOpen ? "ml-64" : "ml-20"}`}
       >
-        {/* Top Bar */}
         <header className="h-16 flex items-center justify-between px-8 bg-admin-card/80 backdrop-blur-md border-b border-gray-700 sticky top-0 z-40 shadow-sm">
           <h2 className="text-gray-300 text-lg font-medium hidden sm:block">
             Admin Management System
@@ -146,7 +177,6 @@ const AdminLayout = () => {
           </div>
         </header>
 
-        {/* 💉 Outlet: เจาะรูให้เนื้อหาลูกๆ โผล่ตรงนี้ */}
         <div className="p-6 md:p-8 flex-1 overflow-x-hidden">
           <Outlet />
         </div>

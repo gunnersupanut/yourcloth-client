@@ -48,7 +48,7 @@ const AdminOrderList = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const res = await adminOrderService.getOrders(
+      const res = await adminOrderService.getOrders({
         currentPage,
         itemsPerPage,
         activeTab,
@@ -56,7 +56,7 @@ const AdminOrderList = () => {
         sortBy,
         startDate,
         endDate,
-      );
+      });
 
       if (res.success) {
         setOrders(res.data.orders);
@@ -73,32 +73,13 @@ const AdminOrderList = () => {
 
   // Socket.io
   useEffect(() => {
-    // ต่อสายไปหา Server (Backend URL)
     const socket = io(import.meta.env.VITE_SERVER_URL);
-    console.log("Listening for Order Updates...");
 
-    // รอฟัง event ชื่อ "ADMIN_UPDATE"
-    socket.on("ADMIN_UPDATE", (data: any) => {
-      console.log("Socket Event Received:", data);
-
-      // แจ้งเตือน
-      if (data.type === "NEW_ORDER") {
-        toast.success(`New Order #${data.orderId} incoming.`, {
-          duration: 5000,
-        });
-      } else if (data.type === "NEW_SLIP") {
-        toast.success(`Check Slip for Order #${data.orderId}!`, {
-          duration: 5000,
-          icon: "👀",
-        });
-      }
-
-      // สั่งโหลดข้อมูลใหม่ทันที
-      // มันจะไปเรียก API getAllOrderAdmin ให้อัตโนมัติ
+    socket.on("ADMIN_UPDATE", () => {
+      console.log("Refreshing Table...");
       fetchOrders();
     });
 
-    // ตัดการเชื่อมต่อ socket io เมื่อปิดหน้านี้
     return () => {
       socket.disconnect();
     };
