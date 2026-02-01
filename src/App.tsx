@@ -1,7 +1,7 @@
 // src/App.tsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { ProtectedRoute } from "../src/components/auth/ProtectedRoute";
+import { ProtectedRoute } from "../src/routes/ProtectedRoute";
 // import layouts and pages
 import MainLayout from "./layouts/MainLayout";
 import Homepage from "./pages/HomePage";
@@ -27,6 +27,7 @@ import AdminLayout from "./layouts/AdminLayout";
 import AdminOrderList from "./pages/admin/AdminOrderList";
 import AdminCatalog from "./pages/admin/AdminCatalog";
 import AdminProductForm from "./pages/admin/AdminProductForm";
+import CheckoutGuard from "./routes/CheckoutGuard";
 const AboutPage = () => <div className="text-xl">🔐 หน้า About (รอทำ)</div>;
 const ContactPage = () => <div className="text-xl">🔐 หน้า Contact (รอทำ)</div>;
 
@@ -49,8 +50,14 @@ function App() {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/orders" element={<AdminOrderList />} />
             <Route path="/admin/catalog" element={<AdminCatalog />} />
-            <Route path="/admin/product/create" element={<AdminProductForm />} />
-            <Route path="/admin/product/edit/:id" element={<AdminProductForm />} />
+            <Route
+              path="/admin/product/create"
+              element={<AdminProductForm />}
+            />
+            <Route
+              path="/admin/product/edit/:id"
+              element={<AdminProductForm />}
+            />
           </Route>
         </Route>
         {/* --------------- */}
@@ -78,7 +85,9 @@ function App() {
           {/* ---โซน Customer ต้อง Login ถึงจะเข้าได้--- */}
           <Route element={<ProtectedRoute allowedRoles={["CUSTOMER"]} />}>
             <Route path="cart" element={<CartPage />} />
-            <Route path="checkout" element={<CheckoutPage />} />{" "}
+            <Route element={<CheckoutGuard />}>
+              <Route path="checkout" element={<CheckoutPage />} />
+            </Route>
             <Route path="/setting" element={<SettingLayout />}>
               {/* Redirect: เข้า /setting เฉยๆ ให้ดีดไป /setting/account */}
               <Route index element={<Navigate to="account" replace />} />
