@@ -13,9 +13,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
     >
       <Link
         to={`/shop/${product.category}/${product.id}`}
-        className="h-[350px]"
+        className="block w-full h-[250px] sm:h-[350px] overflow-hidden relative"
       >
-        <img src={product.image_url} alt={product.product_name} />
+        <img
+          src={product.image_url}
+          alt={product.product_name}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        />
       </Link>
 
       <div className="p-4 ">
