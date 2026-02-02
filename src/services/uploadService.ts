@@ -6,7 +6,8 @@ const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
 const PRESETS = {
     SLIP: import.meta.env.VITE_CLOUDINARY_PRESET_SLIP,
     PROBLEM: import.meta.env.VITE_CLOUDINARY_PRESET_PROBLEM,
-    PRODUCT: import.meta.env.VITE_CLOUDINARY_PRESET_PRODUCT
+    PRODUCT: import.meta.env.VITE_CLOUDINARY_PRESET_PRODUCT,
+    BANNER: import.meta.env.VITE_CLOUDINARY_PRESET_BANNER
 };
 
 export const uploadService = {
@@ -74,6 +75,29 @@ export const uploadService = {
             }
         } catch (error) {
             console.error("Product Upload Failed:", error);
+            throw error;
+        }
+    },
+    uploadBannerImage: async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', PRESETS.BANNER); // ใช้ Preset ของ Banner
+        formData.append('folder', 'my-shop/banners'); // แยก Folder 
+
+        try {
+            const response = await axios.post(
+                `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+                formData
+            );
+            console.log("Banner Image Uploaded:", response.data.secure_url);
+
+            // คืนค่ากลับไปให้หน้าบ้านเอาไปใช้ต่อ
+            return {
+                url: response.data.secure_url,
+                publicId: response.data.public_id
+            };
+        } catch (error) {
+            console.error("Banner Upload Failed:", error);
             throw error;
         }
     }

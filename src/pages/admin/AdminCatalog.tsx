@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Package, Image as ImageIcon, TicketPercent, Plus } from "lucide-react";
 import AdminProductList from "../admin/AdminProductList";
 import { useNavigate } from "react-router-dom";
-// import AdminBannerList from "../features/admin/AdminBannerList";
+import AdminBannerPage from "./AdminBannerPage";
 // import AdminDiscountList from "../features/admin/AdminDiscountList";
 
 const AdminCatalog = () => {
@@ -16,7 +16,7 @@ const AdminCatalog = () => {
   const tabs = [
     { id: "products", label: "Products", icon: <Package size={18} /> },
     { id: "banners", label: "Banners", icon: <ImageIcon size={18} /> },
-    // { id: "discounts", label: "Discounts", icon: <TicketPercent size={18} /> }, 
+    // { id: "discounts", label: "Discounts", icon: <TicketPercent size={18} /> },
   ];
   const handleCreate = () => {
     if (activeTab === "products") {
@@ -75,13 +75,7 @@ const AdminCatalog = () => {
         {activeTab === "products" && <AdminProductList />}
 
         {/* Banners Content */}
-        {activeTab === "banners" && (
-          <div className="text-center py-20 text-gray-500">
-            <ImageIcon size={48} className="mx-auto mb-4 opacity-50" />
-            <h3 className="text-xl font-bold text-white">Banner Management</h3>
-            <p>Coming Soon...</p>
-          </div>
-        )}
+        {activeTab === "banners" && <AdminBannerPage />}
 
         {/* Discounts Content */}
         {activeTab === "discounts" && (
