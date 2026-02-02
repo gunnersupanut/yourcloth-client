@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Calendar } from "lucide-react";
 import toast from "react-hot-toast";
 import { userService } from "../../services/userService";
+import ChangePasswordModal from "../../components/ui/ChangePasswordModal";
 
 // Interface
 interface UserProfile {
@@ -42,6 +43,7 @@ const MyAccount = () => {
   // State สำหรับเก็บ Error
   const [errors, setErrors] = useState<FormErrors>({});
 
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   // --- Fetch Data ---
   useEffect(() => {
     fetchProfile();
@@ -339,7 +341,7 @@ const MyAccount = () => {
         <div className="flex flex-col sm:flex-row justify-between gap-4 pt-6 mt-6 border-t border-gray-100">
           <button
             type="button"
-            onClick={() => toast("รอทำหน้า Change Password.")}
+            onClick={() => setIsChangePasswordOpen(true)}
             className="px-12 py-3 rounded-full border border-[#594a60] text-[#594a60] font-bold hover:bg-gray-50 transition-colors w-full sm:w-auto"
           >
             Change Password
@@ -354,6 +356,10 @@ const MyAccount = () => {
           </button>
         </div>
       </form>
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+      />
     </div>
   );
 };

@@ -9,4 +9,7 @@ export const userService = {
     updateProfile: async (data: any) => {
         return await api.put("/users/profile", data);
     },
+    changePassword: async (data: { current_password: string; new_password: string }) => {
+        return await api.put("/users/change-password", data);
+    },
 };
