@@ -54,7 +54,7 @@ export default function SettingLayout() {
             className="text-red-400 p-3 hover:bg-red-50 rounded-lg md:mt-4 md:w-full text-left md:text-left ml-auto md:ml-0"
             onClick={() => handleLogout()}
           >
-            🚪 <span className="hidden md:inline">Logout</span>
+            <span>Logout</span>
           </button>
         </nav>
       </aside>

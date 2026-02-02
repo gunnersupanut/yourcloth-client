@@ -20,7 +20,7 @@ export const addressService = {
         return response.data;
     },
     setDefault: async (addressId: number,) => {
-        const response = await api.delete(`/addresses/default/${addressId}`);
+        const response = await api.patch(`/addresses/default/${addressId}`);
         return response.data;
     },
 };
