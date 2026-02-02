@@ -49,10 +49,10 @@ const AdminOrderList = () => {
     setLoading(true);
     try {
       const res = await adminOrderService.getOrders({
-        currentPage,
-        itemsPerPage,
-        activeTab,
-        searchQuery,
+        page: currentPage,
+        limit: itemsPerPage,
+        status: activeTab,
+        search: searchQuery,
         sortBy,
         startDate,
         endDate,
@@ -88,8 +88,7 @@ const AdminOrderList = () => {
   // โหลดข้อมูลใหม่เมื่อ filter เปลี่ยน
   useEffect(() => {
     fetchOrders();
-  }, [currentPage, itemsPerPage, activeTab]);
-  // หมายเหตุ: searchQuery เอาออกจาก dependency array เพื่อกันยิงรัวๆ (จะยิงตอนกด Enter/Button)
+  }, [currentPage, itemsPerPage, activeTab, sortBy, startDate, endDate]);
 
   // --- Handlers ---
   const handleSearch = (e: React.FormEvent) => {
@@ -164,6 +163,7 @@ const AdminOrderList = () => {
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
+                  onClick={(e) => e.currentTarget.showPicker()}
                   className="bg-transparent text-white text-sm focus:outline-none [&::-webkit-calendar-picker-indicator]:invert cursor-pointer"
                 />
               </div>
@@ -172,12 +172,14 @@ const AdminOrderList = () => {
                 <input
                   type="date"
                   value={endDate}
-                  min={startDate} // ห้ามเลือกวันจบก่อนวันเริ่ม
+                  min={startDate}
                   onChange={(e) => setEndDate(e.target.value)}
+                  onClick={(e) => e.currentTarget.showPicker()}
                   className="bg-transparent text-white text-sm focus:outline-none [&::-webkit-calendar-picker-indicator]:invert cursor-pointer"
                 />
               </div>
-              {/* ปุ่ม Clear Date */}
+
+              {/* ปุ่ม Clear Date (เหมือนเดิม) */}
               {(startDate || endDate) && (
                 <button
                   onClick={clearDateFilter}
@@ -210,7 +212,7 @@ const AdminOrderList = () => {
           </div>
         </div>
 
-        {/* 2. Tabs Navigation */}
+        {/* Tabs Navigation */}
         <div className="bg-admin-card rounded-t-2xl p-2 border-b border-gray-700 overflow-x-auto custom-scrollbar">
           <div className="flex space-x-2 min-w-max">
             {TABS.map((tab) => (
