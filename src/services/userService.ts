@@ -12,4 +12,7 @@ export const userService = {
     changePassword: async (data: { current_password: string; new_password: string }) => {
         return await api.put("/users/change-password", data);
     },
+    deleteMyAccount: async () => {
+        return await api.delete("/users/account");
+    },
 };

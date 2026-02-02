@@ -3,6 +3,8 @@ import { Loader2, Calendar } from "lucide-react";
 import toast from "react-hot-toast";
 import { userService } from "../../services/userService";
 import ChangePasswordModal from "../../components/ui/ChangePasswordModal";
+import { useNavigate } from "react-router-dom";
+import ConfirmModal from "../../components/ui/ConfirmModal";
 
 // Interface
 interface UserProfile {
@@ -26,6 +28,7 @@ interface FormErrors {
 }
 
 const MyAccount = () => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
 
@@ -42,8 +45,10 @@ const MyAccount = () => {
 
   // State สำหรับเก็บ Error
   const [errors, setErrors] = useState<FormErrors>({});
-
+  // States สำหรับ Modal
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   // --- Fetch Data ---
   useEffect(() => {
     fetchProfile();
@@ -69,7 +74,7 @@ const MyAccount = () => {
       });
     } catch (error) {
       console.error(error);
-      toast.error("โหลดข้อมูลไม่สำเร็จ");
+      toast.error("Data loading failed.");
     } finally {
       setIsFetching(false);
     }
@@ -148,7 +153,29 @@ const MyAccount = () => {
       setIsLoading(false);
     }
   };
+  const onDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      // เรียก API ลบ
+      await userService.deleteMyAccount();
 
+      toast.success("Account deleted. We will miss you! 👋");
+
+      // 🧹 Clear Token & Data
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      // 🚀 ดีดไปหน้า Login หรือ Home
+      navigate("/login");
+      window.location.reload(); // Refresh เพื่อให้ App รู้ว่า Logout แล้วจริงๆ
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete account.");
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteModalOpen(false);
+    }
+  };
   if (isFetching) {
     return (
       <div className="flex h-96 items-center justify-center">
@@ -349,7 +376,7 @@ const MyAccount = () => {
 
           <button
             type="button"
-            onClick={() => toast.error("DELETE ACCOUNT")}
+            onClick={() => setIsDeleteModalOpen(true)}
             className="px-8 py-3 rounded-full bg-[#A898B0] text-white font-bold hover:bg-[#9685A0] transition-colors w-full sm:w-auto shadow-sm"
           >
             Delete Account
@@ -359,6 +386,16 @@ const MyAccount = () => {
       <ChangePasswordModal
         isOpen={isChangePasswordOpen}
         onClose={() => setIsChangePasswordOpen(false)}
+      />
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={onDeleteAccount}
+        title="Delete Account?"
+        message={`Are you sure you want to delete your account?\nThis action cannot be undone.`}
+        variant="danger"
+        confirmText="Yes, Delete Account"
+        isLoading={isDeleting}
       />
     </div>
   );
