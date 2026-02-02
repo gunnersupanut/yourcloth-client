@@ -28,6 +28,7 @@ import AdminOrderList from "./pages/admin/AdminOrderList";
 import AdminCatalog from "./pages/admin/AdminCatalog";
 import AdminProductForm from "./pages/admin/AdminProductForm";
 import CheckoutGuard from "./routes/CheckoutGuard";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
 const AboutPage = () => <div className="text-xl">🔐 หน้า About (รอทำ)</div>;
 const ContactPage = () => <div className="text-xl">🔐 หน้า Contact (รอทำ)</div>;
 
@@ -58,6 +59,7 @@ function App() {
               path="/admin/product/edit/:id"
               element={<AdminProductForm />}
             />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
           </Route>
         </Route>
         {/* --------------- */}

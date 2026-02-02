@@ -33,7 +33,7 @@ const AdminProductList = () => {
       setProducts(data);
     } catch (error) {
       console.error("Fetch Error:", error);
-      toast.error("โหลดข้อมูลไม่สำเร็จ! ลองใหม่นะวัยรุ่น 😭");
+      toast.error("Loading data failed.");
     } finally {
       setIsLoading(false);
     }
