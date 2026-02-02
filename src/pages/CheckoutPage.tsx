@@ -211,10 +211,10 @@ const CheckoutPage = () => {
     }
   };
 
-  const handleChooseDiscount = () => {
-    console.log(" User Clicked: Choose Discount");
-    toast("Feature 'Coupons' coming soon!", { icon: "🎟️" });
-  };
+  // const handleChooseDiscount = () => {
+  //   console.log(" User Clicked: Choose Discount");
+  //   toast("Feature 'Coupons' coming soon!", { icon: "🎟️" });
+  // };
 
   return (
     <div className="container mx-auto px-4 sm:px-6 max-w-7xl font-kanit">
@@ -463,7 +463,7 @@ const CheckoutPage = () => {
 
       {/* ส่วน Footer แบบ Full Width (ทะลุ Container) */}
       <div className="fixed bottom-0 z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.1)] w-screen left-1/2 -translate-x-1/2">
-        {/* Discount Section (Dark Purple) */}
+        {/* Discount Section (Dark Purple)
         <div className="bg-[#563F58] py-4">
           <div className="container mx-auto px-4 md:px-8 flex justify-end items-center gap-6">
             <span className="text-[#FFD700] flex items-center gap-2 font-medium cursor-pointer underline decoration-[#FFD700]">
@@ -489,7 +489,7 @@ const CheckoutPage = () => {
               Choose A Discount Code
             </button>
           </div>
-        </div>
+        </div> */}
 
         {/* 💰 Bar 2: Summary Section (Light Purple) */}
         <div className="bg-[#A795AD] py-6">

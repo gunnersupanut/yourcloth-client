@@ -8,7 +8,7 @@ import {
   Package,
   ShoppingCart,
   Users,
-  BarChart3,
+  // BarChart3,
   LifeBuoy,
   LogOut,
   Menu,
@@ -74,7 +74,7 @@ const AdminLayout = () => {
     { name: "Catalog", path: "/admin/catalog", icon: <Package size={20} /> },
     { name: "Order", path: "/admin/orders", icon: <ShoppingCart size={20} /> },
     { name: "User", path: "/admin/users", icon: <Users size={20} /> },
-    { name: "Report", path: "/admin/reports", icon: <BarChart3 size={20} /> },
+    // { name: "Report", path: "/admin/reports", icon: <BarChart3 size={20} /> },
     { name: "Support", path: "/admin/support", icon: <LifeBuoy size={20} /> },
   ];
 

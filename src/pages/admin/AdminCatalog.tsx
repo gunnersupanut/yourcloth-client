@@ -16,7 +16,7 @@ const AdminCatalog = () => {
   const tabs = [
     { id: "products", label: "Products", icon: <Package size={18} /> },
     { id: "banners", label: "Banners", icon: <ImageIcon size={18} /> },
-    { id: "discounts", label: "Discounts", icon: <TicketPercent size={18} /> }, // ทำทีหลังได้
+    // { id: "discounts", label: "Discounts", icon: <TicketPercent size={18} /> }, 
   ];
   const handleCreate = () => {
     if (activeTab === "products") {

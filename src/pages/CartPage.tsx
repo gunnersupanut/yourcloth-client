@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Trash2, Minus, Plus, Info, Ticket } from "lucide-react"; // ไอคอน
+import { Trash2, Minus, Plus, 
+  // Info, Ticket 
+} from "lucide-react"; // ไอคอน
 import { useCart } from "../contexts/CartContext";
 import toast from "react-hot-toast";
 import { cartService } from "../services/cart.service";
@@ -312,7 +314,7 @@ const CartPage = () => {
 
       {/* --- Bottom--- */}
       <div className="fixed bottom-0 w-full z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
-        {/*  Discount */}
+         {/* Discount
         <div className="w-full bg-primary py-3 sm:py-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-end items-center gap-8">
             <button className="text-secondary flex gap-2 items-center underline text-body hover:text-white transition-colors">
@@ -322,7 +324,7 @@ const CartPage = () => {
               <Ticket size={16} /> Add Coupon
             </button>
           </div>
-        </div>
+        </div> */}
 
         {/*Total & Button*/}
         <div className="w-full bg-tertiary py-4 sm:py-6">
