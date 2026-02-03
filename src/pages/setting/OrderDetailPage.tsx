@@ -433,21 +433,23 @@ export default function OrderDetail() {
                 </p>
                 <div className="flex flex-col text-h3xl text-secondary items-center gap-1 mb-4 md:mb-0">
                   <p className="mr-3">{order.parcelDetail?.shipping_carrier}</p>
-                  <div className="flex gap-2">
-                    <p>{order.parcelDetail?.parcel_number}</p>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(
-                          order.parcelDetail?.parcel_number || "",
-                        );
-                        toast.success("Copy Parcel number.");
-                      }}
-                      className="p-1 hover:bg-gray-100 rounded-md transition-colors"
-                      title="Copy Parcel Number"
-                    >
-                      <Copy className="w-4 h-4 text-secondary cursor-pointer" />
-                    </button>
-                  </div>
+                  {order?.parcelDetail && (
+                    <div className="flex gap-2">
+                      <p>{order.parcelDetail?.parcel_number}</p>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(
+                            order.parcelDetail?.parcel_number || "",
+                          );
+                          toast.success("Copy Parcel number.");
+                        }}
+                        className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+                        title="Copy Parcel Number"
+                      >
+                        <Copy className="w-4 h-4 text-secondary cursor-pointer" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 

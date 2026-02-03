@@ -27,10 +27,10 @@ import AdminLayout from "./layouts/AdminLayout";
 import AdminOrderList from "./pages/admin/AdminOrderList";
 import AdminCatalog from "./pages/admin/AdminCatalog";
 import AdminProductForm from "./pages/admin/AdminProductForm";
-import CheckoutGuard from "./routes/CheckoutGuard";
+import HistoryGuard from "./routes/HistoryGuard";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import ContactPage from "./pages/ContactPage";
 const AboutPage = () => <div className="text-xl">🔐 หน้า About (รอทำ)</div>;
-const ContactPage = () => <div className="text-xl">🔐 หน้า Contact (รอทำ)</div>;
 
 function App() {
   return (
@@ -82,12 +82,13 @@ function App() {
           <Route path="forgotpassword" element={<ForgotPasswordPage />} />
           <Route path="resetpassword" element={<ResetPasswordPage />} />
           <Route path="about" element={<AboutPage />} />
-          <Route path="contact" element={<ContactPage />} />
           {/* -------------- */}
           {/* ---โซน Customer ต้อง Login ถึงจะเข้าได้--- */}
           <Route element={<ProtectedRoute allowedRoles={["CUSTOMER"]} />}>
             <Route path="cart" element={<CartPage />} />
-            <Route element={<CheckoutGuard />}>
+            <Route path="contact" element={<ContactPage />} />
+            {/* Login */}
+            <Route element={<HistoryGuard />}>
               <Route path="checkout" element={<CheckoutPage />} />
             </Route>
             <Route path="/setting" element={<SettingLayout />}>

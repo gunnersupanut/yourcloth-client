@@ -4,7 +4,7 @@ import { userService } from "../services/userService";
 import { Loader2 } from "lucide-react";
 import ProfileGuardModal from "../components/ProfileGuardModal";
 
-const CheckoutGuard = () => {
+const HistoryGuard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
 
@@ -17,7 +17,7 @@ const CheckoutGuard = () => {
       const res = await userService.getProfile();
       const user = res.data.data;
 
-      //  LOGIC เช็คความครบ (ชื่อ, นามสกุล, เบอร์, วันเกิด, เพศ)
+      //  เช็คความครบ (ชื่อ, นามสกุล, เบอร์, วันเกิด, เพศ)
       if (
         user.name &&
         user.surname &&
@@ -59,4 +59,4 @@ const CheckoutGuard = () => {
   return <Outlet />;
 };
 
-export default CheckoutGuard;
+export default HistoryGuard;
