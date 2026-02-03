@@ -69,11 +69,7 @@ const LoginPage = () => {
       setLoading(false);
     }
   };
-  const handleSocialSignUp = () => {
-    toast.success("Not ready yet, but working on it", {
-      icon: "🔜",
-    });
-  };
+ 
   return (
     <div className="flex justify-center items-center">
       <AuthCard>
