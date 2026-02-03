@@ -50,7 +50,7 @@ const ContactPage = () => {
 
       // 2. Success Message
       toast.success(
-        "Your request has been successfully submitted! We will respond via email within 24-48 hours.",
+        "Your request has been successfully submitted.",
       );
 
       // Clear Form

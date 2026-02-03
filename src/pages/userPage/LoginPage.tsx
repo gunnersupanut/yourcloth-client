@@ -9,8 +9,6 @@ import toast from "react-hot-toast";
 // import pictures and icons here
 import UserIcon from "../../assets/icons/icons8-user-48 1.png";
 import PasswordIcon from "../../assets/icons/icons8-password-50 1.png";
-import FacebookIcon from "../../assets/icons/fb icon.png";
-import GoogleIcon from "../../assets/icons/gg icon.png";
 import ShowPassWordIcon from "../../assets/icons/icons8-eye-50 1.png";
 import HidePassWordIcon from "../../assets/icons/hidepasswordIcon.png";
 
@@ -162,23 +160,7 @@ const LoginPage = () => {
             </Link>
           </p>
 
-          <div className="flex justify-center gap-4 mt-4">
-            {/* Facebook Circle */}
-            <button
-              className="p-3 hover:scale-110 transition text-[#1877F2]"
-              onClick={handleSocialSignUp}
-            >
-              <img src={FacebookIcon} alt="FacebookIcon" width={60} />
-            </button>
-
-            {/* Google Circle */}
-            <button
-              className="p-3 hover:scale-110 transition text-red-500"
-              onClick={handleSocialSignUp}
-            >
-              <img src={GoogleIcon} alt="GoogleIcon" width={60} />
-            </button>
-          </div>
+     {/*  */}
         </div>
       </AuthCard>
     </div>
