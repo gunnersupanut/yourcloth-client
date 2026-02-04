@@ -17,13 +17,17 @@ export interface ProductVariant {
   color_code: string;
   color_name: string;
   size: string;
-  stock: number;      
-  price: number; 
+  stock: number;
+  price: number;
 }
 
 // Interface เดิม เพิ่ม field นี้เข้าไป
 export interface ProductDetail extends Product {
   variants: ProductVariant[];
+  gallery?: {
+    image_url: string;
+    display_order?: number; // (เผื่อไว้ถ้า backend ส่งมา)
+  }[];
 }
 
 export interface ProductAPIResponse {

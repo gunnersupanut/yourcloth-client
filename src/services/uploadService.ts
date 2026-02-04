@@ -78,6 +78,13 @@ export const uploadService = {
             throw error;
         }
     },
+    uploadGalleryImages: async (files: File[]) => {
+        // ใช้ Promise.all ยิงพร้อมกันรัวๆ (Parallel Upload)
+        const uploadPromises = files.map(file => uploadService.uploadProductImage(file));
+
+        // รอจนเสร็จทุกรูป แล้วคืนค่าเป็น Array ของ { url, publicId }
+        return await Promise.all(uploadPromises);
+    },
     uploadBannerImage: async (file: File) => {
         const formData = new FormData();
         formData.append('file', file);

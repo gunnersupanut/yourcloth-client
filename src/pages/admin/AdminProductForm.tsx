@@ -7,7 +7,7 @@ import {
   Loader2,
   Upload,
   X,
-  Check,
+  Check
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -23,7 +23,7 @@ interface MasterData {
 }
 
 interface VariantData {
-  variant_id?: number; //  มีเฉพาะตอน Edit
+  variant_id?: number;
   color_id: number;
   size_id: number;
   price: number;
@@ -81,8 +81,8 @@ const ColorSelector = ({
 
 const AdminProductForm = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // ดึง ID จาก URL
-  const isEditMode = Boolean(id); // เช็คโหมด: ถ้ามี ID = Edit, ไม่มี = Create
+  const { id } = useParams();
+  const isEditMode = Boolean(id);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -103,7 +103,7 @@ const AdminProductForm = () => {
     product_name: "",
     description: "",
     image_url: "",
-    file_path: "", // เพิ่ม file_path
+    file_path: "",
     category_id: 0,
     gender_id: 0,
     is_active: true,
@@ -113,13 +113,17 @@ const AdminProductForm = () => {
     { color_id: 0, size_id: 0, price: 0, stock_quantity: 0 },
   ]);
 
-  // --- Fetch Data (Master + Product if Edit) ---
+  // 🔥 GALLERY STATES (เพิ่มใหม่)
+  const [gallery, setGallery] = useState<any[]>([]); // รูปเดิมจาก DB
+  const [newGalleryFiles, setNewGalleryFiles] = useState<File[]>([]); // รูปใหม่ที่เลือกเพิ่ม
+  const [deletedGalleryIds, setDeletedGalleryIds] = useState<number[]>([]); // ID รูปเดิมที่จะลบ
+
+  // --- Fetch Data ---
   useEffect(() => {
     const initData = async () => {
       try {
         setIsDataLoading(true);
 
-        // โหลด Master Data ก่อน
         const masterData = await masterService.getMetadata();
         const cats = masterData.categories || [];
         const gens = masterData.genders || [];
@@ -131,37 +135,37 @@ const AdminProductForm = () => {
         setColors(cols);
         setSizes(szs);
 
-        // เช็คว่า Edit หรือ Create
         if (isEditMode && id) {
-          // 🔥 EDIT MODE: ดึงข้อมูลสินค้าเดิม
+          // EDIT MODE
           const product = await productService.getAdminById(Number(id));
 
-          // Map เข้า Form
           setFormData({
             product_name: product.product_name,
             description: product.description || "",
             image_url: product.image_url,
-            file_path: product.file_path || "", // รับมาด้วย
-            category_id:
-              product.category_id || (cats.length > 0 ? cats[0].id : 0),
+            file_path: product.file_path || "",
+            category_id: product.category_id || (cats.length > 0 ? cats[0].id : 0),
             gender_id: product.gender_id || (gens.length > 0 ? gens[0].id : 0),
             is_active: product.is_active ?? true,
           });
 
-          // Map Variants
           if (product.variants && product.variants.length > 0) {
             setVariants(
               product.variants.map((v: any) => ({
-                variant_id: v.variant_id || v.id, // สำคัญ ต้องเก็บ ID ไว้เช็คว่าเป็นของเก่า
+                variant_id: v.variant_id || v.id,
                 color_id: v.color_id,
                 size_id: v.size_id,
                 price: Number(v.price),
                 stock_quantity: Number(v.stock_quantity),
-              })),
+              }))
             );
           }
+          
+          // 🔥 Load Gallery
+          setGallery(product.gallery || []);
+
         } else {
-          // CREATE MODE: Set Default Values
+          // CREATE MODE
           setFormData((prev) => ({
             ...prev,
             category_id: cats.length > 0 ? cats[0].id : 0,
@@ -182,7 +186,7 @@ const AdminProductForm = () => {
       } catch (error) {
         console.error("Error loading data:", error);
         toast.error("Failed to load data.");
-        navigate("/admin/catalog"); // เด้งออกถ้าพัง
+        navigate("/admin/catalog");
       } finally {
         setIsDataLoading(false);
       }
@@ -191,12 +195,14 @@ const AdminProductForm = () => {
     initData();
   }, [id, isEditMode, navigate]);
 
-  // --- Clean up memory ---
+  // Clean up memory
   useEffect(() => {
     return () => {
       if (previewUrl && selectedFile) URL.revokeObjectURL(previewUrl);
+      // Clean up gallery previews
+      newGalleryFiles.forEach(file => URL.revokeObjectURL(URL.createObjectURL(file)));
     };
-  }, [previewUrl, selectedFile]);
+  }, [previewUrl, selectedFile, newGalleryFiles]);
 
   // --- Handlers ---
   const handleInputChange = (
@@ -232,6 +238,28 @@ const AdminProductForm = () => {
     setFormData((prev) => ({ ...prev, image_url: "" }));
   };
 
+  // 🔥 GALLERY HANDLERS
+  const handleGalleryFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      // Validate Size
+      const validFiles = files.filter(f => f.size <= 5 * 1024 * 1024);
+      if (validFiles.length !== files.length) toast.error("Some files were skipped (>5MB)");
+      
+      setNewGalleryFiles((prev) => [...prev, ...validFiles]);
+    }
+    e.target.value = ""; // Reset
+  };
+
+  const removeNewGalleryFile = (index: number) => {
+    setNewGalleryFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingGalleryImage = (imageId: number) => {
+    setDeletedGalleryIds((prev) => [...prev, imageId]);
+    setGallery((prev) => prev.filter((img) => img.id !== imageId));
+  };
+
   const handleVariantChange = (index: number, field: string, value: any) => {
     const newVariants = [...variants];
     newVariants[index] = { ...newVariants[index], [field]: Number(value) };
@@ -257,12 +285,11 @@ const AdminProductForm = () => {
     setVariants(variants.filter((_, i) => i !== index));
   };
 
-  // --- Submit Logic (Create + Update) ---
+  // --- Submit Logic ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.product_name) return toast.error("Product name is required!");
-    // Edit mode: ยอมให้ image_url เดิมค้างอยู่ได้
     if (!selectedFile && !formData.image_url)
       return toast.error("Product image is required!");
     if (variants.some((v) => v.price <= 0))
@@ -271,40 +298,62 @@ const AdminProductForm = () => {
     setIsLoading(true);
     try {
       let finalImageUrl = formData.image_url;
-      let finalFilePath = formData.file_path; // เก็บ path เดิมไว้ก่อน
+      let finalFilePath = formData.file_path;
 
-      // 1. Upload Image (ถ้ามีการเลือกใหม่)
+      // 1. Upload Main Image (รูปปก)
       if (selectedFile) {
         try {
-          const uploadRes =
-            await uploadService.uploadProductImage(selectedFile);
+          const uploadRes = await uploadService.uploadProductImage(selectedFile);
           finalImageUrl = uploadRes.url;
           finalFilePath = uploadRes.publicId;
         } catch (uploadError) {
           console.error(uploadError);
-          toast.error("Image upload failed");
+          toast.error("Main Image upload failed");
           setIsLoading(false);
           return;
         }
       }
 
-      // 2Prepare Payload
+      // 2. 🔥 Upload New Gallery Images (ถ้ามี)
+      let newGalleryData: { image_url: string; file_path: string }[] = [];
+      if (newGalleryFiles.length > 0) {
+        try {
+           // ใช้ Helper ใหม่ที่เราเพิ่งเพิ่มไป
+           const uploadedImages = await uploadService.uploadGalleryImages(newGalleryFiles);
+           
+           // แปลง format ให้ตรงกับที่ backend อยากได้
+           newGalleryData = uploadedImages.map(img => ({
+               image_url: img.url,
+               file_path: img.publicId
+           }));
+           
+        } catch (err) {
+            console.error(err);
+            toast.error("Gallery upload failed");
+            setIsLoading(false);
+            return;
+        }
+      }
+
+      // 3. Prepare Payload
       const payload = {
         ...formData,
         image_url: finalImageUrl,
         file_path: finalFilePath,
         category_id: Number(formData.category_id),
         gender_id: Number(formData.gender_id),
-        variants: variants, // ส่ง variants ที่มี variant_id (ของเก่า) และไม่มี (ของใหม่) ไปให้ backend จัดการ
+        variants: variants,
+        
+        // 🔥 เพิ่ม 2 fields นี้ส่งไปให้ Backend
+        new_gallery: newGalleryData,         // รูปใหม่ (URL + Path)
+        deleted_gallery_ids: deletedGalleryIds // ID รูปเก่าที่ต้องลบ
       };
 
       // Call API
       if (isEditMode && id) {
-        // UPDATE
         await productService.update(Number(id), payload);
         toast.success("Product Updated Successfully.");
       } else {
-        // CREATE
         await productService.create(payload);
         toast.success("Product Created Successfully.");
       }
@@ -320,7 +369,6 @@ const AdminProductForm = () => {
     }
   };
 
-  // --- Loading UI ---
   if (isDataLoading) {
     return (
       <div className="flex h-[500px] items-center justify-center text-white">
@@ -383,16 +431,12 @@ const AdminProductForm = () => {
               <h2 className="text-lg font-bold text-white">
                 General Information
               </h2>
-
-              {/* Switch Toggle */}
               {isEditMode && (
                 <div className="flex items-center gap-3">
                   <span
                     className={`text-sm font-bold ${formData.is_active ? "text-green-400" : "text-gray-500"}`}
                   >
-                    {formData.is_active
-                      ? "Active (Selling)"
-                      : "Inactive (Hidden)"}
+                    {formData.is_active ? "Active" : "Inactive"}
                   </span>
                   <button
                     type="button"
@@ -411,6 +455,7 @@ const AdminProductForm = () => {
                 </div>
               )}
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1">
                 Product Name *
@@ -580,13 +625,13 @@ const AdminProductForm = () => {
 
         {/* --- RIGHT COLUMN --- */}
         <div className="space-y-6">
-          <div className="bg-admin-card border border-gray-700 rounded-2xl p-6 shadow-sm sticky top-6">
+          <div className="bg-admin-card border border-gray-700 rounded-2xl p-6 shadow-sm">
             <h2 className="text-lg font-bold text-white mb-4 border-b border-gray-700 pb-2">
-              Media
+              Main Image
             </h2>
             <div className="space-y-4">
               <label className="block text-sm font-medium text-gray-400">
-                Product Image
+                Product Image (รูปปก)
               </label>
 
               <input
@@ -658,6 +703,66 @@ const AdminProductForm = () => {
               </div>
             </div>
           </div>
+
+          {/* 🔥 GALLERY SECTION (เพิ่มใหม่) */}
+          <div className="bg-admin-card border border-gray-700 rounded-2xl p-6 shadow-sm">
+             <h2 className="text-lg font-bold text-white mb-4 border-b border-gray-700 pb-2">Gallery Images</h2>
+             
+             {/* Grid รูป */}
+             <div className="grid grid-cols-2 gap-3 mb-4">
+                {/* 1. รูปเดิม (Existing) */}
+                {gallery.map(img => (
+                   <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden border border-gray-600 group">
+                      <img src={img.image_url} className="w-full h-full object-cover" alt="Gallery"/>
+                      {/* ปุ่มลบรูปเดิม */}
+                      <button 
+                        type="button" 
+                        onClick={() => removeExistingGalleryImage(img.id)} 
+                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                         <X size={14}/>
+                      </button>
+                   </div>
+                ))}
+                
+                {/* 2. รูปใหม่ Preview (New) */}
+                {newGalleryFiles.map((file, idx) => (
+                   <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-admin-primary/50 group">
+                      <img 
+                        src={URL.createObjectURL(file)} 
+                        className="w-full h-full object-cover opacity-80" 
+                        alt="New"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span className="bg-black/50 text-white text-xs px-2 py-1 rounded">NEW</span>
+                      </div>
+                      {/* ปุ่มลบรูปใหม่ */}
+                      <button 
+                        type="button" 
+                        onClick={() => removeNewGalleryFile(idx)} 
+                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-100 hover:bg-red-600"
+                      >
+                         <X size={14}/>
+                      </button>
+                   </div>
+                ))}
+
+                {/* 3. ปุ่ม Add (Dropzone) */}
+                <label className="aspect-square rounded-lg border-2 border-dashed border-gray-600 flex flex-col items-center justify-center cursor-pointer hover:border-admin-primary hover:bg-white/5 transition-colors">
+                   <Plus size={24} className="text-gray-400 mb-1"/>
+                   <span className="text-xs text-gray-400">Add</span>
+                   <input 
+                    type="file" 
+                    multiple // 🔥 เลือกได้หลายรูป
+                    accept="image/*" 
+                    className="hidden" 
+                    onChange={handleGalleryFileChange}
+                   />
+                </label>
+             </div>
+             <p className="text-xs text-gray-500">* Supported: JPG, PNG (Max 5MB)</p>
+          </div>
+
         </div>
       </div>
     </form>
