@@ -1,11 +1,17 @@
-import type { Product } from '../types/product';
+import type { Product, ProductAPIResponse, ProductParams } from '../types/product';
 import { api } from './api';
 
 export const productService = {
-    getAll: async (): Promise<Product[]> => {
+    getAllProducts: async (params: ProductParams = {}): Promise<ProductAPIResponse> => {
         try {
-            const response = await api.get('/products');
-            return response.data.result;
+            // ส่ง params ไปให้ axios จัดการ query string
+            const response = await api.get<ProductAPIResponse>('/products', {
+                params: params
+            });
+
+            // ส่งข้อมูลกลับไปทั้งก้อน (data + pagination)
+            return response.data;
+
         } catch (error) {
             console.error("Error fetching products:", error);
             throw error;

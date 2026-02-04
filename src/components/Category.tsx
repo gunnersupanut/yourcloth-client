@@ -1,72 +1,85 @@
 import { Link } from "react-router-dom";
-// import icon
-import headWearIcon from "../assets/icons/icons8-cap-96 1.png";
-import topsIcon from "../assets/icons/icons8-t-shirt-100 (1) 1.png";
-import pantsIcon from "../assets/icons/icons8-pant-96 1.png";
-import shoesIcon from "../assets/icons/icons8-sneaker-100 (1) 4.png";
-import accessoriesIcon from "../assets/icons/icons8-bag-100 1.png";
-const Category = () => {
-  // ข้อมูลหมวดหมู่ (Config ทีเดียวจบ)
-  const categories = [
-    {
-      id: 1,
-      name: "Head Wear",
-      icon: headWearIcon,
-      path: "/shop/Head Wear",
-    },
-    { id: 2, name: "Tops", icon: topsIcon, path: "/shop/Tops" },
-    { id: 3, name: "Pants", icon: pantsIcon, path: "/shop/Pants" },
-    { id: 4, name: "Shoes", icon: shoesIcon, path: "/shop/Shoes" },
-    {
-      id: 5,
-      name: "Accessories",
-      icon: accessoriesIcon,
-      path: "/shop/Accessories",
-    },
-  ];
-  return (
-    <div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 justify-items-center">
-        {categories.map((cat) => (
-          <Link
-            key={cat.id}
-            to={cat.path}
-            className="group flex flex-col items-center gap-4 cursor-pointer my-8 mb-10"
-          >
-            {/* --- วงกลม (Circle) --- */}
-            <div
-              className="
-              w-[150px] h-[150px] rounded-full
-              border-2 border-black bg-white 
-              shadow-[5px_5px_5px_rgba(0,0,0,0.25)]
-              flex items-center justify-center 
-              transition-all duration-300
-              
-              /* Hover Effect: เปลี่ยนพื้นเป็นสีเหลือง ขอบเหลือง เงาเด้ง */
-              group-hover:shadow-lg group-hover:-translate-y-1
-            "
-            >
-              {/* --- ไอคอน (Icon) --- */}
-              <div
-                className="
-                text-4xl md:text-5xl text-yellow-400 
-                transition-colors duration-300
-                
-                /* Hover Effect: ไอคอนเปลี่ยนเป็นสีขาว */
-                group-hover:text-white
-              "
-              >
-                <img src={cat.icon} alt="Icon.png" />
-              </div>
-            </div>
+import {
+  Crown,       // Head Wear
+  Shirt,       // Tops
+  Footprints,  // Shoes
+  Watch,       // Accessories
+} from "lucide-react";
 
-            {/* --- ชื่อหมวด (Label) --- */}
-            <span className="text-text_primary text-h3xl group-hover:text-secondary transition-colors">
-              {cat.name}
-            </span>
-          </Link>
-        ))}
-      </div>
+const PantsIcon = ({ size = 24, className = "", strokeWidth = 2 }: any) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M6 5v15a2 2 0 0 0 2 2h2l2-4 2 4h2a2 2 0 0 0 2-2V5" />
+      <rect x="6" y="2" width="12" height="3" rx="1" />
+    </svg>
+  );
+};
+
+const Category = () => {
+  const categories = [
+    { id: 1, name: "Head Wear", icon: Crown, path: "/shop/headwear" },
+    { id: 2, name: "Tops", icon: Shirt, path: "/shop/tops" },
+    { id: 3, name: "Pants", icon: PantsIcon, path: "/shop/pants" },
+    { id: 4, name: "Shoes", icon: Footprints, path: "/shop/shoes" },
+    { id: 5, name: "Accessories", icon: Watch, path: "/shop/accessories" },
+  ];
+
+  return (
+    // Grid Layout
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-8 py-4">
+      {categories.map((cat) => (
+        <Link
+          to={cat.path}
+          key={cat.id}
+          className="group flex flex-col items-center justify-center cursor-pointer"
+        >
+          <div className="
+            relative 
+            w-24 h-24 md:w-32 md:h-32  /* ขนาดวงกลม */
+            bg-white 
+            rounded-full 
+            border-2 border-gray-800   /* ขอบสีเข้มตาม Design */
+            flex items-center justify-center
+            shadow-md                  /* เงาเบาๆ */
+            transition-all duration-300
+            
+            /* Hover Effect: เด้งขึ้น + เงาเข้ม + ขอบสีเปลี่ยน */
+            group-hover:-translate-y-2
+            group-hover:shadow-xl
+            group-hover:border-secondary
+          ">
+            {/* ตัวไอคอน */}
+            <cat.icon
+              size={48} 
+              strokeWidth={1.5}
+              className="text-secondary transition-transform duration-300 group-hover:scale-110" 
+            />
+          </div>
+
+          <span className="
+            mt-4 
+            text-lg md:text-xl 
+            font-bold 
+            text-gray-800 
+            font-kanit
+            group-hover:text-secondary 
+            transition-colors
+          ">
+            {cat.name}
+          </span>
+        </Link>
+      ))}
     </div>
   );
 };

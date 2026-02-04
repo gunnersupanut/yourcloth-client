@@ -1,55 +1,69 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useCallback } from "react";
 import type { ReactNode } from "react";
-import type { Product } from "../types/product";
+import type { PaginationMeta, Product, ProductParams } from "../types/product";
 import { productService } from "../services/product.service";
 
-// กำหนด type ของ Context
+// กำหนด Type ของ Context ใหม่
 interface ProductContextType {
-  products: Product[]; // รายการสินค้าทั้งหมด
-  loading: boolean; // กำลังโหลดอยู่ไหม?
-  error: string | null; // มี Error อะไรไหม?
-  refreshProducts: () => void; // ปุ่มกดโหลดใหม่
+  products: Product[];
+  pagination: PaginationMeta; // เพิ่มตัวนี้
+  loading: boolean;
+  error: string | null;
+  fetchProducts: (params?: ProductParams) => Promise<void>;
 }
 
-// สร้าง Context
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
-// สร้าง Provider (ตัวครอบที่ส่งข้อมูลไปให้ตัวอื่นๆ)
 export const ProductProvider = ({ children }: { children: ReactNode }) => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Default Pagination State
+  const [pagination, setPagination] = useState<PaginationMeta>({
+    total: 0,
+    page: 1,
+    totalPages: 1,
+  });
+  const [loading, setLoading] = useState(false); // เปลี่ยนเป็น false เริ่มต้น (รอเรียก)
   const [error, setError] = useState<string | null>(null);
 
-  // (โหลดข้อมูล)
-  const fetchProducts = async () => {
+  // ฟังก์ชันโหลดของ (ใส่ useCallback เพื่อกัน render loop เวลาใช้ใน useEffect)
+  const fetchProducts = useCallback(async (params: ProductParams = {}) => {
     try {
       setLoading(true);
-      // เรียกใช้ Service
-      const data = await productService.getAll();
-      setProducts(data);
+      setError(null);
+
+
+      const response = await productService.getAllProducts(params);
+      console.log("Product data:", response);
+      // Backend ส่งมาแบบนี้: { success: true, data: [...], pagination: {...} }
+      // หรือถ้า Service return data.data ก็ปรับตรงนี้ตาม response จริงนายนะ
+      setProducts(response.data || response); // กันเหนียว
+
+      if (response.pagination) {
+        setPagination(response.pagination);
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Fetch Error:", err);
       setError("ไม่สามารถโหลดข้อมูลสินค้าได้");
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
-  };
-
-  // สั่งให้ทำงานครั้งแรกทันทีที่เข้าเว็บ
-  useEffect(() => {
-    fetchProducts();
   }, []);
-  // ส่งออกไปให้ตัวอื่นใช้
+
   return (
     <ProductContext.Provider
-      value={{ products, loading, error, refreshProducts: fetchProducts }}
+      value={{
+        products,
+        pagination,
+        loading,
+        error,
+        fetchProducts,
+      }}
     >
       {children}
     </ProductContext.Provider>
   );
 };
 
-// สร้าง Hook  ไว้ให้หน้าอื่นเรียกใช้ง่ายๆ
 export const useProduct = () => {
   const context = useContext(ProductContext);
   if (!context) {

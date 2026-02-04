@@ -1,22 +1,26 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 
 const Breadcrumbs = () => {
   const location = useLocation();
+  
+  // ดึง Search Param ออกมา
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("search");
 
-  // แยก URL ออกเป็นชิ้นๆ (เช่น /shop/men -> ['', 'shop', 'men'])
-  // filter((x) => x) คือตัดตัวว่างทิ้ง
   const pathnames = location.pathname.split("/").filter((x) => x);
-  // ดัก productDetail
-  // ถ้า url ขึ้นต้นด้วย shop และมีความยาว 3 ท่อน (เช่น /shop/men/123)
+
+  // ดัก productDetail (เหมือนเดิม)
   const isProductDetailPage = pathnames[0] === "shop" && pathnames.length === 3;
-  // ถ้าไม่มี pathnames เลย (อยู่หน้า Home) ก็ไม่ต้องแสดงอะไร
+
   if (pathnames.length === 0 || isProductDetailPage) {
     return null;
   }
+
   return (
     <nav className="text-sm font-medium text-text_secondary p-6">
-      <ol className="list-none p-0 inline-flex">
-        {/* === 1. ปุ่ม Home (มีเสมอ) === */}
+      <ol className="list-none p-0 inline-flex flex-wrap items-center"> 
+        
+        {/* === ปุ่ม Home === */}
         <li className="flex items-center">
           <Link
             to="/"
@@ -26,18 +30,16 @@ const Breadcrumbs = () => {
           </Link>
         </li>
 
-        {/* === 2. Loop สร้างปุ่มตาม URL === */}
+        {/* === Loop สร้างปุ่มตาม URL === */}
         {pathnames.map((value, index) => {
-          // สร้าง Link URL สะสม (เช่น รอบแรกเป็น /shop รอบสองเป็น /shop/men)
           const to = `/${pathnames.slice(0, index + 1).join("/")}`;
 
-          // เช็คว่าเป็นหน้าสุดท้ายไหม? (ถ้าใช่ ให้เป็นสีเข้ม และกดไม่ได้)
-          const isLast = index === pathnames.length - 1;
+          // เช็คว่าเป็นตัวสุดท้ายจริงๆ หรือไม่?
+          // ถ้าเป็นตัวสุดท้ายของ Path แต่ 'มี Search ต่อท้าย' -> ถือว่ายังไม่จบ (ต้องเป็น Link)
+          // ถ้าเป็นตัวสุดท้าย และ 'ไม่มี Search' -> จบจริง (เป็น Text ธรรมดา)
+          const isLastPath = index === pathnames.length - 1;
+          const isActive = isLastPath && !searchQuery; // ถ้ามี search, ตัวนี้จะไม่ Active
 
-          // แปลงชื่อให้สวยขึ้น (เช่น product-detail -> Product Detail)
-          // 1. decodeURIComponent: แก้ภาษาไทย หรืออักขระพิเศษ
-          // 2. replace: เปลี่ยนขีด - เป็นช่องว่าง
-          // 3. charAt(0).toUpperCase: ตัวแรกตัวใหญ่
           const name = decodeURIComponent(value).replace(/-/g, " ");
           const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
 
@@ -47,13 +49,13 @@ const Breadcrumbs = () => {
                 /
               </span>
 
-              {isLast ? (
-                // หน้าปัจจุบัน
+              {isActive ? (
+                // หน้าปัจจุบัน (ไม่มี Search)
                 <span className="text-text_primary font-bold text-sm md:text-h3xl truncate max-w-[150px] md:max-w-none">
                   {formattedName}
                 </span>
               ) : (
-                // หน้าก่อนหน้า
+                // หน้าก่อนหน้า (หรือหน้าปัจจุบันที่มี Search ต่อท้าย)
                 <Link
                   to={to}
                   className="hover:text-secondary transition-colors text-text_secondary text-sm md:text-h3xl"
@@ -64,6 +66,19 @@ const Breadcrumbs = () => {
             </li>
           );
         })}
+
+        {/* === ส่วนงอก Search (ถ้ามี) === */}
+        {searchQuery && (
+          <li className="flex items-center">
+             <span className="mx-1 md:mx-2 text-text_secondary text-sm md:text-xl">
+                /
+             </span>
+             <span className="text-text_primary font-bold text-sm md:text-h3xl truncate max-w-[200px] md:max-w-none">
+                Search: "{searchQuery}"
+             </span>
+          </li>
+        )}
+
       </ol>
     </nav>
   );

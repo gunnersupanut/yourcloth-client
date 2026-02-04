@@ -6,6 +6,7 @@ const ScrollToTop = () => {
 
   useEffect(() => {
     // เมื่อ pathname เปลี่ยน (เปลี่ยนหน้า) ให้ดีดไปบนสุดทันที
+    if (pathname === "/shop") return;
     window.scrollTo({
       top: 0,
       left: 0,

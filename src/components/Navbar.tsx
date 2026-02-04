@@ -4,10 +4,9 @@ import { useAuth } from "../contexts/AuthContext";
 
 import AuthModal from "./AuthModal";
 // import Icon
-import searchIcon from "../assets/search_icon.png";
 import accountIcon from "../assets/account_icon.png";
-import cartIcon from "../assets/cart_icon.png";
 import { useCart } from "../contexts/CartContext";
+import { Search, ShoppingCart } from "lucide-react";
 
 const Navbar = () => {
   // ดึง user กับ logout มาใช้ได้เลย (ไม่ต้องเขียน logic แกะ token แล้ว)
@@ -32,26 +31,44 @@ const Navbar = () => {
       : "text-white hover:text-secondary transition pb-1"; // Inactive Style
   };
 
-  // เก็บ class style ของไอคอน hover
-  const iconClass = `p-2 rounded-full text-white border-2 transition-all duration-300 hover:border-secondary`;
-
   const iconLinkClass = ({ isActive }: { isActive: boolean }) => {
     return isActive
       ? `p-2 rounded-full text-white border-2 border-secondary transition-all duration-300 ` // Active Style
       : `p-2 rounded-full text-white border-2 border-transparent transition-all duration-300 hover:border-secondary`; // Inactive Style
   };
   // ฟังก์ชันจัดการการกด Enter ในช่องค้นหา
-  const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // เช็คว่ากด Enter และมีข้อความไหม
-    if (e.key === "Enter" && searchText.trim() !== "") {
-      // 🚀 ไปหน้า Shop พร้อมแนบ ?search=คำค้น
+  // แยก Logic ค้นหาออกมาเป็นฟังก์ชัน (จะได้เรียกใช้ทั้งตอนกด Enter และกดปุ่ม)
+  const handleSearchExecute = () => {
+    if (searchText.trim() !== "") {
       navigate(`/shop?search=${encodeURIComponent(searchText.trim())}`);
-
-      // ปิดช่อง Search เพื่อความเนียน
       setIsSearchOpen(false);
+      // setSearchText(""); // (Optional) ถ้าอยากให้ค้นเสร็จแล้วล้างข้อความ ก็เปิดบรรทัดนี้
     }
   };
 
+  //  ฟังก์ชันกด Enter (เรียกใช้ตัวข้างบน)
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearchExecute();
+    }
+  };
+
+  // ฟังก์ชันปุ่มแว่นขยาย (The Smart Button)
+  const handleIconClick = () => {
+    if (!isSearchOpen) {
+      // ถ้าปิดอยู่ -> ให้เปิด
+      setIsSearchOpen(true);
+    } else {
+      // ถ้าเปิดอยู่...
+      if (searchText.trim() !== "") {
+        // มีข้อความ -> ค้นหาเลย
+        handleSearchExecute();
+      } else {
+        // ไม่มีข้อความ 
+        setIsSearchOpen(false);
+      }
+    }
+  };
   const handleCartClick = (e: React.MouseEvent) => {
     if (!isAuthenticated) {
       // อย่าเพิ่งเปลี่ยนหน้า
@@ -93,27 +110,40 @@ const Navbar = () => {
         <div className="flex items-center space-x-3">
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search 'Hoodie', 'Black', 'Oversize'..."
             className={`
-                    bg-white text-black placeholder-gray-300 outline-none
-                    transition-all duration-300 ease-in-out rounded-[20px] p-1 
-                    ${
-                      isSearchOpen
-                        ? "w-50 px-2 opacity-100"
-                        : "w-0 px-0 opacity-0"
-                    }
-                `}
+           bg-white text-black placeholder-gray-400 outline-none border border-gray-200
+           transition-all duration-300 ease-in-out rounded-full py-2
+           shadow-sm text-sm
+           ${
+             isSearchOpen
+               ? "w-[220px] px-4 opacity-100 ml-2"
+               : "w-0 px-0 opacity-0 border-none"
+           }
+        `}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            onKeyDown={handleSearchSubmit}
+            onKeyDown={handleKeyDown}
           />
+
+          {/* Search Button (Smart Button) */}
           <button
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-            className={`${iconClass} ${
-              isSearchOpen ? "border-secondary" : "border-transparent"
-            }`}
+            onClick={handleIconClick}
+            className={`
+    transition-all duration-300 rounded-full p-2 active:scale-95
+    ${
+      isSearchOpen
+        ? "bg-primary/10 text-black"
+        : "bg-transparent text-secondary hover:scale-105"
+    } 
+  `}
+            title={
+              isSearchOpen && searchText ? "Click to Search" : "Open Search"
+            }
           >
-            <img src={searchIcon} alt="Search_Icon" className="w-[50px]" />
+            {/* ใช้ Component Search แทน img */}
+            {/* strokeWidth={2.5} คือทำให้เส้นหนาขึ้นหน่อย ดูเท่ๆ */}
+            <Search className="w-6 h-6 md:w-7 md:h-7" strokeWidth={2.5} />
           </button>
           {isAuthenticated ? (
             // Login แล้ว
@@ -179,15 +209,29 @@ const Navbar = () => {
           {/* Cart Icon */}
           <NavLink
             to="/cart"
-            className={`${iconLinkClass} relative`}
             onClick={handleCartClick}
+            className={`
+    relative group p-2 rounded-full transition-all duration-300 
+  `}
           >
-            <img src={cartIcon} alt="Cart_Icon" className="w-[50px]" />
+            {/* ไอคอนตะกร้า */}
+            <ShoppingCart
+              className="w-6 h-6 md:w-7 md:h-7 text-secondary hover:scale-105 transition-colors"
+              strokeWidth={2.5}
+            />
 
-            {/* ส่วนของ Badge (แสดงเฉพาะตอนมีของ > 0) */}
+            {/* ส่วนของ Badge (แจ้งเตือนจำนวน) */}
             {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] text-button text-white shadow-sm ring-2 ring-white">
-                {/* ถ้าเกิน 99 ให้โชว์ 99+*/}
+              <span
+                className="
+      absolute top-0 right-0 
+      flex h-5 w-5 items-center justify-center 
+      rounded-full bg-red-600 
+      text-[10px] font-bold text-white 
+      shadow-sm ring-2 ring-white
+      animate-bounce-short /* (Optional) เพิ่ม animation เด้งดึ๋งๆ ตอนตัวเลขเปลี่ยนจะเท่มาก */
+    "
+              >
                 {totalItems > 99 ? "99+" : totalItems}
               </span>
             )}
