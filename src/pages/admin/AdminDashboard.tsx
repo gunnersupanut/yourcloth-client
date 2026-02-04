@@ -32,7 +32,7 @@ const AdminDashboard = () => {
     });
 
         const allOrders: AdminOrder[] = response.data.orders || response.data;
-        console.log("All orders.", allOrders);
+        // console.log("All orders.", allOrders);
 
         // Helper สำหรับเช็คสถานะจ่ายเงินแล้ว
         const paidStatuses = ["PAID", "SHIPPED", "COMPLETE", "COMPLETED"];

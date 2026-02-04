@@ -51,7 +51,7 @@ const AdminOrderDetailModal = ({
     try {
       const res = await adminOrderService.getOrderDetails(orderId);
       setOrder(res.data || res);
-      console.log("OrderData:", res);
+      // console.log("OrderData:", res);
     } catch (error) {
       console.error(error);
       toast.error("Failed to load order details");

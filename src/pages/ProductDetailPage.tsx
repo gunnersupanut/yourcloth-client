@@ -13,6 +13,7 @@ import shareIcon from "../assets/icons/icons8-share-100 1.png";
 import FeaturedSlider from "../components/FeaturedSlider";
 import { cartService } from "../services/cart.service";
 import { useCart } from "../contexts/CartContext";
+import ShareModal from "../components/ShareModal";
 
 type ProductParams = {
   category: string;
@@ -30,7 +31,9 @@ const ProductDetailPage = () => {
   const cachedProduct = products.find((p) => p.id === Number(id));
 
   const [product, setProduct] = useState<ProductDetail | null>(
-    cachedProduct ? ({ ...cachedProduct, variants: [] } as ProductDetail) : null,
+    cachedProduct
+      ? ({ ...cachedProduct, variants: [] } as ProductDetail)
+      : null,
   );
 
   const [loading, setLoading] = useState(!cachedProduct);
@@ -40,12 +43,13 @@ const ProductDetailPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState("");
 
-  // Logic ดึง Gallery จาก API 
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  // Logic ดึง Gallery จาก API
 
   const galleryImages = useMemo(() => {
     if (!product) return [];
-    
-    // เริ่มต้นด้วยรูปปก 
+
+    // เริ่มต้นด้วยรูปปก
     const images = [product.image_url];
 
     // ถ้ามี Gallery จาก DB ให้เอามาต่อท้าย
@@ -53,10 +57,9 @@ const ProductDetailPage = () => {
       // product.gallery เป็น array ของ object { image_url: "..." }
       const galleryUrls = product.gallery.map((g: any) => g.image_url);
       images.push(...galleryUrls);
-    } 
+    }
     return images;
   }, [product]);
-
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -64,7 +67,7 @@ const ProductDetailPage = () => {
       try {
         const res = await productService.getById(id);
         setProduct(res.result);
-        
+
         // Set รูปแรกเป็น Main Image
         if (res.result?.image_url) {
           setMainImage(res.result.image_url);
@@ -112,15 +115,34 @@ const ProductDetailPage = () => {
   const displayPrice = currentVariant ? currentVariant.price : product?.price;
 
   if (loading) return <div className="p-10 text-center">Loading...</div>;
-  if (!product) return <div className="p-10 text-center">Product not found</div>;
+  if (!product)
+    return <div className="p-10 text-center">Product not found</div>;
 
   const handleQuantity = (type: "inc" | "dec") => {
     if (type === "dec" && quantity > 1) setQuantity(quantity - 1);
     if (type === "inc") setQuantity(quantity + 1);
   };
 
-  const handleShare = () => {
-    toast.success(`Share Coming Soon.`, { icon: "🔜" });
+  const handleShare = async () => {
+    const shareData = {
+      title: product?.product_name || "Check this out!",
+      text: product?.description || "Awesome product at YourCloth",
+      url: window.location.href, // เอา URL หน้าปัจจุบัน
+    };
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      );
+    if (isMobile && navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.log("Error sharing:", err);
+      }
+    } else {
+      // 💻 ถ้าเป็น PC (ถึงจะมี navigator.share ก็ไม่สน) -> เปิด Modal เราโลด!
+      setIsShareModalOpen(true);
+    }
   };
   const handleSizeDetails = () => {
     toast.success(`Size Details Coming Soon.`, { icon: "🔜" });
@@ -201,15 +223,28 @@ const ProductDetailPage = () => {
       <nav className="text-sm text-text_secondary mb-8 py-5 overflow-x-auto whitespace-nowrap">
         <ol className="list-none p-0 inline-flex items-center">
           <li className="flex items-center">
-            <Link to="/" className="hover:text-secondary transition-colors text-h3xl">Home</Link>
+            <Link
+              to="/"
+              className="hover:text-secondary transition-colors text-h3xl"
+            >
+              Home
+            </Link>
           </li>
           <span className="mx-2 text-text_secondary">/</span>
           <li className="flex items-center">
-            <Link to="/shop" className="hover:text-secondary transition-colors text-h3xl">Shop</Link>
+            <Link
+              to="/shop"
+              className="hover:text-secondary transition-colors text-h3xl"
+            >
+              Shop
+            </Link>
           </li>
           <span className="mx-2 text-text_secondary">/</span>
           <li className="flex items-center">
-            <Link to={`/shop/${product.category || ""}`} className="hover:text-secondary transition-colors text-h3xl capitalize">
+            <Link
+              to={`/shop/${product.category || ""}`}
+              className="hover:text-secondary transition-colors text-h3xl capitalize"
+            >
               {product.category || "Category"}
             </Link>
           </li>
@@ -228,7 +263,9 @@ const ProductDetailPage = () => {
           <p className="text-h1xl text-primary">{product.product_name}</p>
         </div>
         <div className="flex items-center">
-          <p className="text-bodyxl text-text_primary">{product.description || "-"}</p>
+          <p className="text-bodyxl text-text_primary">
+            {product.description || "-"}
+          </p>
         </div>
 
         {/* IMAGE GALLERY */}
@@ -303,13 +340,17 @@ const ProductDetailPage = () => {
             {Number(displayPrice).toLocaleString("en-US", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
-            })} ฿
+            })}{" "}
+            ฿
           </div>
 
           {/* Color */}
           <div className="mb-4">
             <h3 className="text-bodyxl font-medium text-gray-900 mb-6">
-              Color <span className="text-primary font-bold ml-2">{selectedColor || "-"}</span>
+              Color{" "}
+              <span className="text-primary font-bold ml-2">
+                {selectedColor || "-"}
+              </span>
             </h3>
             <div className="flex flex-wrap gap-5">
               {product?.available_colors?.map((color: any) => {
@@ -343,11 +384,12 @@ const ProductDetailPage = () => {
                     onClick={() => setSelectedSize(size)}
                     className={`
                       w-12 h-12 flex items-center justify-center rounded-sm text-sm font-bold border-transparent transition-all duration-300 shadow-[2px_2px_5px_0px_rgba(0,0,0,0.25)]
-                      ${!isAvailable 
-                        ? "bg-gray-100 text-gray-300 border-gray-200 cursor-not-allowed decoration-slice line-through" 
-                        : isSelected 
-                          ? "bg-secondary text-text_inverse shadow-md" 
-                          : "bg-tertiary text-primary hover:scale-110 hover:text-text_inverse"
+                      ${
+                        !isAvailable
+                          ? "bg-gray-100 text-gray-300 border-gray-200 cursor-not-allowed decoration-slice line-through"
+                          : isSelected
+                            ? "bg-secondary text-text_inverse shadow-md"
+                            : "bg-tertiary text-primary hover:scale-110 hover:text-text_inverse"
                       }
                     `}
                   >
@@ -392,7 +434,9 @@ const ProductDetailPage = () => {
             <button
               disabled={addingToCart}
               className={`w-full font-bold py-3.5 rounded-full shadow-md transition transform active:scale-[0.98] hover:scale-105 ${
-                addingToCart ? "bg-quaternary text-white" : "bg-yellow-400 text-white"
+                addingToCart
+                  ? "bg-quaternary text-white"
+                  : "bg-yellow-400 text-white"
               }`}
               onClick={handleAddCart}
             >
@@ -417,7 +461,15 @@ const ProductDetailPage = () => {
           <FeaturedSlider currentProductId={product.id} />
         </div>
       </div>
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        url={window.location.href}
+      />
     </div>
   );
 };
