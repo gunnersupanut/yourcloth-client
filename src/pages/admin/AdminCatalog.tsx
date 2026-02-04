@@ -31,7 +31,7 @@ const AdminCatalog = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight">
-            Catalog Management
+            Catalog <span className="text-secondary">Management</span>
           </h1>
           <p className="text-gray-400 mt-1">
             Manage your products, banners, and promotions here.

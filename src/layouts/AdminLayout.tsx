@@ -79,7 +79,7 @@ const AdminLayout = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-admin-bg font-kanit text-text_inverse">
+   <div className="flex h-screen bg-admin-bg font-kanit text-text_inverse overflow-auto">
       {/*  ใส่ Toaster ไว้ตรงนี้เพื่อให้แจ้งเตือนเด้งได้ */}
       <Toaster />
 
@@ -161,7 +161,7 @@ const AdminLayout = () => {
 
       {/* Main Content Area (เหมือนเดิม) */}
       <main
-        className={`flex-1 transition-all duration-300 min-h-screen flex flex-col ${isSidebarOpen ? "ml-64" : "ml-20"}`}
+        className={`flex-1 flex flex-col h-full transition-all duration-300 relative ${isSidebarOpen ? "ml-64" : "ml-20"}`}
       >
         <header className="h-16 flex items-center justify-between px-8 bg-admin-card/80 backdrop-blur-md border-b border-gray-700 sticky top-0 z-40 shadow-sm">
           <h2 className="text-gray-300 text-lg font-medium hidden sm:block">
@@ -176,8 +176,7 @@ const AdminLayout = () => {
             </div>
           </div>
         </header>
-
-        <div className="p-6 md:p-8 flex-1 overflow-x-hidden">
+        <div className="flex-1 overflow-x-auto overflow-y-auto p-6 md:p-8">
           <Outlet />
         </div>
       </main>

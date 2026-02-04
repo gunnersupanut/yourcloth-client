@@ -7,7 +7,7 @@ import {
   Loader2,
   Upload,
   X,
-  Check
+  Check,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -144,7 +144,8 @@ const AdminProductForm = () => {
             description: product.description || "",
             image_url: product.image_url,
             file_path: product.file_path || "",
-            category_id: product.category_id || (cats.length > 0 ? cats[0].id : 0),
+            category_id:
+              product.category_id || (cats.length > 0 ? cats[0].id : 0),
             gender_id: product.gender_id || (gens.length > 0 ? gens[0].id : 0),
             is_active: product.is_active ?? true,
           });
@@ -157,13 +158,12 @@ const AdminProductForm = () => {
                 size_id: v.size_id,
                 price: Number(v.price),
                 stock_quantity: Number(v.stock_quantity),
-              }))
+              })),
             );
           }
-          
+
           // 🔥 Load Gallery
           setGallery(product.gallery || []);
-
         } else {
           // CREATE MODE
           setFormData((prev) => ({
@@ -200,7 +200,9 @@ const AdminProductForm = () => {
     return () => {
       if (previewUrl && selectedFile) URL.revokeObjectURL(previewUrl);
       // Clean up gallery previews
-      newGalleryFiles.forEach(file => URL.revokeObjectURL(URL.createObjectURL(file)));
+      newGalleryFiles.forEach((file) =>
+        URL.revokeObjectURL(URL.createObjectURL(file)),
+      );
     };
   }, [previewUrl, selectedFile, newGalleryFiles]);
 
@@ -243,9 +245,10 @@ const AdminProductForm = () => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
       // Validate Size
-      const validFiles = files.filter(f => f.size <= 5 * 1024 * 1024);
-      if (validFiles.length !== files.length) toast.error("Some files were skipped (>5MB)");
-      
+      const validFiles = files.filter((f) => f.size <= 5 * 1024 * 1024);
+      if (validFiles.length !== files.length)
+        toast.error("Some files were skipped (>5MB)");
+
       setNewGalleryFiles((prev) => [...prev, ...validFiles]);
     }
     e.target.value = ""; // Reset
@@ -293,7 +296,7 @@ const AdminProductForm = () => {
     if (!selectedFile && !formData.image_url)
       return toast.error("Product image is required!");
     if (variants.some((v) => v.price <= 0))
-      return toast.error("Price must be greater than 0!");
+      return toast.error("Price must be greater than 0.");
 
     setIsLoading(true);
     try {
@@ -303,7 +306,8 @@ const AdminProductForm = () => {
       // 1. Upload Main Image (รูปปก)
       if (selectedFile) {
         try {
-          const uploadRes = await uploadService.uploadProductImage(selectedFile);
+          const uploadRes =
+            await uploadService.uploadProductImage(selectedFile);
           finalImageUrl = uploadRes.url;
           finalFilePath = uploadRes.publicId;
         } catch (uploadError) {
@@ -318,20 +322,20 @@ const AdminProductForm = () => {
       let newGalleryData: { image_url: string; file_path: string }[] = [];
       if (newGalleryFiles.length > 0) {
         try {
-           // ใช้ Helper ใหม่ที่เราเพิ่งเพิ่มไป
-           const uploadedImages = await uploadService.uploadGalleryImages(newGalleryFiles);
-           
-           // แปลง format ให้ตรงกับที่ backend อยากได้
-           newGalleryData = uploadedImages.map(img => ({
-               image_url: img.url,
-               file_path: img.publicId
-           }));
-           
+          // ใช้ Helper ใหม่ที่เราเพิ่งเพิ่มไป
+          const uploadedImages =
+            await uploadService.uploadGalleryImages(newGalleryFiles);
+
+          // แปลง format ให้ตรงกับที่ backend อยากได้
+          newGalleryData = uploadedImages.map((img) => ({
+            image_url: img.url,
+            file_path: img.publicId,
+          }));
         } catch (err) {
-            console.error(err);
-            toast.error("Gallery upload failed");
-            setIsLoading(false);
-            return;
+          console.error(err);
+          toast.error("Gallery upload failed");
+          setIsLoading(false);
+          return;
         }
       }
 
@@ -343,10 +347,10 @@ const AdminProductForm = () => {
         category_id: Number(formData.category_id),
         gender_id: Number(formData.gender_id),
         variants: variants,
-        
+
         // 🔥 เพิ่ม 2 fields นี้ส่งไปให้ Backend
-        new_gallery: newGalleryData,         // รูปใหม่ (URL + Path)
-        deleted_gallery_ids: deletedGalleryIds // ID รูปเก่าที่ต้องลบ
+        new_gallery: newGalleryData, // รูปใหม่ (URL + Path)
+        deleted_gallery_ids: deletedGalleryIds, // ID รูปเก่าที่ต้องลบ
       };
 
       // Call API
@@ -580,12 +584,16 @@ const AdminProductForm = () => {
                     </label>
                     <input
                       type="number"
-                      value={variant.price}
+                      // 🔥 แก้ 1: ถ้าค่าเป็น 0 ให้โชว์เป็นว่างๆ (User จะได้พิมพ์ง่ายๆ ไม่ต้องลบเลข 0)
+                      value={variant.price === 0 ? "" : variant.price}
                       onChange={(e) =>
                         handleVariantChange(index, "price", e.target.value)
                       }
-                      className="w-full bg-admin-card border border-gray-600 rounded-lg px-3 py-2 text-white text-sm"
+                      // 🔥 แก้ 2: เพิ่ม Class ลบลูกศร (Spin Button)
+                      className="w-full bg-admin-card border border-gray-600 rounded-lg px-3 py-2 text-white text-sm 
+    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       min="0"
+                      placeholder="0" // ใส่ Placeholder แทน
                     />
                   </div>
 
@@ -595,7 +603,12 @@ const AdminProductForm = () => {
                     </label>
                     <input
                       type="number"
-                      value={variant.stock_quantity}
+                      // 🔥 แก้เหมือนกัน
+                      value={
+                        variant.stock_quantity === 0
+                          ? ""
+                          : variant.stock_quantity
+                      }
                       onChange={(e) =>
                         handleVariantChange(
                           index,
@@ -603,8 +616,11 @@ const AdminProductForm = () => {
                           e.target.value,
                         )
                       }
-                      className="w-full bg-admin-card border border-gray-600 rounded-lg px-3 py-2 text-white text-sm"
+                      // 🔥 แก้เหมือนกัน
+                      className="w-full bg-admin-card border border-gray-600 rounded-lg px-3 py-2 text-white text-sm 
+    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       min="0"
+                      placeholder="0"
                     />
                   </div>
 
@@ -706,63 +722,78 @@ const AdminProductForm = () => {
 
           {/* 🔥 GALLERY SECTION (เพิ่มใหม่) */}
           <div className="bg-admin-card border border-gray-700 rounded-2xl p-6 shadow-sm">
-             <h2 className="text-lg font-bold text-white mb-4 border-b border-gray-700 pb-2">Gallery Images</h2>
-             
-             {/* Grid รูป */}
-             <div className="grid grid-cols-2 gap-3 mb-4">
-                {/* 1. รูปเดิม (Existing) */}
-                {gallery.map(img => (
-                   <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden border border-gray-600 group">
-                      <img src={img.image_url} className="w-full h-full object-cover" alt="Gallery"/>
-                      {/* ปุ่มลบรูปเดิม */}
-                      <button 
-                        type="button" 
-                        onClick={() => removeExistingGalleryImage(img.id)} 
-                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                         <X size={14}/>
-                      </button>
-                   </div>
-                ))}
-                
-                {/* 2. รูปใหม่ Preview (New) */}
-                {newGalleryFiles.map((file, idx) => (
-                   <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-admin-primary/50 group">
-                      <img 
-                        src={URL.createObjectURL(file)} 
-                        className="w-full h-full object-cover opacity-80" 
-                        alt="New"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <span className="bg-black/50 text-white text-xs px-2 py-1 rounded">NEW</span>
-                      </div>
-                      {/* ปุ่มลบรูปใหม่ */}
-                      <button 
-                        type="button" 
-                        onClick={() => removeNewGalleryFile(idx)} 
-                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-100 hover:bg-red-600"
-                      >
-                         <X size={14}/>
-                      </button>
-                   </div>
-                ))}
+            <h2 className="text-lg font-bold text-white mb-4 border-b border-gray-700 pb-2">
+              Gallery Images
+            </h2>
 
-                {/* 3. ปุ่ม Add (Dropzone) */}
-                <label className="aspect-square rounded-lg border-2 border-dashed border-gray-600 flex flex-col items-center justify-center cursor-pointer hover:border-admin-primary hover:bg-white/5 transition-colors">
-                   <Plus size={24} className="text-gray-400 mb-1"/>
-                   <span className="text-xs text-gray-400">Add</span>
-                   <input 
-                    type="file" 
-                    multiple // 🔥 เลือกได้หลายรูป
-                    accept="image/*" 
-                    className="hidden" 
-                    onChange={handleGalleryFileChange}
-                   />
-                </label>
-             </div>
-             <p className="text-xs text-gray-500">* Supported: JPG, PNG (Max 5MB)</p>
+            {/* Grid รูป */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {/* 1. รูปเดิม (Existing) */}
+              {gallery.map((img) => (
+                <div
+                  key={img.id}
+                  className="relative aspect-square rounded-lg overflow-hidden border border-gray-600 group"
+                >
+                  <img
+                    src={img.image_url}
+                    className="w-full h-full object-cover"
+                    alt="Gallery"
+                  />
+                  {/* ปุ่มลบรูปเดิม */}
+                  <button
+                    type="button"
+                    onClick={() => removeExistingGalleryImage(img.id)}
+                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+
+              {/* 2. รูปใหม่ Preview (New) */}
+              {newGalleryFiles.map((file, idx) => (
+                <div
+                  key={idx}
+                  className="relative aspect-square rounded-lg overflow-hidden border border-admin-primary/50 group"
+                >
+                  <img
+                    src={URL.createObjectURL(file)}
+                    className="w-full h-full object-cover opacity-80"
+                    alt="New"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span className="bg-black/50 text-white text-xs px-2 py-1 rounded">
+                      NEW
+                    </span>
+                  </div>
+                  {/* ปุ่มลบรูปใหม่ */}
+                  <button
+                    type="button"
+                    onClick={() => removeNewGalleryFile(idx)}
+                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-100 hover:bg-red-600"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+
+              {/* 3. ปุ่ม Add (Dropzone) */}
+              <label className="aspect-square rounded-lg border-2 border-dashed border-gray-600 flex flex-col items-center justify-center cursor-pointer hover:border-admin-primary hover:bg-white/5 transition-colors">
+                <Plus size={24} className="text-gray-400 mb-1" />
+                <span className="text-xs text-gray-400">Add</span>
+                <input
+                  type="file"
+                  multiple // 🔥 เลือกได้หลายรูป
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleGalleryFileChange}
+                />
+              </label>
+            </div>
+            <p className="text-xs text-gray-500">
+              * Supported: JPG, PNG (Max 5MB)
+            </p>
           </div>
-
         </div>
       </div>
     </form>
