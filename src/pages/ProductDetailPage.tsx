@@ -85,12 +85,6 @@ const ProductDetailPage = () => {
     fetchProduct();
   }, [id, navigate]);
 
-  useEffect(() => {
-    if (product?.available_colors?.length) {
-      const firstColorObj = product.available_colors[0];
-      setSelectedColor(firstColorObj.name);
-    }
-  }, [product]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const scroll = (direction: "left" | "right") => {
@@ -104,6 +98,22 @@ const ProductDetailPage = () => {
       }
     }
   };
+  // Auto Reset Size เมื่อเปลี่ยนสี (ถ้าไซส์นั้นไม่มีในสีใหม่)
+  useEffect(() => {
+    if (selectedColor && selectedSize) {
+      const variantExists = product?.variants.some(
+        (v) =>
+          v.color_name === selectedColor &&
+          v.size === selectedSize &&
+          v.stock > 0,
+      );
+
+      // ถ้าคู่สี+ไซส์นี้ ไม่มีของ -> ให้เคลียร์ไซส์ทิ้ง
+      if (!variantExists) {
+        setSelectedSize("");
+      }
+    }
+  }, [selectedColor]);
 
   const currentVariant = useMemo(() => {
     if (!product || !selectedColor || !selectedSize) return null;
@@ -140,12 +150,9 @@ const ProductDetailPage = () => {
         console.log("Error sharing:", err);
       }
     } else {
-      // 💻 ถ้าเป็น PC (ถึงจะมี navigator.share ก็ไม่สน) -> เปิด Modal เราโลด!
+      // ถ้าเป็น PC (ถึงจะมี navigator.share ก็ไม่สน) -> เปิด Modal เราโลด!
       setIsShareModalOpen(true);
     }
-  };
-  const handleSizeDetails = () => {
-    toast.success(`Size Details Coming Soon.`, { icon: "🔜" });
   };
 
   const handleAddCart = async () => {
@@ -355,17 +362,42 @@ const ProductDetailPage = () => {
             <div className="flex flex-wrap gap-5">
               {product?.available_colors?.map((color: any) => {
                 const isSelected = selectedColor === color.name;
+
+                // Logic ใหม่: เช็ค Variant จริงๆ
+                const isAvailable = product.variants.some((v) => {
+                  const matchColor = v.color_name === color.name;
+                  const matchSize = selectedSize
+                    ? v.size === selectedSize
+                    : true; // ถ้าเลือกไซส์อยู่ ต้องตรงไซส์
+                  const hasStock = v.stock > 0; // ต้องมีของ
+                  return matchColor && matchSize && hasStock;
+                });
+
                 return (
                   <button
                     key={color.name}
                     onClick={() => setSelectedColor(color.name)}
+                    disabled={!isAvailable} // 🔥 disable ถ้าไม่มีของจับคู่
                     className={`
-                      w-10 h-10 rounded-full shadow-sm border border-gray-200 transition-all duration-300 ease-in-out relative
-                      ${isSelected ? "ring-2 ring-offset-2 ring-[#5B486B] scale-110" : "hover:scale-110 hover:border-gray-400"}
-                    `}
+            w-10 h-10 rounded-full shadow-sm border border-gray-200 transition-all duration-300 ease-in-out relative
+            ${
+              isSelected
+                ? "ring-2 ring-offset-2 ring-[#5B486B] scale-110"
+                : isAvailable
+                  ? "hover:scale-110 hover:border-gray-400" // มีของ = hover ได้
+                  : "opacity-20 cursor-not-allowed grayscale" // ไม่มีของ = จาง + ห้ามกด
+            }
+          `}
                     style={{ backgroundColor: color.code }}
                     title={color.name}
-                  ></button>
+                  >
+                    {/* (Optional) กากบาททับถ้าไม่มีของ */}
+                    {!isAvailable && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-full h-[1px] bg-gray-500 rotate-45"></div>
+                      </div>
+                    )}
+                  </button>
                 );
               })}
             </div>
@@ -375,36 +407,38 @@ const ProductDetailPage = () => {
           <div className="mb-8 mt-10">
             <div className="flex justify-center gap-12 flex-wrap">
               {["S", "M", "L", "XL", "XXL", "XXXL"].map((size) => {
-                const isAvailable = product.available_sizes?.includes(size);
                 const isSelected = selectedSize === size;
+
+                // Logic ใหม่ เช็ค Variant จริงๆ
+                const isAvailable = product.variants.some((v) => {
+                  const matchSize = v.size === size;
+                  const matchColor = selectedColor
+                    ? v.color_name === selectedColor
+                    : true; // ถ้าเลือกสีอยู่ ต้องตรงสี
+                  const hasStock = v.stock > 0; // ต้องมีของ
+                  return matchSize && matchColor && hasStock;
+                });
+
                 return (
                   <button
                     key={size}
-                    disabled={!isAvailable}
+                    disabled={!isAvailable} // ถ้าไม่มีคู่สีนี้ ให้กดไม่ได้
                     onClick={() => setSelectedSize(size)}
                     className={`
-                      w-12 h-12 flex items-center justify-center rounded-sm text-sm font-bold border-transparent transition-all duration-300 shadow-[2px_2px_5px_0px_rgba(0,0,0,0.25)]
-                      ${
-                        !isAvailable
-                          ? "bg-gray-100 text-gray-300 border-gray-200 cursor-not-allowed decoration-slice line-through"
-                          : isSelected
-                            ? "bg-secondary text-text_inverse shadow-md"
-                            : "bg-tertiary text-primary hover:scale-110 hover:text-text_inverse"
-                      }
-                    `}
+            w-12 h-12 flex items-center justify-center rounded-sm text-sm font-bold border-transparent transition-all duration-300 shadow-[2px_2px_5px_0px_rgba(0,0,0,0.25)]
+            ${
+              !isAvailable
+                ? "bg-gray-100 text-gray-300 border-gray-200 cursor-not-allowed decoration-slice line-through"
+                : isSelected
+                  ? "bg-secondary text-text_inverse shadow-md"
+                  : "bg-tertiary text-primary hover:scale-110 hover:text-text_inverse"
+            }
+          `}
                   >
                     {size}
                   </button>
                 );
               })}
-            </div>
-            <div className="text-right mt-14 w-full flex justify-end">
-              <button
-                className="text-xs text-primary underline hover:text-text_primary"
-                onClick={handleSizeDetails}
-              >
-                Size details
-              </button>
             </div>
           </div>
 

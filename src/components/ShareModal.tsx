@@ -21,11 +21,9 @@ const ShareModal = ({ isOpen, onClose, url }: ShareModalProps) => {
   };
 
   const handleFacebook = () => {
-    // 🔥 เช็คหน่อย ถ้าเป็น Localhost ให้เตือน หรือ เปลี่ยนเป็นเว็บอื่นเทส
     let shareUrl = url;
     if (shareUrl.includes("localhost")) {
         console.warn("Facebook cannot scrape localhost! Sharing might look empty.");
-        // shareUrl = "https://your-deployed-site.com..."; // ถ้ามีเว็บจริงให้ใส่ตรงนี้แทน
     }
 
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
