@@ -33,7 +33,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
 
 
       const response = await productService.getAllProducts(params);
-      console.log("Product data:", response);
+      // console.log("Product data:", response);
       // Backend ส่งมาแบบนี้: { success: true, data: [...], pagination: {...} }
       // หรือถ้า Service return data.data ก็ปรับตรงนี้ตาม response จริงนายนะ
       setProducts(response.data || response); // กันเหนียว
