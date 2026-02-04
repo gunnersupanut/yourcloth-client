@@ -133,7 +133,7 @@ const AdminOrderList = () => {
   return (
     <>
       <div className="space-y-6 font-kanit">
-        {/* 1. Header & Filters */}
+        {/* Header & Filters */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <h1 className="text-h2xl font-bold text-white">
             Order <span className="text-admin-secondary">Management</span>

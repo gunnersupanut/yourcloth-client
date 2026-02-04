@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 
 // --- Components ย่อย (Modal) ---
-// แยกออกมาจะได้ไม่งง หรือจะแยกไฟล์ก็ได้
 interface BannerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -42,9 +41,8 @@ const BannerModal: React.FC<BannerModalProps> = ({
     if (initialData) {
       setFormData({
         title: initialData.title || "",
-        is_active: initialData.is_active,   
+        is_active: initialData.is_active,
         sort_order: initialData.sort_order,
-        // ตัดเวลาออกให้เหลือ YYYY-MM-DD สำหรับ input date
         start_date: initialData.start_date
           ? new Date(initialData.start_date).toISOString().split("T")[0]
           : "",
@@ -54,7 +52,7 @@ const BannerModal: React.FC<BannerModalProps> = ({
       });
       setPreviewUrl(initialData.image_url);
     } else {
-      // Reset form for create mode
+      // Reset form
       setFormData({
         title: "",
         is_active: true,
@@ -71,15 +69,14 @@ const BannerModal: React.FC<BannerModalProps> = ({
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setSelectedFile(file);
-      setPreviewUrl(URL.createObjectURL(file)); // สร้าง URL ชั่วคราวเพื่อ Preview
+      setPreviewUrl(URL.createObjectURL(file));
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // ถ้า Create ต้องมีรูปเสมอ, ถ้า Edit รูปเป็น Optional
     if (!initialData && !selectedFile) {
-      alert("กรุณาเลือกรูปภาพ");
+      alert("Please select an image.");
       return;
     }
     onSubmit(formData as IBannerPayload, selectedFile);
@@ -93,7 +90,7 @@ const BannerModal: React.FC<BannerModalProps> = ({
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-700 bg-admin-primary/20">
           <h2 className="text-h2xl font-kanit text-white">
-            {initialData ? "แก้ไขแบนเนอร์" : "เพิ่มแบนเนอร์ใหม่"}
+            {initialData ? "Edit Banner" : "Add New Banner"}
           </h2>
           <button
             onClick={onClose}
@@ -108,7 +105,7 @@ const BannerModal: React.FC<BannerModalProps> = ({
           {/* Image Upload Area */}
           <div className="space-y-2">
             <label className="text-cardtitlesecondary text-gray-300">
-              รูปภาพแบนเนอร์ *
+              Banner Image *
             </label>
             <div className="relative group w-full h-48 bg-admin-bg border-2 border-dashed border-gray-600 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-admin-secondary transition overflow-hidden">
               <input
@@ -126,7 +123,7 @@ const BannerModal: React.FC<BannerModalProps> = ({
               ) : (
                 <div className="text-gray-500 flex flex-col items-center">
                   <ImageIcon size={32} className="mb-2" />
-                  <span className="text-ui">คลิกเพื่ออัปโหลด</span>
+                  <span className="text-ui">Click to upload</span>
                 </div>
               )}
             </div>
@@ -135,7 +132,7 @@ const BannerModal: React.FC<BannerModalProps> = ({
           {/* Title & Order */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-ui text-gray-400">หัวข้อ (Optional)</label>
+              <label className="text-ui text-gray-400">Title (Optional)</label>
               <input
                 type="text"
                 value={formData.title}
@@ -143,11 +140,11 @@ const BannerModal: React.FC<BannerModalProps> = ({
                   setFormData({ ...formData, title: e.target.value })
                 }
                 className="w-full bg-admin-bg border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-admin-secondary"
-                placeholder="ชื่อโปรโมชั่น..."
+                placeholder="Promotion name..."
               />
             </div>
             <div className="space-y-1">
-              <label className="text-ui text-gray-400">ลำดับการแสดง</label>
+              <label className="text-ui text-gray-400">Sort Order</label>
               <input
                 type="number"
                 value={formData.sort_order}
@@ -165,7 +162,7 @@ const BannerModal: React.FC<BannerModalProps> = ({
           {/* Dates */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-ui text-gray-400">เริ่มวันที่</label>
+              <label className="text-ui text-gray-400">Start Date</label>
               <div className="relative">
                 <input
                   type="date"
@@ -179,7 +176,7 @@ const BannerModal: React.FC<BannerModalProps> = ({
               </div>
             </div>
             <div className="space-y-1">
-              <label className="text-ui text-gray-400">สิ้นสุดวันที่</label>
+              <label className="text-ui text-gray-400">End Date</label>
               <div className="relative">
                 <input
                   type="date"
@@ -197,9 +194,7 @@ const BannerModal: React.FC<BannerModalProps> = ({
 
           {/* Status Toggle */}
           <div className="flex items-center justify-between bg-admin-bg p-3 rounded-lg border border-gray-700">
-            <span className="text-white text-sm font-medium">
-              สถานะเปิดใช้งาน
-            </span>
+            <span className="text-white text-sm font-medium">Active Status</span>
             <button
               type="button"
               onClick={() =>
@@ -224,7 +219,7 @@ const BannerModal: React.FC<BannerModalProps> = ({
             className="w-full bg-admin-secondary text-admin-primary font-bold py-3 rounded-xl mt-4 hover:brightness-110 transition shadow-custombutton flex justify-center items-center gap-2"
           >
             {isSubmitting && <Loader2 className="animate-spin" size={20} />}
-            {isSubmitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+            {isSubmitting ? "Saving..." : "Save Banner"}
           </button>
         </form>
       </div>
@@ -236,13 +231,10 @@ const BannerModal: React.FC<BannerModalProps> = ({
 const AdminBannerPage = () => {
   const [banners, setBanners] = useState<IBanner[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState<IBanner | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Load Data
   const fetchBanners = async () => {
     try {
       setLoading(true);
@@ -259,49 +251,42 @@ const AdminBannerPage = () => {
     fetchBanners();
   }, []);
 
-  // Handle Save (Create/Update)
   const handleSave = async (data: IBannerPayload, file: File | null) => {
     try {
       setIsSubmitting(true);
       let finalImageUrl = data.image_url;
 
-      // 1. ถ้ามีไฟล์ใหม่ ให้ Upload ก่อน
       if (file) {
         const uploadRes = await uploadService.uploadBannerImage(file);
         finalImageUrl = uploadRes.url;
       }
 
-      // 2. Prepare Payload
       const payload: IBannerPayload = {
         ...data,
         image_url: finalImageUrl,
-        // แปลง Empty String เป็น null สำหรับวันที่
         start_date: data.start_date === "" ? null : data.start_date,
         end_date: data.end_date === "" ? null : data.end_date,
       };
 
-      // 3. Call API
       if (editingBanner) {
         await bannerService.updateBanner(editingBanner.id, payload);
       } else {
         await bannerService.createBanner(payload);
       }
 
-      // 4. Cleanup
       setIsModalOpen(false);
       setEditingBanner(null);
-      fetchBanners(); // Refresh Table
+      fetchBanners();
     } catch (error) {
       console.error("Save error", error);
-      alert("เกิดข้อผิดพลาดในการบันทึก");
+      alert("Error saving banner");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Handle Delete
   const handleDelete = async (id: number) => {
-    if (!window.confirm("คุณแน่ใจหรือไม่ที่จะลบแบนเนอร์นี้?")) return;
+    if (!window.confirm("Are you sure you want to delete this banner?")) return;
     try {
       await bannerService.deleteBanner(id);
       setBanners((prev) => prev.filter((b) => b.id !== id));
@@ -310,23 +295,19 @@ const AdminBannerPage = () => {
     }
   };
 
-  // Handle Toggle Active
   const handleToggleActive = async (banner: IBanner) => {
     try {
-      // Toggle UI ทันทีเพื่อให้ดูเร็ว (Optimistic Update)
       setBanners((prev) =>
         prev.map((b) =>
           b.id === banner.id ? { ...b, is_active: !b.is_active } : b,
         ),
       );
-
-      // Call API Background
       await bannerService.updateBanner(banner.id, {
         is_active: !banner.is_active,
       });
     } catch (error) {
       console.error("Toggle error", error);
-      fetchBanners(); // Revert ถ้าพัง
+      fetchBanners();
     }
   };
 
@@ -349,7 +330,7 @@ const AdminBannerPage = () => {
             Banner Management
           </h1>
           <p className="text-gray-400 mt-1">
-            จัดการป้ายโฆษณาและแบนเนอร์ประชาสัมพันธ์
+            Manage advertising banners and promotions.
           </p>
         </div>
         <button
@@ -357,14 +338,14 @@ const AdminBannerPage = () => {
           className="bg-admin-secondary text-admin-primary px-6 py-3 rounded-xl font-bold shadow-custombutton hover:scale-105 transition-transform flex items-center gap-2"
         >
           <Plus size={20} />
-          เพิ่มแบนเนอร์
+          Add Banner
         </button>
       </div>
 
       {/* Loading State */}
       {loading ? (
         <div className="flex justify-center items-center h-64 text-gray-400">
-          <Loader2 className="animate-spin mr-2" /> กำลังโหลดข้อมูล...
+          <Loader2 className="animate-spin mr-2" /> Loading Data...
         </div>
       ) : (
         /* Banner Grid */
@@ -401,7 +382,7 @@ const AdminBannerPage = () => {
 
                 {/* Order Badge */}
                 <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-lg text-xs text-white">
-                  ลำดับ: {banner.sort_order}
+                  Order: {banner.sort_order}
                 </div>
               </div>
 
@@ -411,26 +392,26 @@ const AdminBannerPage = () => {
                   className="text-h3xl font-bold mb-1 truncate"
                   title={banner.title}
                 >
-                  {banner.title || "ไม่มีชื่อหัวข้อ"}
+                  {banner.title || "No Title"}
                 </h3>
 
                 {/* Dates Info */}
                 <div className="text-xs text-gray-400 space-y-1 mt-2 mb-4 bg-admin-bg p-2 rounded-lg">
                   <div className="flex justify-between">
-                    <span>เริ่ม:</span>
+                    <span>Start:</span>
                     <span className="text-gray-300">
                       {banner.start_date
                         ? new Date(banner.start_date).toLocaleDateString(
-                            "th-TH",
+                            "en-GB",
                           )
                         : "-"}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>สิ้นสุด:</span>
+                    <span>End:</span>
                     <span className="text-gray-300">
                       {banner.end_date
-                        ? new Date(banner.end_date).toLocaleDateString("th-TH")
+                        ? new Date(banner.end_date).toLocaleDateString("en-GB")
                         : "-"}
                     </span>
                   </div>
@@ -452,7 +433,7 @@ const AdminBannerPage = () => {
                       ></div>
                     </button>
                     <span className="text-xs text-gray-400">
-                      {banner.is_active ? "เปิด" : "ปิด"}
+                      {banner.is_active ? "On" : "Off"}
                     </span>
                   </div>
 

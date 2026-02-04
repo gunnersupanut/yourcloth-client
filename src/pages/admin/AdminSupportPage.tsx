@@ -85,7 +85,7 @@ const AdminSupportPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-admin-bg text-white font-kanit p-6 md:p-10 relative">
+    <div className="min-h-screen bg-admin-bg text-white font-kanit relative">
       {/* Header & Stats (เหมือนเดิม) */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div>
