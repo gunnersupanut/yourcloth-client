@@ -30,6 +30,7 @@ import AdminProductForm from "./pages/admin/AdminProductForm";
 import HistoryGuard from "./routes/HistoryGuard";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import ContactPage from "./pages/ContactPage";
+import AdminSupportPage from "./pages/admin/AdminSupportPage";
 const AboutPage = () => <div className="text-xl">🔐 หน้า About (รอทำ)</div>;
 
 function App() {
@@ -60,6 +61,7 @@ function App() {
               element={<AdminProductForm />}
             />
             <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/admin/support" element={<AdminSupportPage />} />
           </Route>
         </Route>
         {/* --------------- */}

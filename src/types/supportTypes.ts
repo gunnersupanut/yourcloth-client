@@ -1,5 +1,4 @@
-// --- Types ---
-// หน้าตาของ Ticket ที่ได้จาก Server
+
 export interface ISupportTicket {
   id: number;
   user_id: number;
@@ -12,7 +11,8 @@ export interface ISupportTicket {
   // ข้อมูล User ที่ Join มา (สำหรับ Admin)
   username?: string;
   email?: string;
-  phone?: string; 
+  tel?: string;
+  resolver_name?: string
 }
 
 // ข้อมูลที่จะส่งไปสร้าง Ticket (ไม่ต้องส่ง userId เพราะ Backend แกะจาก Token)
