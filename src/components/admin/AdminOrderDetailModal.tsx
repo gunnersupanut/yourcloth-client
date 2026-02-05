@@ -406,7 +406,7 @@ const AdminOrderDetailModal = ({
               </div>
 
               {/* Evidence & History (Grid Layout) --- */}
-              <div className="px-8 mt-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-start pb-8">
+              <div className="px-8 mt-6 grid grid-cols-1  gap-8 items-start pb-8">
                 {/* LEFT COLUMN Reason / Slip / Tracking */}
                 <div className="space-y-5">
                   {/* Rejection Reason (โชว์เฉพาะตอน PENDING ที่โดนดีดกลับมา) */}
@@ -486,9 +486,8 @@ const AdminOrderDetailModal = ({
                     </div>
                   )}
                 </div>
-
-                {/*RIGHT COLUMN: Order Timeline (Logs) */}
-                <div className="bg-gray-50 rounded-2xl border border-gray-100 h-full max-h-[400px] overflow-y-auto custom-scrollbar md:mt-10">
+                {/* Order Timeline (Logs) */}
+                <div className="bg-gray-50 rounded-2xl border border-gray-100 h-full max-h-[400px] overflow-y-auto custom-scrollbar ">
                   <h3
                     className="sticky top-0 z-20 flex items-center gap-2 
       -mt-5  px-5 p-5 mb-4 
@@ -578,7 +577,9 @@ const AdminOrderDetailModal = ({
           <div className="p-6 bg-white border-t border-gray-100 space-y-6">
             {/* Total */}
             <div className="flex justify-between items-end">
-              <span className="text-h3xl font-bold text-admin-primary">Total</span>
+              <span className="text-h3xl font-bold text-admin-primary">
+                Total
+              </span>
               <span className="text-h2xl font-extrabold text-admin-secondary">
                 ฿{order.totalAmount}
               </span>

@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Trash2, Minus, Plus, 
-  // Info, Ticket 
+import {
+  Trash2,
+  Minus,
+  Plus,
+  // Info, Ticket
 } from "lucide-react"; // ไอคอน
 import { useCart } from "../contexts/CartContext";
 import toast from "react-hot-toast";
@@ -50,7 +53,7 @@ const CartPage = () => {
     cartItemId: number,
     variantId: number,
     currentQty: number,
-    delta: number
+    delta: number,
   ) => {
     const newQty = currentQty + delta;
 
@@ -76,7 +79,7 @@ const CartPage = () => {
       // ถ้าไม่ผ่าน
       console.error("Update Error:", error);
       toast.error(
-        error.response?.data?.message || "Unable to update quantity."
+        error.response?.data?.message || "Unable to update quantity.",
       );
       await fetchCart();
     } finally {
@@ -145,7 +148,7 @@ const CartPage = () => {
     // เอา quantity และ variant info ไปด้วย
     const itemsToCheckout = cartItems
       .filter(
-        (item) => selectedCartItemIds.includes(item.cart_item_id) // เช็คว่า item นี้ถูกเลือกไหม
+        (item) => selectedCartItemIds.includes(item.cart_item_id), // เช็คว่า item นี้ถูกเลือกไหม
       )
       .map((item) => ({
         // จัด Format ให้หน้า Checkout ใช้ง่ายๆ
@@ -172,8 +175,8 @@ const CartPage = () => {
   };
 
   const subtotal = calculateTotal();
-  const discount = 0; // เดี๋ยวค่อยทำ Logic ส่วนลด
-  const totalNet = subtotal - discount;
+  // const discount = 0; // เดี๋ยวค่อยทำ Logic ส่วนลด
+  const totalNet = subtotal;
 
   return (
     <div className="min-h-screen font-kanit">
@@ -257,7 +260,7 @@ const CartPage = () => {
                           item.cart_item_id,
                           item.variant_id,
                           item.quantity,
-                          -1
+                          -1,
                         )
                       }
                       className="w-6 h-6 flex items-center justify-center rounded-full border border-black text-black hover:bg-gray-100 transition-colors"
@@ -287,7 +290,7 @@ const CartPage = () => {
                           item.cart_item_id,
                           item.variant_id,
                           item.quantity,
-                          1
+                          1,
                         )
                       }
                       className="w-6 h-6 flex items-center justify-center rounded-full border border-black text-black hover:bg-gray-100 transition-colors"
@@ -314,7 +317,7 @@ const CartPage = () => {
 
       {/* --- Bottom--- */}
       <div className="fixed bottom-0 w-full z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
-         {/* Discount
+        {/* Discount
         <div className="w-full bg-primary py-3 sm:py-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-end items-center gap-8">
             <button className="text-secondary flex gap-2 items-center underline text-body hover:text-white transition-colors">
@@ -364,20 +367,7 @@ const CartPage = () => {
                     ฿{totalNet.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-4 sm:gap-12">
-                  <div className="flex gap-6">
-                    Subtotal{" "}
-                    <span className="text-text_primary">
-                      ฿{subtotal.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex gap-6">
-                    Discount{" "}
-                    <span className=" text-white">
-                      ฿{discount.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
+               
               </div>
 
               <button

@@ -28,11 +28,11 @@ const PantsIcon = ({ size = 24, className = "", strokeWidth = 2 }: any) => {
 
 const Category = () => {
   const categories = [
-    { id: 1, name: "Head Wear", icon: Crown, path: "/shop/headwear" },
-    { id: 2, name: "Tops", icon: Shirt, path: "/shop/tops" },
-    { id: 3, name: "Pants", icon: PantsIcon, path: "/shop/pants" },
-    { id: 4, name: "Shoes", icon: Footprints, path: "/shop/shoes" },
-    { id: 5, name: "Accessories", icon: Watch, path: "/shop/accessories" },
+    { id: 1, name: "Head Wear", icon: Crown, path: "/shop/Head Wear" },
+    { id: 2, name: "Tops", icon: Shirt, path: "/shop/Tops" },
+    { id: 3, name: "Pants", icon: PantsIcon, path: "/shop/Pants" },
+    { id: 4, name: "Shoes", icon: Footprints, path: "/shop/Shoes" },
+    { id: 5, name: "Accessories", icon: Watch, path: "/shop/Accessories" },
   ];
 
   return (

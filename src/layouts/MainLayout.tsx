@@ -11,7 +11,6 @@ const MainLayout = () => {
   // เช็คว่าอยู่หน้า Cart/Checkout ไหม
   const isCartPage = location.pathname === "/cart";
   const isCheckoutPage = location.pathname === "/checkout";
-  const hasStickyFooter = isCartPage || isCheckoutPage;
   if (isAdminPath) {
     return <Outlet />;
   }
@@ -27,7 +26,7 @@ const MainLayout = () => {
       </main>
 
       {/* Footer*/}
-      <div className={`${hasStickyFooter && "pb-[210px]"}`}>
+      <div className={`${isCartPage && "pb-[119px]"} ${isCheckoutPage && "pb-[100px]"}`}>
         <Footer />
       </div>
     </div>

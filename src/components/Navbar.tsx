@@ -165,15 +165,15 @@ const Navbar = () => {
 
             {/* Cart Icon */}
             <NavLink to="/cart" onClick={handleCartClick} className="relative group p-1.5 md:p-2 rounded-full transition-all duration-300">
-              <ShoppingCart className="w-5 h-5 md:w-7 md:h-7 text-secondary hover:scale-105 transition-colors" strokeWidth={2.5} />
+              <ShoppingCart className="w-5 h-5 md:w-7 md:h-7 mr-2 text-secondary hover:scale-105 transition-colors" strokeWidth={2.5} />
               {totalItems > 0 && (
-                <span className="absolute top-0 right-0 flex h-4 w-4 md:h-5 md:w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-sm ring-2 ring-white animate-bounce-short">
+                <span className="absolute top-0 right-0 flex mr-2 h-4 w-4 md:h-5 md:w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-sm ring-2 ring-white animate-bounce-short">
                   {totalItems > 99 ? "99+" : totalItems}
                 </span>
               )}
             </NavLink>
 
-            {/* Hamburger (🔥 เปลี่ยนเป็น lg:hidden) */}
+            {/* Hamburger */}
             <button
               className="lg:hidden text-secondary p-1 hover:bg-white/10 rounded-md transition-colors"
               onClick={() => {
@@ -185,8 +185,6 @@ const Navbar = () => {
             </button>
           </div>
         </div>
-
-        {/* 🔥 MOBILE/TABLET SEARCH BAR (New Row) */}
         {/* โชว์เฉพาะจอเล็กกว่า 1024px (lg:hidden) */}
         {isSearchOpen && (
           <div className="lg:hidden w-full mt-3 pb-2 animate-in slide-in-from-top-2 fade-in duration-200">

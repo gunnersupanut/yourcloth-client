@@ -2,7 +2,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import Category from "../components/Category";
 import { useState, useEffect } from "react";
 import DropdownFilter from "../components/ui/DropdownFilter";
-import OnSaleToggle from "../components/OnSaleToggle";
+// import OnSaleToggle from "../components/OnSaleToggle";
 import PriceSlider from "../components/PriceSlider";
 import { useProduct } from "../contexts/ProductContext";
 import ProductGrid from "../components/ProductGrid";
@@ -50,7 +50,7 @@ const ShopPage = () => {
       category: category,
       search: searchQuery || undefined,
       gender: gender === "All" ? undefined : gender,
-      // size: size === "All" ? undefined : size,
+      size: size === "All" ? undefined : size,
       minPrice: 0,
       maxPrice: priceFilter, // ใช้ค่าที่ปล่อยเมาส์แล้ว
       sort: sortParam,
@@ -144,8 +144,8 @@ const ShopPage = () => {
               defaultValue="All"
               onChange={setGender}
             />
-            <div className="h-8 w-[1px] bg-gray-200 hidden md:block mx-2"></div>{" "}
-            <OnSaleToggle />
+            {/* <div className="h-8 w-[1px] bg-gray-200 hidden md:block mx-2"></div>{" "}
+            <OnSaleToggle /> */}
           </div>
 
           {/* Price Slider (แก้ Logic ให้ลื่น) */}

@@ -19,7 +19,7 @@ const FeaturedSlider = ({ currentProductId }: FeaturedSliderProps) => {
 
   // 3. เตรียมสินค้า
   const displayProducts = useMemo(() => {
-    let filtered = products;
+    let filtered = products.filter((item) => item.total_stock > 0);
     if (currentProductId) {
       filtered = filtered.filter((item) => item.id !== currentProductId);
       return [...filtered].sort(() => 0.5 - Math.random()).slice(0, 10);
@@ -44,25 +44,35 @@ const FeaturedSlider = ({ currentProductId }: FeaturedSliderProps) => {
 
   // --- Render State ---
   if (loading && products.length === 0)
-    return <div className="text-center py-20 font-kanit animate-pulse text-gray-400">Loading recommendations...</div>;
-  
+    return (
+      <div className="text-center py-20 font-kanit animate-pulse text-gray-400">
+        Loading recommendations...
+      </div>
+    );
+
   if (error)
-    return <div className="text-center py-20 text-red-500 font-kanit">{error}</div>;
+    return (
+      <div className="text-center py-20 text-red-500 font-kanit">{error}</div>
+    );
 
   if (!loading && displayProducts.length === 0) return null;
 
   return (
-    <div className="w-full"> {/* เพิ่ม w-full คุมไว้ */}
+    <div className="w-full">
+      {" "}
+      {/* เพิ่ม w-full คุมไว้ */}
       <div className="relative group">
-        
         {/* --- ปุ่มซ้าย --- */}
         <button
           onClick={slideLeft}
           className="absolute -left-4 md:-left-6 top-1/2 -translate-y-1/2 z-20 bg-white hover:bg-gray-50 p-3 rounded-full shadow-xl border border-gray-100 opacity-0 group-hover:opacity-100 transition-all duration-300 hidden md:block transform hover:scale-110"
         >
-          <img src={arrowLeftIcon} alt="Previous" className="w-5 h-5 opacity-70" />
+          <img
+            src={arrowLeftIcon}
+            alt="Previous"
+            className="w-5 h-5 opacity-70"
+          />
         </button>
-
         {/* --- ตัวรางเลื่อน --- */}
         <div
           ref={sliderRef}
@@ -77,7 +87,7 @@ const FeaturedSlider = ({ currentProductId }: FeaturedSliderProps) => {
             gap-6 md:gap-10 lg:gap-12   
           "
         >
-      {displayProducts.map((product) => (
+          {displayProducts.map((product) => (
             <div
               key={product.id}
               className="

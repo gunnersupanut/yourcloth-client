@@ -11,6 +11,7 @@ export interface Product {
     code: string;
   }[];
   available_sizes: string[];
+  total_stock: number;
 }
 export interface ProductVariant {
   variant_id: number;
@@ -45,6 +46,7 @@ export interface ProductParams {
   search?: string;
   category?: string;
   gender?: string;
+  size?: string;
   sort?: string;
   minPrice?: number;
   maxPrice?: number;

@@ -504,19 +504,13 @@ const CheckoutPage = () => {
                 <span className="opacity-70">Shipping Cost</span>
                 <span>฿{shippingCost.toLocaleString()}</span>
               </div>
-              <div className="flex gap-2">
-                <span className="opacity-70">Discount</span>
-                <span className="text-[#FFD700]">
-                  ฿{discount.toLocaleString()}
-                </span>
-              </div>
             </div>
 
             {/* Right: Total Net & Button */}
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-6 flex-col md:flex-row">
               <div className="flex items-center gap-3">
-                <span className="text-[#563F58] text-xl ">Total Net</span>
-                <span className="text-[#FFD700] text-4xl font-extrabold">
+                <span className="text-[#563F58] text-h3xl ">Total Net</span>
+                <span className="text-[#FFD700] text-h3xl font-extrabold">
                   ฿{totalNet.toLocaleString()}
                 </span>
               </div>
@@ -524,7 +518,7 @@ const CheckoutPage = () => {
               <button
                 onClick={handlePlaceOrder}
                 disabled={confirm}
-                className={`bg-[#FFD700] hover:bg-[#ffc800] text-white text-xl  py-3 px-10 rounded-xl shadow-lg transition transform active:scale-95 flex items-center gap-2 ${
+                className={`bg-[#FFD700] hover:bg-[#ffc800] text-white text-xl  py-3 px-12 rounded-xl shadow-custombutton transition transform active:scale-95 flex items-center gap-2 ${
                   confirm ? "opacity-70 cursor-not-allowed" : ""
                 }`}
               >

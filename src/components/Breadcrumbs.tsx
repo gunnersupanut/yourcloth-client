@@ -45,20 +45,20 @@ const Breadcrumbs = () => {
 
           return (
             <li key={to} className="flex items-center">
-              <span className="mx-1 md:mx-2 text-text_secondary text-sm md:text-xl">
+              <span className="mx-1 md:mx-2 text-text_secondary text-xl">
                 /
               </span>
 
               {isActive ? (
                 // หน้าปัจจุบัน (ไม่มี Search)
-                <span className="text-text_primary font-bold text-sm md:text-h3xl truncate max-w-[150px] md:max-w-none">
+                <span className="text-text_primary font-bold text-h3xl truncate max-w-[150px] md:max-w-none">
                   {formattedName}
                 </span>
               ) : (
                 // หน้าก่อนหน้า (หรือหน้าปัจจุบันที่มี Search ต่อท้าย)
                 <Link
                   to={to}
-                  className="hover:text-secondary transition-colors text-text_secondary text-sm md:text-h3xl"
+                  className="hover:text-secondary transition-colors text-text_secondary text-h3xl"
                 >
                   {formattedName}
                 </Link>
