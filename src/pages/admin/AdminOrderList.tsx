@@ -36,7 +36,7 @@ const AdminOrderList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [totalOrders, setTotalOrders] = useState(0);
+  // const [totalOrders, setTotalOrders] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [sortBy, setSortBy] = useState("newest");
   const [startDate, setStartDate] = useState("");
@@ -60,7 +60,7 @@ const AdminOrderList = () => {
 
       if (res.success) {
         setOrders(res.data.orders);
-        setTotalOrders(res.data.total);
+        // setTotalOrders(res.data.total);
         setTotalPages(res.data.totalPages);
       }
     } catch (error) {
@@ -358,7 +358,7 @@ const AdminOrderList = () => {
                 {currentPage}
               </span>{" "}
               of <span className="font-bold">{totalPages || 1}</span>
-              <span className="ml-2 text-gray-500">({totalOrders} items)</span>
+              {/* <span className="ml-2 text-gray-500">({totalOrders} items)</span> */}
             </div>
 
             {/* Pagination Controls */}

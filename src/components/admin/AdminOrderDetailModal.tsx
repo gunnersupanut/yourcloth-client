@@ -64,7 +64,7 @@ const AdminOrderDetailModal = ({
   // --- Action Handlers ---
   const handleSubmitAction = async () => {
     if (!orderId) return;
-    setIsSubmitting(true); // 🔥 เริ่มหมุน
+    setIsSubmitting(true); 
     try {
       if (actionMode === "REJECTING") {
         if (!inputValue.trim()) {
