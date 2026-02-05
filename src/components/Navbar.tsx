@@ -29,11 +29,11 @@ const Navbar = () => {
       : "text-white hover:text-secondary transition pb-1";
   };
 
-  const iconLinkClass = ({ isActive }: { isActive: boolean }) => {
-    return isActive
-      ? `p-2 rounded-full text-white border-2 border-secondary transition-all duration-300`
-      : `p-2 rounded-full text-white border-2 border-transparent transition-all duration-300 hover:border-secondary`;
-  };
+  // const iconLinkClass = ({ isActive }: { isActive: boolean }) => {
+  //   return isActive
+  //     ? `p-2 rounded-full text-white border-2 border-secondary transition-all duration-300`
+  //     : `p-2 rounded-full text-white border-2 border-transparent transition-all duration-300 hover:border-secondary`;
+  // };
 
   // Search Logic
   const handleSearchExecute = () => {
@@ -192,8 +192,11 @@ const Navbar = () => {
                 )}
               </div>
             ) : (
-              <NavLink to="/login" className={iconLinkClass}>
-                <User className="w-5 h-5 md:w-7 md:h-7" strokeWidth={2.5} />
+              <NavLink to="/login">
+                <User
+                  className="w-5 h-5 md:w-7 md:h-7  text-secondary hover:scale-105 transition-all"
+                  strokeWidth={2.5}
+                />
               </NavLink>
             )}
 
