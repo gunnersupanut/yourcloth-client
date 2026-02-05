@@ -226,9 +226,11 @@ const AdminDashboard = () => {
                     <td className="py-4">
                       <span
                         className={`px-3 py-1 rounded-full text-xs 
-                        ${order.status === "PENDING" ? "bg-yellow-500/10 text-yellow-500" : ""}
-                        ${order.status === "PAID" ? "bg-blue-500/10 text-blue-500" : ""}
-                        ${order.status === "SHIPPED" ? "bg-green-500/10 text-green-500" : ""}
+                        ${order.status === "PENDING" ? "bg-gray-500/10 text-gray-500" : ""}
+                        ${order.status === "INSPECTING" ? "bg-blue-500/10 text-blue-500" : ""}
+                        ${order.status === "SHIPPING" ? "bg-yellow-500/10 text-yellow-500" : ""}
+                        ${order.status === "PACKING" ? "bg-purple-500/10 text-purple-500" : ""}
+                        ${order.status === "COMPLETE" ? "bg-green-500/10 text-green-500" : ""}
                         ${order.status === "CANCELLED" ? "bg-red-500/10 text-red-500" : ""}
                       `}
                       >

@@ -24,6 +24,14 @@ const Footer = () => {
             <div className="flex flex-col space-y-4 md:border-r border-secondary py-10 px-5 font-kanit">
               <h3 className="text-h3xl text-secondary">Help</h3>
               <ul className="space-y-2 text-bodyxl">
+                 <li>
+                  <Link
+                    to="/"
+                    className="hover:text-secondary transition"
+                  >
+                    Home
+                  </Link>
+                </li>
                 <li>
                   <Link
                     to="/contact"
@@ -33,16 +41,8 @@ const Footer = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    to="/return-policy"
-                    className="hover:text-secondary transition"
-                  >
-                    Return Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/faq" className="hover:text-secondary transition">
-                    FAQ
+                  <Link to="/setting/account" className="hover:text-secondary transition">
+                    Acoount
                   </Link>
                 </li>
               </ul>
@@ -56,7 +56,7 @@ const Footer = () => {
                 <ul className="space-y-2 text-bodyxl">
                   <li>
                     <Link
-                      to="/shop/headwear"
+                      to="/shop/Head Wear"
                       className="hover:text-secondary transition"
                     >
                       Head Wear
@@ -64,7 +64,7 @@ const Footer = () => {
                   </li>
                   <li>
                     <Link
-                      to="/shop/tops"
+                      to="/shop/Tops"
                       className="hover:text-secondary transition"
                     >
                       Tops
@@ -72,7 +72,7 @@ const Footer = () => {
                   </li>
                   <li>
                     <Link
-                      to="/shop/pants"
+                      to="/shop/Pants"
                       className="hover:text-secondary transition"
                     >
                       Pants
@@ -83,7 +83,7 @@ const Footer = () => {
                 <ul className="space-y-2">
                   <li>
                     <Link
-                      to="/shop/shoes"
+                      to="/shop/Shoes"
                       className="hover:text-secondary transition"
                     >
                       Shoes
@@ -91,10 +91,10 @@ const Footer = () => {
                   </li>
                   <li>
                     <Link
-                      to="/shop/bags"
+                      to="/shop/Accessories"
                       className="hover:text-secondary transition"
                     >
-                      Bags
+                      Accessories
                     </Link>
                   </li>
                 </ul>
@@ -117,7 +117,7 @@ const Footer = () => {
 
           <div className="flex space-x-8">
             <span>Icon By Lucide</span>
-            <span>Images From Pexels & Gemini</span>
+            <span>Images From Pexels, Pixabay, unsplash & Gemini</span>
           </div>
         </div>
       </div>

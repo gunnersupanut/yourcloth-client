@@ -55,8 +55,7 @@ const AdminProductList = () => {
         `Delete product "${productToDelete.product_name}" successfully.`,
       );
 
-      // อัปเดต State โดยไม่ต้องโหลดใหม่ (Optimistic Update)
-      setProducts((prev) => prev.filter((p) => p.id !== productToDelete.id));
+     fetchProducts()
     } catch (error) {
       console.error(error);
       toast.error("Delete Product Fail");
@@ -164,7 +163,7 @@ const AdminProductList = () => {
                 Status
               </label>
               <div className="flex flex-wrap gap-2">
-                {["All", "Active", "Out of Stock"].map((status) => (
+                {["All", "Active", "Out of Stock","Inactive"].map((status) => (
                   <button
                     key={status}
                     onClick={() => setStatusFilter(status)}

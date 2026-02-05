@@ -17,7 +17,7 @@ const CartPage = () => {
   const { cartItems, fetchCart, selectedCartItemIds, setSelectedCartItemIds } =
     useCart();
 
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(0);
 
   // Delete state
   const [deleteModal, setDeleteModal] = useState<DeleteModalState>({
@@ -70,7 +70,7 @@ const CartPage = () => {
       toast.error(`Only a few items left ${item.stock_quantity} .`);
       return;
     }
-    setIsUpdating(true);
+    setIsUpdating(cartItemId);
     try {
       await cartService.updateCart(cartItemId, newQty, variantId);
       // ถ้าผ่าน -> สั่ง Context โหลดตะกร้าใหม่ทันที (ตัวเลขจะเปลี่ยนเองตาม DB)
@@ -83,7 +83,7 @@ const CartPage = () => {
       );
       await fetchCart();
     } finally {
-      setIsUpdating(false);
+      setIsUpdating(0);
     }
   };
 
@@ -229,7 +229,7 @@ const CartPage = () => {
 
                   {/* ปุ่มลบ */}
                   <button
-                    disabled={isUpdating}
+                    disabled={isUpdating !== 0}
                     onClick={() => handleSingleDeleteClick(item.cart_item_id)}
                     className="text-secondary hover:text-red-500 transition-colors p-1 sm:p-2 -mr-2 sm:mr-0"
                   >
@@ -275,7 +275,7 @@ const CartPage = () => {
                     {/* ตัวเลข */}
                     <div className="min-w-[30px] sm:min-w-[50px] h-6 sm:h-8 flex items-center justify-center rounded-full border border-black px-2">
                       <div className="text-sm sm:text-bodyxl text-primary font-medium">
-                        {isUpdating ? (
+                        {isUpdating === item.cart_item_id ? (
                           <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
                         ) : (
                           item.quantity
@@ -357,7 +357,7 @@ const CartPage = () => {
               </button>
             </div>
 
-            {/* ฝั่งขวา: Price Summary & Button */}
+            {/* Price Summary & Button */}
             <div className="flex flex-col sm:flex-row items-center gap-6 w-full md:w-auto justify-end">
               <div className="flex flex-col items-baseline gap-4 text-primary text-h3xl ">
                 {/* ราคารวม */}
@@ -367,7 +367,6 @@ const CartPage = () => {
                     ฿{totalNet.toLocaleString()}
                   </span>
                 </div>
-               
               </div>
 
               <button

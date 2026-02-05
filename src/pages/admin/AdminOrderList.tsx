@@ -198,7 +198,7 @@ const AdminOrderList = () => {
                   placeholder="Search Order ID or Customer..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full md:w-64 bg-gray-200 text-black px-4 py-2 pl-10 rounded-l-lg focus:outline-none placeholder-gray-500"
+                  className="w-full md:w-64 bg-gray-200 text-black px-4 py-2.5 pl-10 rounded-l-lg focus:outline-none placeholder-gray-500"
                 />
                 <Search className="w-4 h-4 absolute left-3 top-3 text-gray-500" />
               </div>

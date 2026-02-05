@@ -326,9 +326,7 @@ const AdminBannerPage = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div>
-          <h1 className="text-h1xl text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
-            Banner Management
-          </h1>
+        
           <p className="text-gray-400 mt-1">
             Manage advertising banners and promotions.
           </p>
