@@ -9,6 +9,7 @@ import {
 import { Link } from "react-router-dom";
 import { adminOrderService } from "../../services/adminOrderService";
 import type { AdminOrder } from "../../types/adminOrderTypes";
+import { io } from "socket.io-client";
 
 const AdminDashboard = () => {
   // 1. กำหนด Type ให้ State ตรงๆ ไปเลย
@@ -23,65 +24,76 @@ const AdminDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        // เรียก API
-        const response = await adminOrderService.getOrders({
-          limit: 1000,
-          page: 1,
-        });
-
-        const allOrders: AdminOrder[] = response.data.orders || response.data;
-        // console.log("All orders.", allOrders);
-
-        // Helper สำหรับเช็คสถานะจ่ายเงินแล้ว
-        const paidStatuses = ["PAID", "SHIPPED", "COMPLETE", "COMPLETED"];
-
-        //  ยอดขายรวม
-        const totalSales = allOrders
-          .filter((o) => paidStatuses.includes(o.status))
-          .reduce((sum, order) => sum + Number(order.totalPrice), 0);
-        // ยอดขายวันนี้ (Today's Sales)
-        const today = new Date().toISOString().slice(0, 10);
-        const todaySales = allOrders
-          .filter((o) => {
-            const orderDate = new Date(o.orderedAt).toISOString().slice(0, 10);
-            return orderDate === today && paidStatuses.includes(o.status);
-          })
-          .reduce((sum, order) => sum + Number(order.totalPrice), 0);
-
-        // ยอดเฉลี่ยต่อบิล (Avg Order Value)
-        const paidOrdersCount = allOrders.filter((o) =>
-          paidStatuses.includes(o.status),
-        ).length;
-        const averageOrderValue =
-          paidOrdersCount > 0 ? totalSales / paidOrdersCount : 0;
-
-        // Pending & Users
-        const pendingCount = allOrders.filter(
-          (o) => o.status === "INSPECTING",
-        ).length;
-        const userIds = allOrders.map((o) => o.userId);
-        const uniqueCustomers = new Set(userIds).size;
-
-        setStats({
-          totalSales,
-          todaySales,
-          averageOrderValue,
-          pendingCount,
-          totalUsers: uniqueCustomers,
-          recentOrders: allOrders.slice(0, 5),
-        });
-      } catch (error) {
-        console.error("Dashboard Error:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchDashboardData();
   }, []);
+  const fetchDashboardData = async () => {
+    try {
+      // เรียก API
+      const response = await adminOrderService.getOrders({
+        limit: 1000,
+        page: 1,
+      });
 
+      const allOrders: AdminOrder[] = response.data.orders || response.data;
+      // console.log("All orders.", allOrders);
+
+      // Helper สำหรับเช็คสถานะจ่ายเงินแล้ว
+      const paidStatuses = ["PAID", "SHIPPED", "COMPLETE", "COMPLETED"];
+
+      //  ยอดขายรวม
+      const totalSales = allOrders
+        .filter((o) => paidStatuses.includes(o.status))
+        .reduce((sum, order) => sum + Number(order.totalPrice), 0);
+      // ยอดขายวันนี้ (Today's Sales)
+      const today = new Date().toISOString().slice(0, 10);
+      const todaySales = allOrders
+        .filter((o) => {
+          const orderDate = new Date(o.orderedAt).toISOString().slice(0, 10);
+          return orderDate === today && paidStatuses.includes(o.status);
+        })
+        .reduce((sum, order) => sum + Number(order.totalPrice), 0);
+
+      // ยอดเฉลี่ยต่อบิล (Avg Order Value)
+      const paidOrdersCount = allOrders.filter((o) =>
+        paidStatuses.includes(o.status),
+      ).length;
+      const averageOrderValue =
+        paidOrdersCount > 0 ? totalSales / paidOrdersCount : 0;
+
+      // Pending & Users
+      const pendingCount = allOrders.filter(
+        (o) => o.status === "INSPECTING",
+      ).length;
+      const userIds = allOrders.map((o) => o.userId);
+      const uniqueCustomers = new Set(userIds).size;
+
+      setStats({
+        totalSales,
+        todaySales,
+        averageOrderValue,
+        pendingCount,
+        totalUsers: uniqueCustomers,
+        recentOrders: allOrders.slice(0, 5),
+      });
+    } catch (error) {
+      console.error("Dashboard Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  // Socket.io
+  useEffect(() => {
+    const socket = io(import.meta.env.VITE_SERVER_URL);
+
+    socket.on("ADMIN_UPDATE", () => {
+      console.log("Refreshing Table...");
+      fetchDashboardData();
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat("th-TH", {
       style: "currency",
