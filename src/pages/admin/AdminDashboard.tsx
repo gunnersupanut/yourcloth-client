@@ -26,10 +26,10 @@ const AdminDashboard = () => {
     const fetchDashboardData = async () => {
       try {
         // เรียก API
-        const response = await adminOrderService.getOrders({ 
-        limit: 1000, 
-        page: 1 
-    });
+        const response = await adminOrderService.getOrders({
+          limit: 1000,
+          page: 1,
+        });
 
         const allOrders: AdminOrder[] = response.data.orders || response.data;
         // console.log("All orders.", allOrders);
@@ -59,7 +59,7 @@ const AdminDashboard = () => {
 
         // Pending & Users
         const pendingCount = allOrders.filter(
-          (o) => o.status === "PENDING" || o.status === "INSPECTING",
+          (o) => o.status === "INSPECTING",
         ).length;
         const userIds = allOrders.map((o) => o.userId);
         const uniqueCustomers = new Set(userIds).size;
