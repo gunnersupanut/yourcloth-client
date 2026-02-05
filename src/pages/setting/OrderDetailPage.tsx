@@ -350,11 +350,18 @@ export default function OrderDetail() {
           ${
             order.cancelledBy === "ADMIN"
               ? "bg-red-600 text-white"
-              : "bg-gray-200 text-gray-600"
+              : order.cancelledBy === "USER"
+                ? "bg-gray-200 text-gray-600"
+                : "bg-yellow-50 text-secondary"
           }
        `}
                     >
-                      By {order.cancelledBy === "ADMIN" ? "Shop" : "You"}
+                      By{" "}
+                      {order.cancelledBy === "ADMIN"
+                        ? "Shop"
+                        : order.cancelledBy === "USER"
+                          ? "You"
+                          : "SYSTEM"}
                     </span>
                   </div>
 
