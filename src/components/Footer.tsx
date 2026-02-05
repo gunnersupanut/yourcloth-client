@@ -6,10 +6,8 @@ const Footer = () => {
       {/* --- ส่วนบน (เนื้อหาหลัก) สีม่วงเข้ม --- */}
       <div className="bg-primary text-white">
         <div className="container mx-auto px-4">
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            
-            {/* === Column 1: Brand Info === */}
+            {/* === Column 1 Brand Info === */}
             <div className="flex flex-col space-y-4 md:border-r border-secondary py-10 px-5 font-logo">
               {/* Logo ใหญ่ */}
               <h1 className="text-5xl text-secondary">YourCloth</h1>
@@ -24,11 +22,8 @@ const Footer = () => {
             <div className="flex flex-col space-y-4 md:border-r border-secondary py-10 px-5 font-kanit">
               <h3 className="text-h3xl text-secondary">Help</h3>
               <ul className="space-y-2 text-bodyxl">
-                 <li>
-                  <Link
-                    to="/"
-                    className="hover:text-secondary transition"
-                  >
+                <li>
+                  <Link to="/" className="hover:text-secondary transition">
                     Home
                   </Link>
                 </li>
@@ -41,7 +36,10 @@ const Footer = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/setting/account" className="hover:text-secondary transition">
+                  <Link
+                    to="/setting/account"
+                    className="hover:text-secondary transition"
+                  >
                     Acoount
                   </Link>
                 </li>
@@ -102,7 +100,6 @@ const Footer = () => {
             </div>
 
             {/* 🔥 Column 4 Social ลบทิ้งไปแล้ว! */}
-            
           </div>
         </div>
       </div>

@@ -1,10 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import DropdownFilter from "../components/ui/DropdownFilter";
-
 import { thaiLocations } from "../data/thaiAddressData";
 import type { AddressFormState } from "../types/addressTypes";
-
-// 🔥 Mock Data (ฝังไว้ที่นี่ก่อน ขี้เกียจแยกไฟล์)
+import { X } from "lucide-react"; // แนะนำให้ใช้ Icon จาก Lib จะสวยกว่า SVG ดิบ
 
 interface AddNewAddressModalProps {
   isOpen: boolean;
@@ -12,6 +10,7 @@ interface AddNewAddressModalProps {
   onConfirm: (addressData: any) => void;
   initialData?: any;
 }
+
 const defaultFormState = {
   recipientName: "",
   phoneNumber: "",
@@ -22,6 +21,7 @@ const defaultFormState = {
   zipCode: "",
   isDefault: false,
 };
+
 const AddNewAddressModal = ({
   isOpen,
   onClose,
@@ -30,18 +30,16 @@ const AddNewAddressModal = ({
 }: AddNewAddressModalProps) => {
   const [formData, setFormData] = useState<AddressFormState>(defaultFormState);
 
-  // ให้ State เปลี่ยนตาม initialData
+  // --- Logic: Init Data ---
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
-        // แปลง DB -> Form
-        // ห้ามให้หลุด undefined
         setFormData({
           recipientName: initialData.recipient_name || "",
           phoneNumber:
             initialData.phone_number || initialData.phoneNumber || "",
           addressDetail:
-            initialData.address_detail || initialData.adddressDetail || "",
+            initialData.address_detail || initialData.adddressDetail || "", // Handle Typo from DB if any
           province: initialData.province || "",
           district: initialData.district || "",
           subDistrict:
@@ -50,32 +48,19 @@ const AddNewAddressModal = ({
           isDefault: initialData.is_default || initialData.isDefault || false,
         });
       } else {
-        // AddnewAddress ล้างค่าทิ้งให้เกลี้ยง
         setFormData(defaultFormState);
       }
     }
   }, [isOpen, initialData]);
-  useEffect(() => {
-    if (initialData) console.log("FormData:", initialData);
-  }, [initialData]);
-  const isFormValid =
-    formData.recipientName &&
-    formData.phoneNumber &&
-    formData.province &&
-    formData.district &&
-    formData.subDistrict &&
-    formData.zipCode &&
-    formData.addressDetail;
-  // Logic: Cascading Dropdown (เลือกแม่ -> ลูกเปลี่ยน)
-  // หาข้อมูลจังหวัดที่เลือก
+
+  // --- Logic: Cascading Dropdown ---
   const selectedProvinceData = useMemo(() => {
     return thaiLocations.find((p) => p.province === formData.province);
   }, [formData.province]);
 
-  // หาข้อมูลอำเภอที่เลือก
   const selectedDistrictData = useMemo(() => {
     return selectedProvinceData?.districts.find(
-      (d) => d.name === formData.district
+      (d) => d.name === formData.district,
     );
   }, [selectedProvinceData, formData.district]);
 
@@ -83,7 +68,7 @@ const AddNewAddressModal = ({
   useEffect(() => {
     if (formData.subDistrict && selectedDistrictData) {
       const sub = selectedDistrictData.subDistricts.find(
-        (s) => s.name === formData.subDistrict
+        (s) => s.name === formData.subDistrict,
       );
       if (sub) {
         setFormData((prev) => ({ ...prev, zipCode: sub.zipCode }));
@@ -92,10 +77,8 @@ const AddNewAddressModal = ({
   }, [formData.subDistrict, selectedDistrictData]);
 
   // --- Handlers ---
-
-  // สำหรับ Input ปกติ (Text, Checkbox)
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value, type } = e.target;
     const val =
@@ -103,27 +86,21 @@ const AddNewAddressModal = ({
     setFormData((prev) => ({ ...prev, [name]: val }));
   };
 
-  // สำหรับ Dropdown (รับค่า value ตรงๆ)
   const handleDropdownChange = (name: string, value: string) => {
     setFormData((prev) => {
-      // สร้าง state ใหม่จากการเปลี่ยนค่าปกติ
       const newState = { ...prev, [name]: value };
-
-      // Logic (Cascading Reset)
       if (name === "province") {
-        // ถ้าเปลี่ยนจังหวัด -> ล้างอำเภอ, ตำบล, รหัส
         newState.district = "";
         newState.subDistrict = "";
         newState.zipCode = "";
       } else if (name === "district") {
-        // ถ้าเปลี่ยนอำเภอ -> ล้างตำบล, รหัส
         newState.subDistrict = "";
         newState.zipCode = "";
       }
-
       return newState;
     });
   };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (
@@ -134,11 +111,7 @@ const AddNewAddressModal = ({
       alert("Please fill in all required fields!");
       return;
     }
-
-    const payload = {
-      ...formData,
-    };
-
+    const payload = { ...formData };
     onConfirm(payload);
     onClose();
   };
@@ -149,43 +122,40 @@ const AddNewAddressModal = ({
     "w-full border-2 border-gray-300 rounded-xl px-4 py-3 text-gray-700 focus:outline-none focus:border-[#6B4B6E] focus:ring-1 focus:ring-[#6B4B6E] transition placeholder-gray-400";
 
   return (
-    <div className="fixed inset-0 z-[60] overflow-y-auto bg-black/60 backdrop-blur-sm">
-      <div className="flex min-h-full items-center justify-center p-4 py-10">
-        <div className="bg-white w-full max-w-3xl rounded-[32px] shadow-2xl p-8 relative animate-fade-in-up">
+    // Overlay: Fixed เต็มจอ + Scroll ได้เมื่อเนื้อหายาวเกิน
+    <div className="fixed inset-0 z-[60] overflow-y-auto bg-black/60 backdrop-blur-sm font-kanit">
+      {/* Container: จัดกึ่งกลาง Flex + Padding กันขอบ */}
+      <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+        {/* Modal Box: Responsive Width & Padding */}
+        <div
+          className="relative transform overflow-hidden rounded-2xl md:rounded-[32px] bg-white text-left shadow-2xl transition-all 
+          w-full max-w-3xl my-8 p-5 md:p-8 animate-fade-in-up"
+        >
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 text-yellow-400 hover:text-yellow-500 transition"
+            className="absolute top-4 right-4 md:top-6 md:right-6 text-gray-400 hover:text-red-500 transition p-1 bg-gray-100 rounded-full hover:bg-red-50"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-8 w-8"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={3}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <X size={24} strokeWidth={2.5} />
           </button>
 
-          <div className="flex items-baseline gap-2 mb-8">
-            <h2 className="text-h1xl text-primary">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 mb-6 md:mb-8">
+            <h2 className="text-h2xl md:text-h1xl text-primary font-bold">
               {initialData ? "Edit Address" : "Add New Address"}
             </h2>
-            <span className="text-xs text-gray-500 font-medium">*Required</span>
+            <span className="text-xs text-gray-500 font-medium bg-gray-100 px-2 py-1 rounded-md w-fit">
+              *All fields are required
+            </span>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Row 1: Name & Checkbox */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-1">
-                <label className="text-[#563F58] font-bold text-sm">
-                  Recipient Name *
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+            {/* --- Row 1: Name & Default Checkbox --- */}
+            {/* Mobile: Stack, Desktop: 2 Cols */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              <div className="space-y-1.5">
+                <label className="text-[#563F58] font-bold text-sm ml-1">
+                  Recipient Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -194,11 +164,13 @@ const AddNewAddressModal = ({
                   className={inputClass}
                   value={formData.recipientName}
                   onChange={handleChange}
+                  maxLength={100}
                 />
               </div>
 
-              <div className="flex items-center h-full pt-6 md:pl-4">
-                <div className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition w-full">
+              {/* Checkbox Container */}
+              <div className="flex items-end pb-1 md:pl-4">
+                <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-dashed border-gray-300 hover:border-[#563F58] hover:bg-purple-50 transition w-full group">
                   <div className="relative flex items-center">
                     <input
                       type="checkbox"
@@ -206,11 +178,10 @@ const AddNewAddressModal = ({
                       id="isDefault"
                       checked={formData.isDefault}
                       onChange={handleChange}
-                      className="peer h-6 w-6 cursor-pointer appearance-none rounded-md border-2 border-gray-300 transition-all checked:border-[#563F58] checked:bg-[#563F58]"
+                      className="peer h-6 w-6 cursor-pointer appearance-none rounded-md border-2 border-gray-400 transition-all checked:border-[#563F58] checked:bg-[#563F58] group-hover:border-[#563F58]"
                     />
                     <svg
                       className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"
-                      xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -221,22 +192,19 @@ const AddNewAddressModal = ({
                       <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
                   </div>
-                  <label
-                    htmlFor="isDefault"
-                    className="text-[#563F58] font-bold text-sm cursor-pointer select-none"
-                  >
+                  <span className="text-gray-600 font-bold text-sm cursor-pointer select-none group-hover:text-[#563F58]">
                     Set as default address
-                  </label>
-                </div>
+                  </span>
+                </label>
               </div>
             </div>
 
-            {/* Row 2: Province & Phone */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Province Dropdown (Z-Index สูงสุด) */}
-              <div className="space-y-1 relative z-30">
-                <label className="text-[#563F58] font-bold text-sm">
-                  Province *
+            {/* --- Row 2: Province & Phone --- */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              {/* Province (Z-Index 30) */}
+              <div className="space-y-1.5 relative z-30">
+                <label className="text-[#563F58] font-bold text-sm ml-1">
+                  Province <span className="text-red-500">*</span>
                 </label>
                 <DropdownFilter
                   label="Select Province"
@@ -246,27 +214,29 @@ const AddNewAddressModal = ({
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[#563F58] font-bold text-sm">
-                  Phone Number *
+              <div className="space-y-1.5">
+                <label className="text-[#563F58] font-bold text-sm ml-1">
+                  Phone Number <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="tel"
                   name="phoneNumber"
-                  placeholder="0X-XXX-XXXX"
+                  placeholder="08X-XXX-XXXX"
                   className={inputClass}
                   value={formData.phoneNumber}
                   onChange={handleChange}
+                  maxLength={20} // เพิ่มกันเหนียว
                 />
               </div>
             </div>
 
-            {/* Row 3: District, Sub-district, Zip code */}
+            {/* --- Row 3: District, Sub, Zip --- */}
+            {/* Mobile: 1 Col, Desktop: 3 Cols */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* District (Z-Index รองลงมา) */}
-              <div className="space-y-1 relative z-20">
-                <label className="text-[#563F58] font-bold text-sm">
-                  District *
+              {/* District (Z-Index 20) */}
+              <div className="space-y-1.5 relative z-20">
+                <label className="text-[#563F58] font-bold text-sm ml-1">
+                  District <span className="text-red-500">*</span>
                 </label>
                 <DropdownFilter
                   label="Select District"
@@ -281,10 +251,10 @@ const AddNewAddressModal = ({
                 />
               </div>
 
-              {/* Sub-District (Z-Index ต่ำสุดในกลุ่ม dropdown) */}
-              <div className="space-y-1 relative z-10">
-                <label className="text-[#563F58] font-bold text-sm">
-                  Sub-district *
+              {/* Sub-District (Z-Index 10) */}
+              <div className="space-y-1.5 relative z-10">
+                <label className="text-[#563F58] font-bold text-sm ml-1">
+                  Sub-district <span className="text-red-500">*</span>
                 </label>
                 <DropdownFilter
                   label="Select Sub-district"
@@ -299,53 +269,53 @@ const AddNewAddressModal = ({
                 />
               </div>
 
-              {/* Zip Code (Readonly เพราะ Auto Fill) */}
-              <div className="space-y-1 relative">
-                <label className="text-[#563F58] font-bold text-sm">
-                  Zip code *
+              {/* Zip Code */}
+              <div className="space-y-1.5 relative">
+                <label className="text-[#563F58] font-bold text-sm ml-1">
+                  Zip code <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  {/* ใช้ Input ธรรมดาแต่ล็อคไว้ หรือจะใช้ Dropdown ก็ได้แต่เปลือง */}
-                  <input
-                    type="text"
-                    readOnly
-                    value={formData.zipCode}
-                    placeholder="Auto"
-                    className={`${inputClass} bg-gray-50 text-primary text-bodyxl cursor-not-allowed`}
-                  />
-                </div>
+                <input
+                  type="text"
+                  readOnly
+                  value={formData.zipCode}
+                  placeholder="Auto"
+                  className={`${inputClass} bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200`}
+                />
               </div>
             </div>
 
-            {/* Row 4: Address Details */}
-            <div className="space-y-1 relative z-0">
-              <label className="text-[#563F58] font-bold text-sm">
-                Address adddressDetail *
+            {/* --- Row 4: Address Details --- */}
+            <div className="space-y-1.5 relative z-0">
+              <label className="text-[#563F58] font-bold text-sm ml-1">
+                Address Details <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="addressDetail"
                 rows={3}
-                placeholder="(House number, village, road)"
-                className={`${inputClass} resize-none pt-3`}
+                placeholder="House No., Building, Street, Soi..."
+                className={`${inputClass} resize-none pt-3 min-h-[100px]`}
                 value={formData.addressDetail}
                 onChange={handleChange}
+                maxLength={200}
               />
             </div>
 
             {/* Footer Button */}
-            <div className="pt-2">
+            <div className="pt-4">
               <button
                 type="submit"
-                disabled={!isFormValid}
-                className={`w-full text-xl font-bold py-4 rounded-full transition-all duration-300
+                className={`w-full text-lg md:text-xl font-bold py-3.5 md:py-4 rounded-full transition-all duration-300 shadow-md flex items-center justify-center gap-2
                   ${
-                    isFormValid
-                      ? "bg-secondary hover:bg-yellow-400 text-white shadow-lg transform active:scale-95 cursor-pointer"
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
+                    formData.recipientName &&
+                    formData.phoneNumber &&
+                    formData.addressDetail &&
+                    formData.zipCode
+                      ? "bg-secondary hover:bg-yellow-400 text-white transform active:scale-95 cursor-pointer hover:shadow-lg"
+                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
                   }
                 `}
               >
-                Confirm
+                Confirm Address
               </button>
             </div>
           </form>

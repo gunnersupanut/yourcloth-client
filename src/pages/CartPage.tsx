@@ -316,7 +316,7 @@ const CartPage = () => {
       </div>
 
       {/* --- Bottom--- */}
-      <div className="fixed bottom-0 w-full z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
+      <div className="fixed bottom-0 w-full z-30 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
         {/* Discount
         <div className="w-full bg-primary py-3 sm:py-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-end items-center gap-8">

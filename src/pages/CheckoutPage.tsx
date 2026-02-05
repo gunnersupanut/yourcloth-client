@@ -257,7 +257,7 @@ const CheckoutPage = () => {
 
       <hr className="border-gray-800 mb-8" />
 
-      {/* 🟣 Zone Header: Address & Options (Full Width Background) */}
+      {/* Zone Header: Address & Options (Full Width Background) */}
       <div className="w-screen relative left-1/2 -translate-x-1/2 bg-[#A795AD] pt-10 pb-16 mb-[-60px]">
         <div className="container mx-auto px-4 md:px-8">
           {/* 🔥 Grid แบ่ง 2 ฝั่ง: ซ้าย (Address) | ขวา (Options) */}
@@ -288,38 +288,49 @@ const CheckoutPage = () => {
               </div>
 
               {defaultAddress ? (
-                // ✅ เหลือ Div ตัวเดียวพอ (ตัวที่มี relative group)
-                <div className="flex bg-white rounded-xl overflow-hidden shadow-lg h-32 relative group">
+                // ใช้ flex-col บนมือถือ, flex-row บนจอ sm ขึ้นไป
+                <div className="flex flex-col sm:flex-row bg-white rounded-xl overflow-hidden shadow-lg min-h-[140px] relative group border border-gray-100 transition-all hover:shadow-xl">
                   {/* ฝั่งซ้าย: ชื่อ & เบอร์ (สีม่วงเข้ม) */}
-                  <div className="bg-[#563F58] text-white p-6 w-[35%] flex flex-col justify-center min-w-[120px]">
-                    <p className="font-bold text-lg truncate capitalize">
-                      {defaultAddress.recipient_name}
-                    </p>
-                    <p className="text-sm opacity-80 font-medium">
-                      {defaultAddress.phone_number}
-                    </p>
+                  {/* มือถือ: เต็มความกว้าง (w-full), จอใหญ่: กว้าง 35% */}
+                  <div className="bg-[#563F58] text-white p-5 sm:p-6 w-full sm:w-[35%] flex flex-col justify-center min-w-[120px]">
+                    <div className="flex flex-col gap-1">
+                      <p className="font-bold text-lg capitalize break-words">
+                        {/* break-words: ถ้าชื่อยาวมากๆ ให้ปัดลงบรรทัดใหม่ ไม่ตัดทิ้ง */}
+                        {defaultAddress.recipient_name}
+                      </p>
+                      <p className="text-sm opacity-90 font-medium tracking-wide">
+                        {defaultAddress.phone_number}
+                      </p>
+                    </div>
                   </div>
 
                   {/* ฝั่งขวา: รายละเอียดที่อยู่ */}
-                  <div className="p-6 pr-4 flex-1 flex flex-col justify-center text-gray-600 text-sm">
-                    <p className="line-clamp-2 leading-relaxed font-medium">
-                      {defaultAddress.address_detail}{" "}
-                      {defaultAddress.sub_district} {defaultAddress.district}
-                      <br />
-                      {defaultAddress.province} {defaultAddress.zip_code}
-                    </p>
+                  <div className="p-5 sm:p-6 flex-1 flex flex-col justify-center text-gray-600 text-sm">
+                    {/* ปลด line-clamp ออก ให้โชว์เต็มๆ */}
+                    <div className="leading-relaxed font-medium pr-0 sm:pr-8 mb-6 sm:mb-0">
+                      <p className="break-words">
+                        {defaultAddress.address_detail}
+                      </p>
+                      <p className="mt-1 text-gray-500">
+                        {defaultAddress.sub_district}, {defaultAddress.district}
+                        <br className="hidden sm:block" />{" "}
+                        {/* เว้นบรรทัดเฉพาะจอใหญ่ */} {defaultAddress.province}{" "}
+                        {defaultAddress.zip_code}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* ปุ่ม Change Address (ลอยขวาล่าง) */}
+                  {/* ปุ่ม Change Address (ลอยขวาล่าง หรือ ลอยมุมบนขวาในมือถือ) */}
                   <button
-                    className="absolute bottom-3 right-5 text-button text-gray-400 underline decoration-gray-400 hover:text-[#6B4B6E] hover:decoration-[#6B4B6E] transition font-bold"
+                    className="absolute bottom-4 right-5 sm:top-auto sm:bottom-4 
+                    text-button text-gray-400 underline decoration-gray-400 
+                    hover:text-[#6B4B6E] hover:decoration-[#6B4B6E] transition font-bold text-xs sm:text-sm"
                     onClick={() => updateUi("isAddressModalOpen", true)}
                   >
-                    Change Address
+                    Change
                   </button>
                 </div>
               ) : (
-                // Case ไม่มีที่อยู่
                 <div
                   onClick={() => updateUi("isAddressModalOpen", true)}
                   className="flex flex-col items-center justify-center h-32 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-[#563F58] hover:bg-[#563F58]/5 transition group"
@@ -346,12 +357,12 @@ const CheckoutPage = () => {
               )}
             </div>
 
-            {/* 🚚 Right Side: Shipping & Payment Options */}
-            <div className="flex flex-col gap-4 mt-8 lg:mt-0">
+            {/* Right Side: Shipping & Payment Options */}
+            <div className="flex flex-col gap-4 mt-8">
               {/* Shipping Option */}
               <div
                 onClick={() => setShippingMethod("standard")}
-                className={`bg-white border-2 rounded-full px-6 py-3 flex justify-between items-center shadow-md cursor-pointer transition-all hover:scale-[1.02]
+                className={`bg-white border-2 rounded-full px-6 py-3 flex justify-between items-center shadow-md cursor-default transition-all
                     ${
                       shippingMethod === "standard"
                         ? "border-[#6B4B6E]"
@@ -405,7 +416,7 @@ const CheckoutPage = () => {
               {/* Payment Option */}
               <div
                 onClick={() => setPaymentMethod("bank")}
-                className={`bg-white border-2 rounded-full px-6 py-3 flex justify-between items-center shadow-md cursor-pointer transition-all hover:scale-[1.02]
+                className={`bg-white border-2 rounded-full px-6 py-3 flex justify-between items-center shadow-md transition-all
                     ${
                       paymentMethod === "bank"
                         ? "border-[#6B4B6E]"
@@ -413,7 +424,6 @@ const CheckoutPage = () => {
                     }`}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">💰</span>
                   <span className="font-bold text-gray-700">Bank Transfer</span>
                 </div>
                 {/* Check Icon */}
@@ -462,7 +472,7 @@ const CheckoutPage = () => {
       </div>
 
       {/* ส่วน Footer แบบ Full Width (ทะลุ Container) */}
-      <div className="fixed bottom-0 z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.1)] w-screen left-1/2 -translate-x-1/2">
+      <div className="fixed bottom-0 z-30 shadow-[0_-5px_20px_rgba(0,0,0,0.1)] w-screen left-1/2 -translate-x-1/2">
         {/* Discount Section (Dark Purple)
         <div className="bg-[#563F58] py-4">
           <div className="container mx-auto px-4 md:px-8 flex justify-end items-center gap-6">

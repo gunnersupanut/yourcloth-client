@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Plus, Pencil, Trash2, MapPin } from "lucide-react";
 import toast from "react-hot-toast";
-import { addressService } from "../../services/addressService"; // Service ที่นายให้มา
+import { addressService } from "../../services/addressService"; 
 import AddNewAddressModal from "../../components/AddNewAddressModal";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import type { Address } from "../../types/addressTypes";
@@ -12,7 +12,7 @@ const AddressesPage = () => {
 
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingAddress, setEditingAddress] = useState<any>(null); // เก็บข้อมูลที่จะ Edit
+  const [editingAddress, setEditingAddress] = useState<any>(null);
 
   // Delete States
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -27,8 +27,6 @@ const AddressesPage = () => {
     try {
       setIsLoading(true);
       const res = await addressService.getMyAddresses();
-      // res น่าจะเป็น array address ตรงๆ ตามโค้ดนาย
-      console.log("res data:", res);
       setAddresses(res);
     } catch (error) {
       console.error(error);
@@ -66,13 +64,11 @@ const AddressesPage = () => {
     }
   };
 
-  // เปิด Modal เพิ่มใหม่
   const openAddModal = () => {
-    setEditingAddress(null); // ล้างค่าเก่า
+    setEditingAddress(null);
     setIsModalOpen(true);
   };
 
-  //  เปิด Modal แก้ไข (ต้องแปลงข้อมูลให้ตรงกับ Form State ของนาย)
   const openEditModal = (addr: Address) => {
     const formData: Address = {
       id: addr.id,
@@ -89,7 +85,6 @@ const AddressesPage = () => {
     setIsModalOpen(true);
   };
 
-  //  Handle Confirm จาก Modal (รับข้อมูลจาก Form -> แปลง -> ส่ง API)
   const handleModalConfirm = async (formData: any) => {
     try {
       const payload = {
@@ -104,23 +99,20 @@ const AddressesPage = () => {
       };
 
       if (editingAddress) {
-        // Update
         await addressService.updateAddress(editingAddress.id, payload);
         toast.success("Address updated successfully!");
       } else {
-        // Create
         await addressService.createAddress(payload);
         toast.success("New address added successfully!");
       }
 
-      fetchAddresses(); // Refresh หน้าจอ
+      fetchAddresses();
     } catch (error) {
       console.error(error);
       toast.error("Failed to save address.");
     }
   };
 
-  // จัดเรียง: เอา Default ไว้บนสุดเสมอ
   const sortedAddresses = [...addresses].sort((a, b) =>
     a.is_default === b.is_default ? 0 : a.is_default ? -1 : 1,
   );
@@ -133,69 +125,84 @@ const AddressesPage = () => {
     );
 
   return (
-    <div className="max-w-4xl mx-auto p-8 bg-white rounded-[32px] shadow-lg border border-gray-100 font-kanit min-h-[600px] relative">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-[#594a60]">Addresses</h1>
+    // Responsive Container: Padding ลดลงบนมือถือ
+    <div className="max-w-4xl mx-auto p-4 md:p-8 bg-white rounded-xl md:rounded-[32px] shadow-lg border border-gray-100 font-kanit min-h-[600px] relative">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-[#594a60]">Addresses</h1>
+        
+        {/* ปุ่ม Add บนมือถือ ย้ายมาไว้ข้างบนให้กดง่าย */}
+        <button
+          onClick={openAddModal}
+          className="md:hidden w-full bg-[#594a60] text-white font-bold px-4 py-3 rounded-xl shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all"
+        >
+          <Plus size={20} /> Add New Address
+        </button>
       </div>
 
-      <div className="space-y-4 bg-[#A898B0] p-6 rounded-[32px]">
-        {/* Render Cards Loop เดียวไปเลย (Sort แล้ว) */}
+      <div className="space-y-4 bg-[#A898B0] p-4 md:p-6 rounded-2xl md:rounded-[32px]">
         {sortedAddresses.map((addr) => {
           const isDefault = addr.is_default;
 
           return (
             <div key={addr.id}>
-              {/* Header "Default" */}
               {isDefault && (
-                <h3 className="text-white mb-2 text-xl font-bold ml-2">
+                <h3 className="text-white mb-2 text-lg md:text-xl font-bold ml-1">
                   Default
                 </h3>
               )}
 
-              <div className="flex items-stretch rounded-2xl overflow-hidden shadow-md group min-h-[120px]">
-                {/* 🔥 Left Side: Dot + Name/Phone (สีทึบ) */}
+              {/* 🔥 Responsive Card Layout: Flex-col on mobile, Flex-row on desktop */}
+              <div className="flex flex-col md:flex-row items-stretch rounded-2xl overflow-hidden shadow-md group min-h-[120px] transition-transform hover:scale-[1.01]">
+                
+                {/* Part 1: Contact Info (Clickable for Default) */}
                 <div
                   onClick={() => !isDefault && handleSetDefault(addr.id)}
-                  className={`w-[40%] p-5 flex flex-col justify-center gap-2 transition-colors cursor-pointer relative
-            ${isDefault ? "bg-[#6D5D6E] text-white" : "bg-gray-200 text-gray-500 hover:bg-gray-300"}
-          `}
+                  className={`w-full md:w-[40%] p-4 md:p-5 flex flex-row md:flex-col items-center md:items-start justify-between md:justify-center gap-2 transition-colors cursor-pointer relative
+                    ${isDefault ? "bg-[#6D5D6E] text-white" : "bg-gray-200 text-gray-500 hover:bg-gray-300"}
+                  `}
                 >
-                  {/* Container สำหรับ Dot + Name */}
                   <div className="flex items-center gap-3">
                     {/* Dot Indicator */}
                     <div
-                      className={`w-4 h-4 rounded-full border-2 border-white shrink-0
-                ${isDefault ? "bg-[#FFD700]" : "bg-white"}
-              `}
+                      className={`w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-white shrink-0
+                        ${isDefault ? "bg-[#FFD700] shadow-[0_0_10px_#FFD700]" : "bg-white"}
+                      `}
                     />
 
-                    {/* Name */}
-                    <p className="font-bold text-lg leading-tight truncate">
-                      {addr.recipient_name}
+                    <div className="flex flex-col">
+                      <p className="font-bold text-base md:text-lg leading-tight truncate capitalize">
+                        {addr.recipient_name}
+                      </p>
+                      {/* Mobile Phone show here */}
+                      <p className="md:hidden text-xs opacity-80 font-mono mt-0.5">{addr.phone_number}</p>
+                    </div>
+                  </div>
+
+                  {/* Desktop Phone */}
+                  <p className="hidden md:block text-sm opacity-90 pl-7 font-mono">{addr.phone_number}</p>
+                  
+                  {/* Mobile Default Badge */}
+                   {isDefault && <span className="md:hidden text-[10px] bg-[#FFD700] text-[#6D5D6E] px-2 py-0.5 rounded-full font-bold">Default</span>}
+                </div>
+
+                {/* Part 2: Address Detail & Actions */}
+                <div className="w-full md:w-[60%] p-4 md:p-5 bg-white flex flex-col md:flex-row items-start md:items-center justify-between relative gap-4">
+                  {/* Address Text */}
+                  <div className="text-sm text-gray-600 leading-relaxed pr-0 md:pr-12 break-words w-full">
+                    <p className="font-medium text-gray-800 mb-1">{addr.address_detail}</p>
+                    <p className="text-xs text-gray-500">
+                      {addr.sub_district}, {addr.district}, <br className="hidden md:block"/> 
+                      {addr.province} {addr.zip_code}
                     </p>
                   </div>
 
-                  {/* Phone (ขยับให้ตรงกับชื่อ) */}
-                  <p className="text-sm opacity-90 pl-7">{addr.phone_number}</p>
-                </div>
-
-                {/* Right Side: Address & Actions (สีขาว) */}
-                <div className="w-[60%] p-5 bg-white flex items-center justify-between relative">
-                  {/* Address Text */}
-                  <div className="text-sm text-gray-600 leading-relaxed pr-8 line-clamp-3">
-                    {addr.address_detail} <br />
-                    {addr.sub_district}, {addr.district} <br />
-                    {addr.province} {addr.zip_code}
-                  </div>
-
-                  {/* Actions (Absolute Bottom-Right) */}
-                  <div className="absolute bottom-3 right-3 flex gap-2">
+                  {/* Actions (Absolute on Desktop, Flex on Mobile) */}
+                  <div className="flex md:absolute md:bottom-3 md:right-3 gap-2 w-full md:w-auto justify-end border-t md:border-t-0 pt-3 md:pt-0 mt-2 md:mt-0 border-gray-100">
                     <button
                       onClick={() => openEditModal(addr)}
-                      className="p-1.5 text-secondary hover:scale-105 hover:bg-yellow-50 rounded-full transition-all"
-                      title="Edit"
+                      className="flex items-center gap-1 md:block px-3 py-1.5 md:p-2 text-secondary bg-yellow-50 md:bg-transparent rounded-lg md:rounded-full hover:scale-105 hover:bg-yellow-100 transition-all text-xs md:text-base font-bold md:font-normal"
                     >
-                      <Pencil size={18} />
+                      <Pencil size={16} className="md:w-[18px] md:h-[18px]" /> <span className="md:hidden">Edit</span>
                     </button>
 
                     {!isDefault && (
@@ -204,10 +211,9 @@ const AddressesPage = () => {
                           setAddressToDelete(addr.id);
                           setIsDeleteModalOpen(true);
                         }}
-                        className="p-1.5 text-secondary hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
-                        title="Delete"
+                        className="flex items-center gap-1 md:block px-3 py-1.5 md:p-2 text-red-500 bg-red-50 md:bg-transparent rounded-lg md:rounded-full hover:bg-red-100 transition-all text-xs md:text-base font-bold md:font-normal"
                       >
-                        <Trash2 size={18} />
+                        <Trash2 size={16} className="md:w-[18px] md:h-[18px]" /> <span className="md:hidden">Delete</span>
                       </button>
                     )}
                   </div>
@@ -226,8 +232,8 @@ const AddressesPage = () => {
         )}
       </div>
 
-      {/* Floating Add Button */}
-      <div className="mt-8 flex justify-end">
+      {/* Floating Add Button (Desktop Only) */}
+      <div className="hidden md:flex mt-8 justify-end">
         <button
           onClick={openAddModal}
           className="bg-white border-2 border-[#594a60] text-[#594a60] font-bold px-6 py-3 rounded-full shadow-lg hover:bg-[#594a60] hover:text-white transition-all flex items-center gap-2"

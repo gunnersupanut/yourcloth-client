@@ -214,7 +214,7 @@ const Navbar = () => {
         {/* Mobile/Tablet Menu Dropdown */}
         {/* โชว์เฉพาะจอเล็กกว่า 1024px (lg:hidden) */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden mt-4 pb-4 animate-in slide-in-from-top-5 duration-200 border-t border-white/20 pt-4">
+          <div className="z-[999] lg:hidden mt-4 pb-4 animate-in slide-in-from-top-5 duration-200 border-t border-white/20 pt-4">
             <div className="flex flex-col space-y-4 text-center text-lg">
               <NavLink to="/" className={({isActive}) => isActive ? "text-secondary font-bold" : "text-white"} onClick={() => setIsMobileMenuOpen(false)}>Home</NavLink>
               <NavLink to="/shop" className={({isActive}) => isActive ? "text-secondary font-bold" : "text-white"} onClick={() => setIsMobileMenuOpen(false)}>Shop</NavLink>

@@ -10,6 +10,9 @@ import {
   Image as ImageIcon,
   Loader2,
 } from "lucide-react";
+import toast from "react-hot-toast";
+import ConfirmModal from "../../components/ui/ConfirmModal";
+// import { formatDate } from "../../utils/dateUtils";
 
 // --- Components ย่อย (Modal) ---
 interface BannerModalProps {
@@ -36,7 +39,6 @@ const BannerModal: React.FC<BannerModalProps> = ({
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
-
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -160,7 +162,7 @@ const BannerModal: React.FC<BannerModalProps> = ({
           </div>
 
           {/* Dates */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-ui text-gray-400">Start Date</label>
               <div className="relative">
@@ -190,11 +192,13 @@ const BannerModal: React.FC<BannerModalProps> = ({
                 />
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Status Toggle */}
           <div className="flex items-center justify-between bg-admin-bg p-3 rounded-lg border border-gray-700">
-            <span className="text-white text-sm font-medium">Active Status</span>
+            <span className="text-white text-sm font-medium">
+              Active Status
+            </span>
             <button
               type="button"
               onClick={() =>
@@ -234,7 +238,9 @@ const AdminBannerPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState<IBanner | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [bannerToDelete, setBannerToDelete] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const fetchBanners = async () => {
     try {
       setLoading(true);
@@ -285,16 +291,34 @@ const AdminBannerPage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this banner?")) return;
-    try {
-      await bannerService.deleteBanner(id);
-      setBanners((prev) => prev.filter((b) => b.id !== id));
-    } catch (error) {
-      console.error("Delete error", error);
-    }
+  // ฟังก์ชันนี้ผูกกับปุ่มถังขยะ (แทนอันเดิม)
+  const handleDeleteClick = (id: number) => {
+    setBannerToDelete(id); // จำไว้ก่อนว่าจะลบตัวไหน
+    setIsDeleteModalOpen(true); // เปิด Modal
   };
 
+  // ฟังก์ชันนี้ผูกกับปุ่ม Confirm ใน Modal (ลบจริง)
+  const handleConfirmDelete = async () => {
+    if (!bannerToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await bannerService.deleteBanner(bannerToDelete);
+
+      // อัปเดต UI
+      setBanners((prev) => prev.filter((b) => b.id !== bannerToDelete));
+      toast.success("Banner deleted successfully");
+
+      // ปิด Modal
+      setIsDeleteModalOpen(false);
+    } catch (error) {
+      console.error("Delete error", error);
+      toast.error("Failed to delete banner");
+    } finally {
+      setIsDeleting(false);
+      setBannerToDelete(null); // เคลียร์ ID ทิ้ง
+    }
+  };
   const handleToggleActive = async (banner: IBanner) => {
     try {
       setBanners((prev) =>
@@ -326,7 +350,6 @@ const AdminBannerPage = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div>
-        
           <p className="text-gray-400 mt-1">
             Manage advertising banners and promotions.
           </p>
@@ -394,26 +417,20 @@ const AdminBannerPage = () => {
                 </h3>
 
                 {/* Dates Info */}
-                <div className="text-xs text-gray-400 space-y-1 mt-2 mb-4 bg-admin-bg p-2 rounded-lg">
+                {/* <div className="text-xs text-gray-400 space-y-1 mt-2 mb-4 bg-admin-bg p-2 rounded-lg">
                   <div className="flex justify-between">
                     <span>Start:</span>
                     <span className="text-gray-300">
-                      {banner.start_date
-                        ? new Date(banner.start_date).toLocaleDateString(
-                            "en-GB",
-                          )
-                        : "-"}
+                      {banner.start_date ? formatDate(banner.start_date) : "-"}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span>End:</span>
                     <span className="text-gray-300">
-                      {banner.end_date
-                        ? new Date(banner.end_date).toLocaleDateString("en-GB")
-                        : "-"}
+                      {banner.end_date ? formatDate(banner.end_date) : "-"}
                     </span>
                   </div>
-                </div>
+                </div> */}
 
                 <div className="mt-auto pt-4 border-t border-gray-700 flex justify-between items-center">
                   {/* Switch Toggle */}
@@ -444,7 +461,7 @@ const AdminBannerPage = () => {
                       <Edit size={18} />
                     </button>
                     <button
-                      onClick={() => handleDelete(banner.id)}
+                      onClick={() => handleDeleteClick(banner.id)}
                       className="p-2 text-gray-400 hover:text-red-400 hover:bg-white/5 rounded-lg transition"
                     >
                       <Trash2 size={18} />
@@ -464,6 +481,16 @@ const AdminBannerPage = () => {
         initialData={editingBanner}
         onSubmit={handleSave}
         isSubmitting={isSubmitting}
+      />
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Banner"
+        message="Are you sure you want to delete this banner? This action cannot be undone."
+        variant="danger"
+        confirmText="Yes, Delete it"
+        isLoading={isDeleting}
       />
     </div>
   );
