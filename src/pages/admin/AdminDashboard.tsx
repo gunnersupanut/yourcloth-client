@@ -15,7 +15,7 @@ const AdminDashboard = () => {
   // 1. กำหนด Type ให้ State ตรงๆ ไปเลย
   const [stats, setStats] = useState({
     totalSales: 0,
-    todaySales: 0, // เพิ่ม
+    monthlySales: 0, // เพิ่ม
     averageOrderValue: 0, // เพิ่ม
     pendingCount: 0,
     totalUsers: 1240,
@@ -38,18 +38,25 @@ const AdminDashboard = () => {
       // console.log("All orders.", allOrders);
 
       // Helper สำหรับเช็คสถานะจ่ายเงินแล้ว
-      const paidStatuses = ["PAID", "SHIPPED", "COMPLETE", "COMPLETED"];
+      const paidStatuses = ["PACKING", "SHIPPED", "COMPLETE"];
 
       //  ยอดขายรวม
       const totalSales = allOrders
         .filter((o) => paidStatuses.includes(o.status))
         .reduce((sum, order) => sum + Number(order.totalPrice), 0);
-      // ยอดขายวันนี้ (Today's Sales)
-      const today = new Date().toISOString().slice(0, 10);
-      const todaySales = allOrders
+      // หายอดขายเดือนนี้ (Monthly Sales)
+      const currentMonth = new Date().getMonth(); // 0-11
+      const currentYear = new Date().getFullYear();
+
+      const monthlySales = allOrders
         .filter((o) => {
-          const orderDate = new Date(o.orderedAt).toISOString().slice(0, 10);
-          return orderDate === today && paidStatuses.includes(o.status);
+          const d = new Date(o.orderedAt); // หรือ ordered_at แล้วแต่ db
+          // เช็ค เดือนตรง + ปีตรง + สถานะจ่ายแล้ว
+          return (
+            d.getMonth() === currentMonth &&
+            d.getFullYear() === currentYear &&
+            paidStatuses.includes(o.status)
+          );
         })
         .reduce((sum, order) => sum + Number(order.totalPrice), 0);
 
@@ -69,7 +76,7 @@ const AdminDashboard = () => {
 
       setStats({
         totalSales,
-        todaySales,
+        monthlySales,
         averageOrderValue,
         pendingCount,
         totalUsers: uniqueCustomers,
@@ -111,8 +118,8 @@ const AdminDashboard = () => {
       link: null,
     },
     {
-      title: "Today's Sales",
-      value: formatMoney(stats.todaySales),
+      title: "Monthly Sales",
+      value: formatMoney(stats.monthlySales),
       icon: <TrendingUp />,
       color: "text-blue-400",
       bg: "bg-blue-400/10",
