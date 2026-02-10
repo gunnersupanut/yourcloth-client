@@ -176,15 +176,15 @@ const CheckoutPage = () => {
     try {
       setConfirm(true);
       console.log("checkoutItems", checkoutItems);
-      // เตรียม Payload (ให้เหมือนของจริงที่สุด)
+      // เตรียม Payload 
       const payload: CreateOrderPayload = {
         addressId: uiState.selectedAddressId,
         items: checkoutItems.map((item) => ({
           variantId: item.id,
           quantity: item.quantity,
         })),
-        cartItemIds: selectedCartItemIds, // ส่ง Array ID ไปลบในตะกร้า (จาก Context)
-        // Hardcode ไปก่อน
+        cartItemIds: selectedCartItemIds, // ส่งรายการ ID เพื่อลบจากตะกร้า
+        // กำหนดค่าเริ่มต้น (Default)
         paymentMethod: "BANK_TRANSFER",
         shippingMethod: "STANDARD",
         shippingCost: 50,
