@@ -14,6 +14,8 @@ import FeaturedSlider from "../components/FeaturedSlider";
 import { cartService } from "../services/cart.service";
 import { useCart } from "../contexts/CartContext";
 import ShareModal from "../components/ShareModal";
+import { Ruler } from "lucide-react";
+import SizeGuideModal from "../components/SizeGuideModal";
 
 type ProductParams = {
   category: string;
@@ -43,6 +45,7 @@ const ProductDetailPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState("");
 
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   // Logic ดึง Gallery จาก API
 
@@ -67,7 +70,6 @@ const ProductDetailPage = () => {
       try {
         const res = await productService.getById(id);
         setProduct(res.result);
-
         // Set รูปแรกเป็น Main Image
         if (res.result?.image_url) {
           setMainImage(res.result.image_url);
@@ -84,7 +86,6 @@ const ProductDetailPage = () => {
     };
     fetchProduct();
   }, [id, navigate]);
-
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const scroll = (direction: "left" | "right") => {
@@ -115,6 +116,11 @@ const ProductDetailPage = () => {
     }
   }, [selectedColor]);
 
+  useEffect(() => {
+    if (product?.available_sizes?.length === 1) {
+      setSelectedSize(product.available_sizes[0]);
+    }
+  }, [product]);
   const currentVariant = useMemo(() => {
     if (!product || !selectedColor || !selectedSize) return null;
     return product.variants.find(
@@ -265,29 +271,26 @@ const ProductDetailPage = () => {
       </nav>
 
       {/* MAIN CONTENT GRID */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-5">
-        <div className="flex items-center">
-          <p className="text-h1xl text-primary">{product.product_name}</p>
-        </div>
-        <div className="flex items-center">
-          <p className="text-bodyxl text-text_primary">
-            {product.description || "-"}
-          </p>
-        </div>
-
-        {/* IMAGE GALLERY */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-10">
+        {/* --- ฝั่งซ้าย: IMAGE GALLERY --- */}
         <div className="space-y-0">
+          {/* ชื่อสินค้า (ย้ายมาไว้หัวรูปใน Mobile หรือค้างไว้ตรงนี้) */}
+          <div className="mb-6">
+            <p className="text-h1xl text-primary font-bold">
+              {product.product_name}
+            </p>
+          </div>
+
           {/* รูปใหญ่ */}
-          <div className="aspect-square w-[70%] mx-auto bg-gray-100 overflow-hidden shadow-custommain relative group mb-5 ">
+          <div className="aspect-square w-[85%] mx-auto bg-gray-100 overflow-hidden shadow-custommain relative group mb-8">
             <img
-              src={mainImage || product.image_url} // ใช้รูปที่เลือก หรือรูปปก
+              src={mainImage || product.image_url}
               alt={product.product_name}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           </div>
 
           {/* รูปเล็ก (Thumbnails) */}
-          {/* ถ้ามีรูปเดียว ไม่ต้องโชว์ปุ่มเลื่อนและ Thumbnail ก็ได้ แต่ถ้าอยากโชว์ตลอดก็ลบ condition นี้ออก */}
           {galleryImages.length > 1 && (
             <div className="flex items-center gap-4 relative justify-center lg:w-[90%] lg:ml-8">
               <button
@@ -299,7 +302,7 @@ const ProductDetailPage = () => {
 
               <div
                 ref={scrollRef}
-                className="flex gap-4 overflow-x-auto no-scrollbar py-2 px-1" // เพิ่ม px-1 กันเงาขาด
+                className="flex gap-4 overflow-x-auto no-scrollbar py-2 px-1"
               >
                 {galleryImages.map((img, index) => (
                   <div
@@ -340,10 +343,10 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
-        {/*---ด้านขวา PRODUCT DETAILS ---*/}
-        <div className="flex flex-col">
+        {/* --- ฝั่งขวา: PRODUCT SELECTION --- */}
+        <div className="flex flex-col pt-4 md:pt-14">
           {/* ราคา */}
-          <div className="text-h2xl text-text_secondary mb-12">
+          <div className="text-h2xl text-text_secondary mb-8 md:mb-12 font-bold">
             {Number(displayPrice).toLocaleString("en-US", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -353,7 +356,7 @@ const ProductDetailPage = () => {
 
           {/* Color */}
           <div className="mb-4">
-            <h3 className="text-bodyxl font-medium text-gray-900 mb-6">
+            <h3 className="text-bodyxl font-medium text-gray-900 mb-4 md:mb-6">
               Color{" "}
               <span className="text-primary font-bold ml-2">
                 {selectedColor || "-"}
@@ -404,8 +407,22 @@ const ProductDetailPage = () => {
           </div>
 
           {/* Size */}
-          <div className="mb-8 mt-10">
-            <div className="flex justify-center gap-12 flex-wrap">
+          {/* Size Header & Guide Button */}
+          <div className="flex justify-between items-end mb-4 mt-10">
+            <h3 className="text-bodyxl font-medium text-gray-900">
+              Select Size
+            </h3>
+
+            {/*  ปุ่มกดเปิด Modal */}
+            <button
+              onClick={() => setIsSizeGuideOpen(true)}
+              className="text-sm text-secondary hover:text-primary underline flex items-center gap-1 transition-colors"
+            >
+              <Ruler size={16} /> Size Guide
+            </button>
+          </div>
+          <div className="mb-8">
+            <div className="flex justify-center gap-4 md:gap-12 flex-wrap">
               {["S", "M", "L", "XL", "XXL", "XXXL"].map((size) => {
                 const isSelected = selectedSize === size;
 
@@ -442,6 +459,25 @@ const ProductDetailPage = () => {
             </div>
           </div>
 
+          
+          {/* ส่วนแสดง STOCK  */}
+          <div className="h-6  mb-2">
+            {selectedSize && selectedColor ? (
+              currentVariant ? (
+                <p
+                  className={`text-sm font-medium transition-all duration-300 ${currentVariant.stock <= 5 ? "text-red-500 animate-pulse font-bold" : "text-gray-500"}`}
+                >
+                  {currentVariant.stock > 0
+                    ? `Available Stock ${currentVariant.stock} items`
+                    : "Out of Stock"}
+                </p>
+              ) : null
+            ) : (
+              <p className="text-sm text-gray-400 italic">
+                Select color and size to check stock
+              </p>
+            )}
+          </div>
           {/* Quantity */}
           <div className="mb-14 flex justify-center">
             <div className="inline-flex items-center bg-white rounded-full shadow-custombutton px-4 py-2 gap-6">
@@ -486,6 +522,17 @@ const ProductDetailPage = () => {
         </div>
       </div>
 
+      {/* --- NEW SECTION: DESCRIPTION (อยู่ใต้ Grid หลัก) --- */}
+      <div className="max-w-7xl mx-auto mt-16 p-8 bg-gray-50 rounded-2xl border border-gray-100">
+        <h3 className="text-h2xl font-bold text-primary mb-4 flex items-center gap-2">
+          <div className="w-2 h-8 bg-primary rounded-full"></div>
+          Description
+        </h3>
+        <p className="text-bodyxl text-text_primary leading-relaxed whitespace-pre-line pl-4">
+          {product.description || "No description available for this product."}
+        </p>
+      </div>
+
       {/* Recommend */}
       <div className="mt-24 border-t pt-10">
         <h2 className="text-h2xl text-gray-700 mb-8">
@@ -503,6 +550,11 @@ const ProductDetailPage = () => {
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         url={window.location.href}
+      />
+      <SizeGuideModal
+        isOpen={isSizeGuideOpen}
+        onClose={() => setIsSizeGuideOpen(false)}
+        category={product.category || "T-shirts"}
       />
     </div>
   );
