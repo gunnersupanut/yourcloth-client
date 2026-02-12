@@ -404,7 +404,13 @@ const ProductDetailPage = () => {
                 return (
                   <button
                     key={color.name}
-                    onClick={() => setSelectedColor(color.name)}
+                    onClick={() => {
+                      if (selectedColor === color.name) {
+                        setSelectedColor(""); // กดซ้ำ = ยกเลิก
+                      } else {
+                        setSelectedColor(color.name); // กดใหม่ = เลือก
+                      }
+                    }}
                     disabled={!isAvailable} // 🔥 disable ถ้าไม่มีของจับคู่
                     className={`
             w-10 h-10 rounded-full shadow-sm border border-gray-200 transition-all duration-300 ease-in-out relative
@@ -465,7 +471,13 @@ const ProductDetailPage = () => {
                   <button
                     key={size}
                     disabled={!isAvailable} // ถ้าไม่มีคู่สีนี้ ให้กดไม่ได้
-                    onClick={() => setSelectedSize(size)}
+                    onClick={() => {
+                      if (selectedSize === size) {
+                        setSelectedSize(""); // กดซ้ำ = ยกเลิก
+                      } else {
+                        setSelectedSize(size); // กดใหม่ = เลือก
+                      }
+                    }}
                     className={`
             w-12 h-12 flex items-center justify-center rounded-sm text-sm font-bold border-transparent transition-all duration-300 shadow-[2px_2px_5px_0px_rgba(0,0,0,0.25)]
             ${
