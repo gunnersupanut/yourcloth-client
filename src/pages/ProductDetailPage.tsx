@@ -16,7 +16,15 @@ import { useCart } from "../contexts/CartContext";
 import ShareModal from "../components/ShareModal";
 import { Ruler } from "lucide-react";
 import SizeGuideModal from "../components/SizeGuideModal";
-
+const VARIANT_IMAGE_MAP: Record<number, Record<string, string>> = {
+  22: {
+    Black:
+      "https://res.cloudinary.com/ddxepckvy/image/upload/v1770863045/Pro_Gamer_Hoodie_V2_Black_kiicdw.png",
+    White:
+      "https://res.cloudinary.com/ddxepckvy/image/upload/v1770863052/Pro_Gamer_Hoodie_V2_White_fdrmg1.png",
+    Grey: "https://res.cloudinary.com/ddxepckvy/image/upload/v1770257745/my-shop/products/quliw9cm0dtntv2ctfa7.avif",
+  },
+};
 type ProductParams = {
   category: string;
   id: string;
@@ -121,6 +129,23 @@ const ProductDetailPage = () => {
       setSelectedSize(product.available_sizes[0]);
     }
   }, [product]);
+  // Logic เปลี่ยนรูปตามสี (Mock for Demo)
+  useEffect(() => {
+    // ถ้ายังไม่มี product หรือยังไม่เลือกสี ก็ไม่ต้องทำอะไร
+    if (!product || !selectedColor) return;
+    // เช็คว่าสินค้านี้ มีใน Map ที่เราเตรียมไว้ไหม?
+    const demoImages = VARIANT_IMAGE_MAP[product.id];
+
+    if (demoImages && demoImages[selectedColor]) {
+      // เจอ! เป็นสินค้า Demo -> เอารูปที่เตรียมไว้มาโชว์เป็น Main Image เลย
+      setMainImage(demoImages[selectedColor]);
+    } else {
+      // ไม่เจอ (หรือเป็นสินค้าอื่น) -> ไม่ต้องทำไร (ใช้รูปเดิม)
+      // หรือถ้าอยากให้ Reset กลับไปรูปปกเวลากดสีอื่นที่ไม่มีรูป ก็เปิดบรรทัดล่างนี้
+      // setMainImage(product.image_url);
+    }
+  }, [selectedColor, product]);
+
   const currentVariant = useMemo(() => {
     if (!product || !selectedColor || !selectedSize) return null;
     return product.variants.find(
@@ -459,7 +484,6 @@ const ProductDetailPage = () => {
             </div>
           </div>
 
-          
           {/* ส่วนแสดง STOCK  */}
           <div className="h-6  mb-2">
             {selectedSize && selectedColor ? (
